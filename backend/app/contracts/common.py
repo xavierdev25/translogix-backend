@@ -28,7 +28,7 @@ from app.contracts.normalizers import NUMERO_GUIA_PATTERN
 from app.contracts.pii import find_pii
 from app.contracts.timezone import to_bogota
 
-CONTRACT_VERSION = "1.5.0"
+CONTRACT_VERSION = "1.6.0"
 REQUEST_ID_HEADER = "X-Request-ID"
 REQUEST_ID_PATTERN = r"^[A-Za-z0-9._-]{1,128}$"
 LOCALE = "es-CO"
@@ -107,6 +107,8 @@ class ErrorCode(StrEnum):
     CIUDAD_NO_CUBIERTA = "CIUDAD_NO_CUBIERTA"
     TARIFA_NO_DISPONIBLE = "TARIFA_NO_DISPONIBLE"
     ARCHIVO_INVALIDO = "ARCHIVO_INVALIDO"  # reserved for the CSV/Excel upload (P1)
+    # 1.6.0 (CR-008): any request body over the size limit, cut before it is buffered.
+    CUERPO_DEMASIADO_GRANDE = "CUERPO_DEMASIADO_GRANDE"
 
 
 # One HTTP status per code, so every service answers the same failure the same way.
@@ -135,6 +137,7 @@ ERROR_HTTP_STATUS: Mapping[ErrorCode, int] = MappingProxyType(
         ErrorCode.CIUDAD_NO_CUBIERTA: 422,
         ErrorCode.TARIFA_NO_DISPONIBLE: 422,
         ErrorCode.ARCHIVO_INVALIDO: 422,
+        ErrorCode.CUERPO_DEMASIADO_GRANDE: 413,
     }
 )
 
@@ -184,6 +187,7 @@ DEFAULT_ERROR_MESSAGES: Mapping[ErrorCode, str] = MappingProxyType(
         ErrorCode.CIUDAD_NO_CUBIERTA: "No tenemos cobertura operativa en esa ciudad.",
         ErrorCode.TARIFA_NO_DISPONIBLE: "No hay una tarifa disponible para esa ruta.",
         ErrorCode.ARCHIVO_INVALIDO: "El archivo no tiene un formato válido.",
+        ErrorCode.CUERPO_DEMASIADO_GRANDE: "La solicitud supera el tamaño máximo permitido.",
     }
 )
 

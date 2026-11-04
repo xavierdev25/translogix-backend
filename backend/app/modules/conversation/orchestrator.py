@@ -682,7 +682,9 @@ class DialogueOrchestrator:
             [
                 TextBlock(
                     type="TEXT",
-                    text="Tu caso ya está con un asesor de TransLogix. Te responderá en este mismo chat.",
+                    # Audit 2026-11-04 (R1): no advisor→customer channel exists yet (CR-007),
+                    # so the text no longer promises a reply in this chat.
+                    text="Tu caso ya quedó registrado y está en la cola de asesores de TransLogix.",
                 )
             ],
             state.active_intent or Intent.HABLAR_CON_HUMANO,

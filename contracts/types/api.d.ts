@@ -923,7 +923,7 @@ export interface components {
          * ErrorCode
          * @enum {string}
          */
-        ErrorCode: "VALIDACION" | "GUIA_FORMATO_INVALIDO" | "GUIA_NO_ENCONTRADA" | "RUTA_SIN_TARIFA" | "CIUDAD_NO_RECONOCIDA" | "SERVICIO_NO_DISPONIBLE" | "EXCEDE_LIMITE_COBERTURA" | "LLM_NO_DISPONIBLE" | "RAG_SIN_EVIDENCIA" | "FIRMA_INVALIDA" | "LIMITE_DE_TASA" | "NO_ENCONTRADO" | "ERROR_INTERNO" | "NO_CONFIGURADO" | "NO_AUTORIZADO" | "NO_AUTENTICADO" | "IDEMPOTENCIA_CONFLICTO" | "LOTE_DEMASIADO_GRANDE" | "REFERENCIA_DUPLICADA" | "CIUDAD_NO_CUBIERTA" | "TARIFA_NO_DISPONIBLE" | "ARCHIVO_INVALIDO";
+        ErrorCode: "VALIDACION" | "GUIA_FORMATO_INVALIDO" | "GUIA_NO_ENCONTRADA" | "RUTA_SIN_TARIFA" | "CIUDAD_NO_RECONOCIDA" | "SERVICIO_NO_DISPONIBLE" | "EXCEDE_LIMITE_COBERTURA" | "LLM_NO_DISPONIBLE" | "RAG_SIN_EVIDENCIA" | "FIRMA_INVALIDA" | "LIMITE_DE_TASA" | "NO_ENCONTRADO" | "ERROR_INTERNO" | "NO_CONFIGURADO" | "NO_AUTORIZADO" | "NO_AUTENTICADO" | "IDEMPOTENCIA_CONFLICTO" | "LOTE_DEMASIADO_GRANDE" | "REFERENCIA_DUPLICADA" | "CIUDAD_NO_CUBIERTA" | "TARIFA_NO_DISPONIBLE" | "ARCHIVO_INVALIDO" | "CUERPO_DEMASIADO_GRANDE";
         /**
          * EscalationAction
          * @enum {string}
@@ -2572,6 +2572,16 @@ export interface operations {
                     "application/json": components["schemas"]["CotizacionResponse"];
                 };
             };
+            /** @description Códigos: CUERPO_DEMASIADO_GRANDE */
+            413: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
             /** @description Códigos: VALIDACION, RUTA_SIN_TARIFA, CIUDAD_NO_RECONOCIDA, SERVICIO_NO_DISPONIBLE, EXCEDE_LIMITE_COBERTURA */
             422: {
                 headers: {
@@ -2618,6 +2628,16 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CotizacionPerfilResponse"];
+                };
+            };
+            /** @description Códigos: CUERPO_DEMASIADO_GRANDE */
+            413: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
             /** @description Códigos: VALIDACION, CIUDAD_NO_RECONOCIDA, CIUDAD_NO_CUBIERTA, TARIFA_NO_DISPONIBLE */
@@ -2688,6 +2708,16 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
+            /** @description Códigos: CUERPO_DEMASIADO_GRANDE */
+            413: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
             /** @description Códigos: VALIDACION */
             422: {
                 headers: {
@@ -2746,6 +2776,16 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
+            /** @description Códigos: CUERPO_DEMASIADO_GRANDE */
+            413: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
             /** @description Códigos: VALIDACION */
             422: {
                 headers: {
@@ -2796,6 +2836,16 @@ export interface operations {
             };
             /** @description Códigos: NO_ENCONTRADO */
             404: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: CUERPO_DEMASIADO_GRANDE */
+            413: {
                 headers: {
                     "X-Request-ID": components["headers"]["XRequestId"];
                     [name: string]: unknown;
@@ -2987,6 +3037,16 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
+            /** @description Códigos: CUERPO_DEMASIADO_GRANDE */
+            413: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
             /** @description Códigos: VALIDACION */
             422: {
                 headers: {
@@ -3035,6 +3095,16 @@ export interface operations {
                     "application/json": components["schemas"]["WhatsAppSimulationResult"];
                 };
             };
+            /** @description Códigos: CUERPO_DEMASIADO_GRANDE */
+            413: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
             /** @description Códigos: VALIDACION */
             422: {
                 headers: {
@@ -3081,6 +3151,16 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PbxTurnResponse"];
+                };
+            };
+            /** @description Códigos: CUERPO_DEMASIADO_GRANDE */
+            413: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
             /** @description Códigos: VALIDACION */
@@ -3139,6 +3219,16 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PbxTurnResponse"];
+                };
+            };
+            /** @description Códigos: CUERPO_DEMASIADO_GRANDE */
+            413: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
             /** @description Códigos: VALIDACION */
@@ -3269,6 +3359,16 @@ export interface operations {
             };
             /** @description Códigos: NO_ENCONTRADO */
             404: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: CUERPO_DEMASIADO_GRANDE */
+            413: {
                 headers: {
                     "X-Request-ID": components["headers"]["XRequestId"];
                     [name: string]: unknown;
@@ -3705,6 +3805,16 @@ export interface operations {
             };
             /** @description Códigos: NO_AUTORIZADO */
             403: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: CUERPO_DEMASIADO_GRANDE */
+            413: {
                 headers: {
                     "X-Request-ID": components["headers"]["XRequestId"];
                     [name: string]: unknown;

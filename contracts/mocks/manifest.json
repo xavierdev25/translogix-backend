@@ -1,5 +1,5 @@
 {
-  "contract_version": "1.5.0",
+  "contract_version": "1.6.0",
   "match_semantics": {
     "path": "valores exactos de parámetros de ruta",
     "body": "subconjunto exacto del cuerpo JSON de la petición",
@@ -181,6 +181,11 @@
       ],
       "errors": [
         {
+          "status": 413,
+          "code": "CUERPO_DEMASIADO_GRANDE",
+          "example": "examples/error.cuerpo-demasiado-grande.json"
+        },
+        {
           "status": 422,
           "code": "VALIDACION",
           "example": "examples/error.validacion.json"
@@ -233,6 +238,11 @@
         }
       ],
       "errors": [
+        {
+          "status": 413,
+          "code": "CUERPO_DEMASIADO_GRANDE",
+          "example": "examples/error.cuerpo-demasiado-grande.json"
+        },
         {
           "status": 422,
           "code": "VALIDACION",
@@ -317,6 +327,11 @@
           "example": "examples/error.no-encontrado.json"
         },
         {
+          "status": 413,
+          "code": "CUERPO_DEMASIADO_GRANDE",
+          "example": "examples/error.cuerpo-demasiado-grande.json"
+        },
+        {
           "status": 422,
           "code": "VALIDACION",
           "example": "examples/error.validacion.json"
@@ -347,6 +362,11 @@
           "status": 404,
           "code": "NO_ENCONTRADO",
           "example": "examples/error.no-encontrado.json"
+        },
+        {
+          "status": 413,
+          "code": "CUERPO_DEMASIADO_GRANDE",
+          "example": "examples/error.cuerpo-demasiado-grande.json"
         },
         {
           "status": 422,
@@ -557,6 +577,11 @@
           "example": "examples/error.no-encontrado.json"
         },
         {
+          "status": 413,
+          "code": "CUERPO_DEMASIADO_GRANDE",
+          "example": "examples/error.cuerpo-demasiado-grande.json"
+        },
+        {
           "status": 422,
           "code": "VALIDACION",
           "example": "examples/error.validacion.json"
@@ -664,6 +689,11 @@
           "example": "examples/error.firma-invalida.json"
         },
         {
+          "status": 413,
+          "code": "CUERPO_DEMASIADO_GRANDE",
+          "example": "examples/error.cuerpo-demasiado-grande.json"
+        },
+        {
           "status": 422,
           "code": "VALIDACION",
           "example": "examples/error.validacion.json"
@@ -713,6 +743,11 @@
       ],
       "errors": [
         {
+          "status": 413,
+          "code": "CUERPO_DEMASIADO_GRANDE",
+          "example": "examples/error.cuerpo-demasiado-grande.json"
+        },
+        {
           "status": 422,
           "code": "VALIDACION",
           "example": "examples/error.validacion.json"
@@ -745,6 +780,11 @@
         }
       ],
       "errors": [
+        {
+          "status": 413,
+          "code": "CUERPO_DEMASIADO_GRANDE",
+          "example": "examples/error.cuerpo-demasiado-grande.json"
+        },
         {
           "status": 422,
           "code": "VALIDACION",
@@ -783,6 +823,11 @@
         }
       ],
       "errors": [
+        {
+          "status": 413,
+          "code": "CUERPO_DEMASIADO_GRANDE",
+          "example": "examples/error.cuerpo-demasiado-grande.json"
+        },
         {
           "status": 422,
           "code": "VALIDACION",
@@ -862,6 +907,11 @@
           "status": 404,
           "code": "NO_ENCONTRADO",
           "example": "examples/error.no-encontrado.json"
+        },
+        {
+          "status": 413,
+          "code": "CUERPO_DEMASIADO_GRANDE",
+          "example": "examples/error.cuerpo-demasiado-grande.json"
         },
         {
           "status": 422,
@@ -1101,6 +1151,11 @@
           "status": 403,
           "code": "NO_AUTORIZADO",
           "example": "examples/error.no-autorizado.json"
+        },
+        {
+          "status": 413,
+          "code": "CUERPO_DEMASIADO_GRANDE",
+          "example": "examples/error.cuerpo-demasiado-grande.json"
         },
         {
           "status": 422,

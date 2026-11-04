@@ -22,7 +22,7 @@ info:
     * Todo error usa el sobre `ErrorEnvelope` con un `code` estable (`x-error-codes` por respuesta).
 
     '
-  version: 1.5.0
+  version: 1.6.0
 paths:
   /api/v1/tracking/{guia}:
     get:
@@ -493,6 +493,26 @@ paths:
           headers:
             X-Request-ID:
               $ref: '#/components/headers/XRequestId'
+        '413':
+          description: 'Códigos: CUERPO_DEMASIADO_GRANDE'
+          x-error-codes:
+          - CUERPO_DEMASIADO_GRANDE
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                CUERPO_DEMASIADO_GRANDE:
+                  value:
+                    error:
+                      code: CUERPO_DEMASIADO_GRANDE
+                      message: La solicitud supera el tamaño máximo permitido.
+                      details:
+                        max_bytes: 1048576
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
         '422':
           description: 'Códigos: VALIDACION, RUTA_SIN_TARIFA, CIUDAD_NO_RECONOCIDA, SERVICIO_NO_DISPONIBLE,
             EXCEDE_LIMITE_COBERTURA'
@@ -644,6 +664,26 @@ paths:
                     total_cop: 37485
                     advertencias: []
                     calculado_en: '2026-11-04T10:00:00-05:00'
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '413':
+          description: 'Códigos: CUERPO_DEMASIADO_GRANDE'
+          x-error-codes:
+          - CUERPO_DEMASIADO_GRANDE
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                CUERPO_DEMASIADO_GRANDE:
+                  value:
+                    error:
+                      code: CUERPO_DEMASIADO_GRANDE
+                      message: La solicitud supera el tamaño máximo permitido.
+                      details:
+                        max_bytes: 1048576
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
           headers:
             X-Request-ID:
               $ref: '#/components/headers/XRequestId'
@@ -898,6 +938,26 @@ paths:
           headers:
             X-Request-ID:
               $ref: '#/components/headers/XRequestId'
+        '413':
+          description: 'Códigos: CUERPO_DEMASIADO_GRANDE'
+          x-error-codes:
+          - CUERPO_DEMASIADO_GRANDE
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                CUERPO_DEMASIADO_GRANDE:
+                  value:
+                    error:
+                      code: CUERPO_DEMASIADO_GRANDE
+                      message: La solicitud supera el tamaño máximo permitido.
+                      details:
+                        max_bytes: 1048576
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
         '422':
           description: 'Códigos: VALIDACION'
           x-error-codes:
@@ -994,6 +1054,26 @@ paths:
                       code: NO_ENCONTRADO
                       message: No encontramos el recurso solicitado.
                       details: {}
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '413':
+          description: 'Códigos: CUERPO_DEMASIADO_GRANDE'
+          x-error-codes:
+          - CUERPO_DEMASIADO_GRANDE
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                CUERPO_DEMASIADO_GRANDE:
+                  value:
+                    error:
+                      code: CUERPO_DEMASIADO_GRANDE
+                      message: La solicitud supera el tamaño máximo permitido.
+                      details:
+                        max_bytes: 1048576
                       request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
           headers:
             X-Request-ID:
@@ -2006,6 +2086,26 @@ paths:
           headers:
             X-Request-ID:
               $ref: '#/components/headers/XRequestId'
+        '413':
+          description: 'Códigos: CUERPO_DEMASIADO_GRANDE'
+          x-error-codes:
+          - CUERPO_DEMASIADO_GRANDE
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                CUERPO_DEMASIADO_GRANDE:
+                  value:
+                    error:
+                      code: CUERPO_DEMASIADO_GRANDE
+                      message: La solicitud supera el tamaño máximo permitido.
+                      details:
+                        max_bytes: 1048576
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
         '422':
           description: 'Códigos: VALIDACION'
           x-error-codes:
@@ -2407,6 +2507,26 @@ paths:
           headers:
             X-Request-ID:
               $ref: '#/components/headers/XRequestId'
+        '413':
+          description: 'Códigos: CUERPO_DEMASIADO_GRANDE'
+          x-error-codes:
+          - CUERPO_DEMASIADO_GRANDE
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                CUERPO_DEMASIADO_GRANDE:
+                  value:
+                    error:
+                      code: CUERPO_DEMASIADO_GRANDE
+                      message: La solicitud supera el tamaño máximo permitido.
+                      details:
+                        max_bytes: 1048576
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
         '422':
           description: 'Códigos: VALIDACION'
           x-error-codes:
@@ -2736,6 +2856,26 @@ paths:
           headers:
             X-Request-ID:
               $ref: '#/components/headers/XRequestId'
+        '413':
+          description: 'Códigos: CUERPO_DEMASIADO_GRANDE'
+          x-error-codes:
+          - CUERPO_DEMASIADO_GRANDE
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                CUERPO_DEMASIADO_GRANDE:
+                  value:
+                    error:
+                      code: CUERPO_DEMASIADO_GRANDE
+                      message: La solicitud supera el tamaño máximo permitido.
+                      details:
+                        max_bytes: 1048576
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
         '422':
           description: 'Códigos: VALIDACION'
           x-error-codes:
@@ -2895,6 +3035,26 @@ paths:
                       status: NOT_ATTEMPTED
                       provider_message_id: null
                       error_code: null
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '413':
+          description: 'Códigos: CUERPO_DEMASIADO_GRANDE'
+          x-error-codes:
+          - CUERPO_DEMASIADO_GRANDE
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                CUERPO_DEMASIADO_GRANDE:
+                  value:
+                    error:
+                      code: CUERPO_DEMASIADO_GRANDE
+                      message: La solicitud supera el tamaño máximo permitido.
+                      details:
+                        max_bytes: 1048576
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
           headers:
             X-Request-ID:
               $ref: '#/components/headers/XRequestId'
@@ -3069,6 +3229,26 @@ paths:
                       status: NOT_ATTEMPTED
                       provider_message_id: null
                       error_code: null
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '413':
+          description: 'Códigos: CUERPO_DEMASIADO_GRANDE'
+          x-error-codes:
+          - CUERPO_DEMASIADO_GRANDE
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                CUERPO_DEMASIADO_GRANDE:
+                  value:
+                    error:
+                      code: CUERPO_DEMASIADO_GRANDE
+                      message: La solicitud supera el tamaño máximo permitido.
+                      details:
+                        max_bytes: 1048576
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
           headers:
             X-Request-ID:
               $ref: '#/components/headers/XRequestId'
@@ -3372,6 +3552,26 @@ paths:
                       code: NO_ENCONTRADO
                       message: No encontramos el recurso solicitado.
                       details: {}
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '413':
+          description: 'Códigos: CUERPO_DEMASIADO_GRANDE'
+          x-error-codes:
+          - CUERPO_DEMASIADO_GRANDE
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                CUERPO_DEMASIADO_GRANDE:
+                  value:
+                    error:
+                      code: CUERPO_DEMASIADO_GRANDE
+                      message: La solicitud supera el tamaño máximo permitido.
+                      details:
+                        max_bytes: 1048576
                       request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
           headers:
             X-Request-ID:
@@ -4308,6 +4508,26 @@ paths:
                       code: NO_AUTORIZADO
                       message: No tienes autorización para realizar esta operación.
                       details: {}
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '413':
+          description: 'Códigos: CUERPO_DEMASIADO_GRANDE'
+          x-error-codes:
+          - CUERPO_DEMASIADO_GRANDE
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                CUERPO_DEMASIADO_GRANDE:
+                  value:
+                    error:
+                      code: CUERPO_DEMASIADO_GRANDE
+                      message: La solicitud supera el tamaño máximo permitido.
+                      details:
+                        max_bytes: 1048576
                       request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
           headers:
             X-Request-ID:
@@ -5462,6 +5682,7 @@ components:
       - CIUDAD_NO_CUBIERTA
       - TARIFA_NO_DISPONIBLE
       - ARCHIVO_INVALIDO
+      - CUERPO_DEMASIADO_GRANDE
       title: ErrorCode
     EscalationAction:
       type: string

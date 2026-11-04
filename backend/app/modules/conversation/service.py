@@ -134,7 +134,7 @@ class ConversationService:
     async def _resolve(self, msg: InboundMessage, user_hash: str) -> ConversationState:
         moment = self._clock.now()
         if msg.session_id is not None:
-            state = await self._conversations.get(msg.session_id)
+            state = await self._conversations.get(msg.session_id, for_update=True)
             # Another user's or another channel's session is reported as missing (no oracle).
             if (
                 state is None
@@ -147,7 +147,9 @@ class ConversationService:
                 return state
         else:
             since = moment - timedelta(minutes=self._ttl[msg.channel])
-            state = await self._conversations.latest_open(msg.channel, user_hash, since)
+            state = await self._conversations.latest_open(
+                msg.channel, user_hash, since, for_update=True
+            )
             if state is not None:
                 return state
         return ConversationState(

@@ -6,7 +6,7 @@ import re
 import time
 import uuid
 from collections import defaultdict, deque
-from collections.abc import Awaitable, Callable, MutableMapping
+from collections.abc import Awaitable, Callable, Mapping, MutableMapping
 from typing import Any, cast
 
 from fastapi import FastAPI, Request
@@ -58,6 +58,64 @@ class RequestIdMiddleware:
         await self.app(scope, receive, send_with_id)
 
 
+class BodyTooLarge(StarletteHTTPException):
+    """Raised while the body streams in; FastAPI re-raises HTTP errors from body parsing."""
+
+    def __init__(self, max_bytes: int) -> None:
+        super().__init__(status_code=413)
+        self.max_bytes = max_bytes
+
+
+class BodySizeLimitMiddleware:
+    """413 ``CUERPO_DEMASIADO_GRANDE`` before the app buffers an oversized body (CR-008).
+
+    A declared ``Content-Length`` is refused up front; a chunked body is counted while
+    it streams. ``limits`` maps a path prefix to its own limit, and ``None`` leaves the
+    route to enforce one (the batch endpoint answers ``LOTE_DEMASIADO_GRANDE``).
+    """
+
+    def __init__(self, app: ASGIApp, *, default: int, limits: Mapping[str, int | None]) -> None:
+        self.app = app
+        self._default = default
+        self._limits = sorted(limits.items(), key=lambda item: -len(item[0]))
+
+    def _limit_for(self, path: str) -> int | None:
+        for prefix, limit in self._limits:
+            if path.startswith(prefix):
+                return limit
+        return self._default
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        limit = self._limit_for(scope.get("path", "")) if scope["type"] == "http" else None
+        if limit is None:
+            await self.app(scope, receive, send)
+            return
+        headers = dict(scope.get("headers") or [])
+        declared = headers.get(b"content-length", b"").decode("latin-1")
+        if declared.isdigit() and int(declared) > limit:
+            request_id = str((scope.get("state") or {}).get("request_id") or uuid.uuid4())
+            error = ContractError(ErrorCode.CUERPO_DEMASIADO_GRANDE, details={"max_bytes": limit})
+            response = JSONResponse(
+                status_code=error.http_status,
+                content=error.to_envelope(request_id).model_dump(mode="json"),
+                headers={"Connection": "close"},
+            )
+            await response(scope, receive, send)
+            return
+        received = 0
+
+        async def counted() -> Message:
+            nonlocal received
+            message = await receive()
+            if message["type"] == "http.request":
+                received += len(message.get("body", b""))
+                if received > limit:
+                    raise BodyTooLarge(limit)
+            return message
+
+        await self.app(scope, counted, send)
+
+
 def request_id_of(request: Request) -> str:
     return str(getattr(request.state, "request_id", None) or uuid.uuid4())
 
@@ -89,6 +147,11 @@ async def _validation_error(request: Request, exc: Exception) -> JSONResponse:
 
 
 async def _http_error(request: Request, exc: Exception) -> JSONResponse:
+    if isinstance(exc, BodyTooLarge):
+        details = {"max_bytes": exc.max_bytes}
+        return error_response(
+            request, ContractError(ErrorCode.CUERPO_DEMASIADO_GRANDE, details=details)
+        )
     status = cast(StarletteHTTPException, exc).status_code
     code = ErrorCode.NO_ENCONTRADO if status == 404 else ErrorCode.VALIDACION
     response = error_response(request, ContractError(code))

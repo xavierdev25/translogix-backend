@@ -141,3 +141,16 @@ Decisiones de negocio D2–D5 respondidas el 2026-11-04. Fórmula `excedente-v1`
 | DEC-TAR6 | Perfiles versionados e inmutables: un cambio de regla es una versión nueva. Hay como máximo **un perfil ACTIVE por tipo**, garantizado por un índice único parcial. Solo se usan perfiles del tipo `TARIFF_ENVIRONMENT` que estén vigentes (`effective_from` ≤ ahora < `effective_until`). Cada cotización copia en `tariff_quotations` todos los valores usados, así que un cambio de perfil no altera las históricas. Se carga y activa por CLI (`python -m app.tariffs.cli`). | Spec 1.1 §5.1, §6.5. | CONFIRMADA |
 | DEC-TAR7 | Si se supera el peso o el volumen máximo del destino, se **advierte** y no se bloquea (igual que DEC-Q4). `POST /cotizar` (`provisional-v1`) se conserva sin cambios para el chat, el demo y el PDF. | Conflicto 1 de la revisión 1.1. | PROVISIONAL |
 
+
+## 8. Endurecimiento tras la auditoría integral (1.6.0, CR-008)
+
+Correcciones técnicas de la auditoría del 2026-11-04 ([`docs/audits/`](../docs/audits/)). Ninguna es
+una decisión de negocio; los valores salen de mediciones de esa auditoría.
+
+| Id | Decisión | Fuente | Estado |
+|----|----------|--------|--------|
+| DEC-AUD1 | Todo cuerpo de petición tiene límite y se corta **antes** de almacenarlo: 413 `CUERPO_DEMASIADO_GRANDE`. El límite por defecto es 1 MiB (`max_request_body_bytes`); un mensaje de chat no pasa de ~16 KiB (4.096 caracteres). Para `/attachments` el límite es `attachments_max_bytes` + 64 KiB de multipart. Los lotes B2B conservan su propio 413 `LOTE_DEMASIADO_GRANDE`. | SEC-04/05: un JSON de 25 MB subía el RSS de 76 a 182 MB. | CONFIRMADA |
+| DEC-AUD2 | Admisión acotada al LLM: hasta 4 llamadas en curso y 8 en espera por proceso (`llm_max_inflight`, `llm_max_queue`). Por encima de eso, el turno se degrada al instante por la ruta de `LLM_NO_DISPONIBLE` (ofrece un asesor) y no espera. Con 4 + 8, el último en espera responde en ~22 s, dentro de `llm_timeout_seconds` (30 s), medido en el equipo de la auditoría. Si cambia el hardware, hay que volver a medir. | REL-01. | PROVISIONAL (se ajusta por hardware) |
+| DEC-AUD3 | La recuperación del RAG usa **su propio pool** de conexiones. Corre dentro de un turno de chat que ya tiene una conexión, y con un solo pool una ráfaga de turnos se bloqueaba a sí misma hasta el *timeout* del pool (500). | REL-01: 10 de 24 peticiones RAG simultáneas daban 500. | CONFIRMADA |
+| DEC-AUD4 | Un turno bloquea la fila de su conversación (`SELECT … FOR UPDATE`) hasta el commit: dos turnos de la misma conversación se ejecutan uno tras otro. Se mantiene la atomicidad del turno (P08). | CON-01: dos mensajes simultáneos perdían un dato de la cotización. | CONFIRMADA |
+| DEC-AUD5 | Mientras no exista un canal asesor→cliente (CR-007), el texto de espera dice "Tu caso ya quedó registrado y está en la cola de asesores de TransLogix." Antes prometía "Te responderá en este mismo chat". | R1. | PROVISIONAL (lo sustituye CR-007) |

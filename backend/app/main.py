@@ -126,6 +126,7 @@ from app.shared.business_days import load_holidays
 from app.shared.clock import build_clock
 from app.shared.config import REPO_ROOT, Settings, get_settings
 from app.shared.http import (
+    BodySizeLimitMiddleware,
     RequestIdMiddleware,
     SlidingWindowRateLimiter,
     register_error_handlers,
@@ -139,6 +140,7 @@ from app.tariffs.api import routes as tariff_routes
 from app.tariffs.application.service import TariffQuotationService
 
 CONFIG_DIR = REPO_ROOT / "data" / "config"
+MULTIPART_OVERHEAD_BYTES = 64 * 1024  # boundaries and form fields around the uploaded file
 
 
 @dataclass
@@ -160,6 +162,7 @@ class Container:
     intents: IntentDetector
     limiter: SlidingWindowRateLimiter
     engine: AsyncEngine
+    rag_engine: AsyncEngine | None
     audit: ApiAuditService
     shipments: ShipmentService
     batches: BatchService
@@ -238,16 +241,29 @@ def build_container(settings: Settings) -> Container:
     )
     llm = embedding = None
     rag = ingestion = None
+    rag_engine = None
     if settings.ollama_base_url is not None:
         base = str(settings.ollama_base_url)
-        llm = OllamaChat(base, settings.ollama_chat_model or "", settings.llm_timeout_seconds)
+        llm = OllamaChat(
+            base,
+            settings.ollama_chat_model or "",
+            settings.llm_timeout_seconds,
+            max_inflight=settings.llm_max_inflight,
+            max_queue=settings.llm_max_queue,
+        )
         embedding = OllamaEmbedding(
             base,
             settings.ollama_embed_model or "",
             settings.embed_dim,
             settings.llm_timeout_seconds,
         )
-        rag = RagService(sessions, embedding, llm, top_k=settings.rag_top_k)
+        # Own pool (audit 2026-11-04, REL-01): retrieval runs inside a chat turn that already
+        # holds a connection; from the same pool, a burst of turns waited for each other
+        # until the pool timed out (500).
+        rag_engine = create_engine(settings)
+        rag = RagService(
+            create_session_factory(rag_engine), embedding, llm, top_k=settings.rag_top_k
+        )
         ingestion = IngestionService(
             sessions,
             embedding,
@@ -278,6 +294,7 @@ def build_container(settings: Settings) -> Container:
         intents=IntentDetector(llm, tariffs),
         limiter=SlidingWindowRateLimiter(settings.chat_rate_limit_per_minute),
         engine=engine,
+        rag_engine=rag_engine,
         audit=ApiAuditService(sessions),
         shipments=shipments,
         batches=BatchService(
@@ -815,9 +832,20 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         for client in (box.llm, box.embedding):
             if client is not None:
                 await client.aclose()
-        await box.engine.dispose()
+        for engine in (box.engine, box.rag_engine):
+            if engine is not None:
+                await engine.dispose()
 
     app = FastAPI(title=TITLE, version=CONTRACT_VERSION, description=DESCRIPTION, lifespan=lifespan)
+    # Innermost: its 413 still gets the CORS headers and the request id (CR-008).
+    app.add_middleware(
+        BodySizeLimitMiddleware,
+        default=settings.max_request_body_bytes,
+        limits={
+            f"{API_PREFIX}/attachments": settings.attachments_max_bytes + MULTIPART_OVERHEAD_BYTES,
+            f"{API_PREFIX}/shipment-batches": None,  # the route answers LOTE_DEMASIADO_GRANDE
+        },
+    )
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_allow_origins,

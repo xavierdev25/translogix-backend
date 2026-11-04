@@ -11,6 +11,19 @@ partir de la Puerta A** (contrato congelado):
 Antes de la Puerta A las versiones pueden incluir ajustes no aditivos (nadie consume todavía).
 Los demás agentes proponen cambios en [`docs/contract-change-requests.md`](../docs/contract-change-requests.md).
 
+## 1.6.0 — 2026-11-04 · endurecimiento tras la auditoría integral (CR-008)
+
+Cambio **aditivo** (MINOR). Implementa [CR-008](../docs/contract-change-requests.md). Ningún campo ni
+endpoint cambia. Decisiones en [`DECISIONS.md`](DECISIONS.md) §8 (DEC-AUD1 a DEC-AUD5). Evidencia en
+[`docs/audits/TEST_EVIDENCE.md`](../docs/audits/TEST_EVIDENCE.md).
+
+| Cambio | Motivo |
+|--------|--------|
+| `ErrorCode.CUERPO_DEMASIADO_GRANDE` (413), con `details.max_bytes`. Lo documentan todas las operaciones con cuerpo, salvo el lote B2B, que conserva `LOTE_DEMASIADO_GRANDE`. | SEC-04/05: el cuerpo se almacenaba entero antes de validarlo. |
+| Ejemplo `error.cuerpo-demasiado-grande`. | Un ejemplo por código. |
+| Comportamiento (sin cambio de forma): bajo saturación, un turno que necesita el LLM responde 200 con la ruta degradada (oferta de asesor) en lugar de 500. | REL-01. |
+| Comportamiento: el texto de espera del asesor ya no promete una respuesta en el chat. | R1 (provisional hasta CR-007). |
+
 ## 1.5.0 — 2026-11-04 · cotización por perfiles tarifarios (CR-003)
 
 Cambio **aditivo** (MINOR). Implementa [CR-003](../docs/contract-change-requests.md) con las decisiones

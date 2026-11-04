@@ -45,14 +45,18 @@ class ConversationRepository:
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
 
-    async def get(self, session_id: UUID) -> ConversationState | None:
-        row = await self._session.get(ConversationRow, session_id)
+    async def get(self, session_id: UUID, *, for_update: bool = False) -> ConversationState | None:
+        """``for_update`` locks the row until commit: two turns of one conversation run one
+        after the other, so neither overwrites the other's state (audit 2026-11-04, CON-01)."""
+        row = await self._session.get(
+            ConversationRow, session_id, with_for_update=for_update, populate_existing=for_update
+        )
         return ConversationState.model_validate(row.state_json) if row else None
 
     async def latest_open(
-        self, channel: ChannelType, user_hash: str, since: datetime
+        self, channel: ChannelType, user_hash: str, since: datetime, *, for_update: bool = False
     ) -> ConversationState | None:
-        row = await self._session.scalar(
+        query = (
             select(ConversationRow)
             .where(
                 ConversationRow.channel == channel.value,
@@ -63,6 +67,9 @@ class ConversationRepository:
             .order_by(ConversationRow.updated_at.desc())
             .limit(1)
         )
+        if for_update:
+            query = query.with_for_update().execution_options(populate_existing=True)
+        row = await self._session.scalar(query)
         return ConversationState.model_validate(row.state_json) if row else None
 
     async def save(self, state: ConversationState) -> None:

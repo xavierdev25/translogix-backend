@@ -1,0 +1,172 @@
+{
+  "_descripcion": "Conjunto de evaluación de la IA (RAG + escalamiento) de punta a punta por el chat. ANSWER: debe responder con cita y contener alguna palabra clave; NO_ANSWER: no debe afirmar nada (escala o pide aclaración). Las preguntas salen de la especificación oficial (lista de prohibidos, MSDS, IMO) y de los escenarios del contrato.",
+  "casos": [
+    {
+      "id": "G01",
+      "q": "¿Puedo enviar 5 litros de ácido clorhídrico de Bogotá a Cali?",
+      "expect": "ANSWER",
+      "keywords": [
+        "clase 8",
+        "corrosiv",
+        "msds",
+        "doble pared"
+      ],
+      "nota": "Palabras clave ampliadas tras la línea base: la respuesta correcta puede citar la MSDS o el embalaje de doble pared sin nombrar la clase (ver TEST_EVIDENCE.md)."
+    },
+    {
+      "id": "G02",
+      "q": "¿Puedo enviar baterías de litio?",
+      "expect": "ANSWER",
+      "keywords": [
+        "clase 9"
+      ]
+    },
+    {
+      "id": "G03",
+      "q": "¿Puedo enviar joyas?",
+      "expect": "ANSWER",
+      "keywords": [
+        "no se transporta",
+        "no será",
+        "no transport",
+        "prohib"
+      ]
+    },
+    {
+      "id": "G04",
+      "q": "¿Puedo enviar dinero en efectivo?",
+      "expect": "ANSWER",
+      "keywords": [
+        "no se transporta",
+        "no será",
+        "no transport",
+        "prohib"
+      ],
+      "nota": "Palabras clave ampliadas tras revisión manual: la respuesta correcta dice «no será receptado ni transportado» citando la lista negra (§5) sin usar la palabra «prohibido» (ver TEST_EVIDENCE.md)."
+    },
+    {
+      "id": "G05",
+      "q": "¿Puedo enviar pólvora?",
+      "expect": "ANSWER",
+      "keywords": [
+        "no se transporta",
+        "no será",
+        "no transport",
+        "prohib"
+      ]
+    },
+    {
+      "id": "G06",
+      "q": "¿Puedo enviar explosivos?",
+      "expect": "ANSWER",
+      "keywords": [
+        "no se transporta",
+        "no será",
+        "no transport",
+        "prohib"
+      ]
+    },
+    {
+      "id": "G07",
+      "q": "¿Puedo enviar un perro de Bogotá a Medellín?",
+      "expect": "ANSWER",
+      "keywords": [
+        "animales",
+        "no se transporta",
+        "no será",
+        "no transport",
+        "prohib"
+      ]
+    },
+    {
+      "id": "G08",
+      "q": "¿Puedo enviar material radiactivo?",
+      "expect": "ANSWER",
+      "keywords": [
+        "no se transporta",
+        "no será",
+        "no transport",
+        "prohib",
+        "radiactiv"
+      ]
+    },
+    {
+      "id": "G09",
+      "q": "¿Qué documentos necesito para enviar ácido sulfúrico?",
+      "expect": "ANSWER",
+      "keywords": [
+        "msds",
+        "hoja de datos",
+        "hoja de seguridad"
+      ]
+    },
+    {
+      "id": "G10",
+      "q": "¿Cómo debo embalar una pintura a base de solventes?",
+      "expect": "ANSWER",
+      "keywords": [
+        "clase 3",
+        "inflamable",
+        "absorbente",
+        "vermiculita"
+      ]
+    },
+    {
+      "id": "G11",
+      "q": "¿Qué rotulado necesita una carga de químicos peligrosos?",
+      "expect": "ANSWER",
+      "keywords": [
+        "rotul",
+        "etiqueta",
+        "clase",
+        "imo",
+        "onu"
+      ]
+    },
+    {
+      "id": "G12",
+      "q": "Hace un mes me entregaron un envío y hasta hoy lo abrí y vi que falta la mitad de las cosas. Exijo indemnización.",
+      "expect": "ANSWER",
+      "keywords": [
+        "1028",
+        "3 días",
+        "tres días"
+      ]
+    },
+    {
+      "id": "G13",
+      "q": "¿Qué documentos necesito para radicar una reclamación por mercancía averiada?",
+      "expect": "ANSWER",
+      "keywords": [
+        "factura",
+        "carta",
+        "fotos"
+      ]
+    },
+    {
+      "id": "G14",
+      "q": "¿Cuánto cuesta un contenedor de 40 pies a Hong Kong?",
+      "expect": "NO_ANSWER"
+    },
+    {
+      "id": "G15",
+      "q": "¿Quién ganó el último mundial de fútbol?",
+      "expect": "NO_ANSWER"
+    },
+    {
+      "id": "G16",
+      "q": "¿Hacen envíos a Caracas, Venezuela?",
+      "expect": "NO_ANSWER"
+    },
+    {
+      "id": "G17",
+      "q": "¿Cuál es la tasa de cambio del dólar hoy?",
+      "expect": "NO_ANSWER"
+    },
+    {
+      "id": "G18",
+      "q": "¿Puedo pagar el envío con criptomonedas?",
+      "expect": "NO_ANSWER"
+    }
+  ]
+}

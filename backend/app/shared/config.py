@@ -30,6 +30,11 @@ class Settings(BaseSettings):
     ollama_embed_model: str | None = None
     embed_dim: int = Field(default=1024, gt=0)
     llm_timeout_seconds: float = Field(default=30.0, gt=0)
+    # Audit 2026-11-04 (REL-01): a turn keeps its DB connection while it waits for the model,
+    # so the turns waiting for it are bounded (in flight + queued < DB pool of 15). Beyond
+    # that the turn degrades at once (LLM_NO_DISPONIBLE) instead of exhausting the pool (500).
+    llm_max_inflight: int = Field(default=4, gt=0)
+    llm_max_queue: int = Field(default=8, ge=0)
 
     rag_top_k: int = Field(default=5, ge=1, le=20)
     confidence_threshold: float = Field(default=0.75, ge=0, le=1)
@@ -58,6 +63,8 @@ class Settings(BaseSettings):
     business_holidays_file: Path | None = None
     attachments_dir: Path = REPO_ROOT / "var" / "attachments"
     attachments_max_bytes: int = Field(default=10 * 1024 * 1024, gt=0)
+    # Audit 2026-11-04 (SEC-04/05): any other body is cut at this size before it is buffered.
+    max_request_body_bytes: int = Field(default=1024 * 1024, gt=0)
 
     cors_allow_origins: Annotated[list[str], NoDecode] = Field(default_factory=list)
     chat_rate_limit_per_minute: int = Field(default=30, ge=0)  # 0 = sin límite

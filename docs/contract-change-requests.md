@@ -380,7 +380,8 @@ Códigos de error nuevos que comparten:
   `asesor-backend-faltantes.md`. La reconciliación con el backend está en
   [`REVISION_SOLICITUD_ASESOR.md`](REVISION_SOLICITUD_ASESOR.md).
 - **Fecha:** 2026-11-04
-- **Versión destino:** contrato **1.6.0** y migración **0005** (`down_revision="0004"`), en dos entregas
+- **Versión destino:** contrato **1.7.0** (re-asignada: 1.6.0 la tomó CR-008, que no tiene migración) y
+  migración **0005** (`down_revision="0004"`), en dos entregas
   (P0a y P0b). P1 va en otro CR.
 - **Qué cambia:**
 
@@ -491,4 +492,25 @@ Códigos de error nuevos que comparten:
 
   Las propuestas por defecto están en `REVISION_SOLICITUD_ASESOR.md` §4.
 - **Estado:** PROPUESTA
+
+### CR-008 — Endurecimiento tras la auditoría integral
+
+- **Solicitante:** auditoría integral del 2026-11-04 ([`audits/INTEGRAL_AUDIT.md`](audits/INTEGRAL_AUDIT.md)).
+- **Fecha:** 2026-11-04
+- **Qué cambia:**
+  - `ErrorCode.CUERPO_DEMASIADO_GRANDE` (413, `details.max_bytes`), documentado en toda operación con
+    cuerpo salvo el lote B2B, que mantiene `LOTE_DEMASIADO_GRANDE` (DEC-AUD1).
+  - Sin cambio de forma:
+    - admisión acotada al LLM y un pool propio para la recuperación RAG (DEC-AUD2, DEC-AUD3);
+    - bloqueo de fila por turno (DEC-AUD4);
+    - texto de espera del asesor (DEC-AUD5).
+- **Por qué:** hallazgos medidos:
+  - SEC-04/05: un cuerpo de 25 MB se almacenaba entero;
+  - REL-01: 10 de 24 peticiones RAG simultáneas daban 500;
+  - CON-01: dos turnos simultáneos perdían un dato;
+  - R1: el chat prometía una respuesta del asesor que no existe.
+- **Compatibilidad:** aditivo (MINOR). Un cliente que no conozca el código nuevo recibe el sobre de error
+  de siempre con HTTP 413. Sin migración.
+- **Versión:** contrato **1.6.0**. CR-007 pasa a 1.7.0.
+- **Estado:** IMPLEMENTADA
 

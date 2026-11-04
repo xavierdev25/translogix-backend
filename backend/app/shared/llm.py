@@ -4,9 +4,11 @@ Every failure (connection, timeout, HTTP error, malformed body) becomes
 ``ContractError(LLM_NO_DISPONIBLE)`` so callers degrade instead of crashing.
 """
 
+import asyncio
 import logging
 import re
-from collections.abc import Sequence
+from collections.abc import AsyncIterator, Sequence
+from contextlib import asynccontextmanager
 from typing import Any
 
 import httpx
@@ -43,11 +45,50 @@ class _OllamaClient:
         await self._client.aclose()
 
 
+class Admission:
+    """At most ``max_inflight`` calls to the model and ``max_queue`` waiting for one.
+
+    A chat turn keeps its database connection while it waits for the model, so an
+    unbounded queue exhausts the pool and the API answers 500 (audit 2026-11-04,
+    REL-01). A call beyond the queue fails at once as ``LLM_NO_DISPONIBLE``, the same
+    path as an unreachable Ollama: the turn degrades and offers a human.
+    """
+
+    def __init__(self, max_inflight: int, max_queue: int) -> None:
+        self._slots = asyncio.Semaphore(max_inflight)
+        self._max_queue = max_queue
+        self._waiting = 0
+
+    @asynccontextmanager
+    async def slot(self) -> AsyncIterator[None]:
+        if self._slots.locked() and self._waiting >= self._max_queue:
+            logger.warning("llm saturated: %d waiting", self._waiting)
+            raise ContractError(ErrorCode.LLM_NO_DISPONIBLE, details={"motivo": "saturado"})
+        self._waiting += 1
+        try:
+            await self._slots.acquire()
+        finally:
+            self._waiting -= 1
+        try:
+            yield
+        finally:
+            self._slots.release()
+
+
 class OllamaChat:
     """``LlmPort``. Deterministic settings (temperature 0); thinking disabled."""
 
-    def __init__(self, base_url: str, model: str, timeout_seconds: float) -> None:
+    def __init__(
+        self,
+        base_url: str,
+        model: str,
+        timeout_seconds: float,
+        *,
+        max_inflight: int = 4,
+        max_queue: int = 8,
+    ) -> None:
         self._http = _OllamaClient(base_url, timeout_seconds)
+        self._admission = Admission(max_inflight, max_queue)
         self.model = model
 
     async def complete(
@@ -60,16 +101,15 @@ class OllamaChat:
         options: dict[str, Any] = {"temperature": temperature}
         if max_tokens:
             options["num_predict"] = max_tokens
-        data = await self._http.post(
-            "/api/chat",
-            {
-                "model": self.model,
-                "messages": [m.model_dump() for m in messages],
-                "stream": False,
-                "think": False,
-                "options": options,
-            },
-        )
+        body = {
+            "model": self.model,
+            "messages": [m.model_dump() for m in messages],
+            "stream": False,
+            "think": False,
+            "options": options,
+        }
+        async with self._admission.slot():
+            data = await self._http.post("/api/chat", body)
         content = data.get("message", {}).get("content")
         if not isinstance(content, str):
             raise ContractError(

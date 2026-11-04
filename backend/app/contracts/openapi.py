@@ -87,6 +87,9 @@ def _document_errors(operation: dict[str, Any]) -> None:
     responses: dict[str, Any] = operation["responses"]
     if "422" in responses:  # FastAPI adds it whenever there is something to validate
         codes.insert(0, ErrorCode.VALIDACION)
+    # 1.6.0 (CR-008): every body is size-limited; the batch route answers its own 413.
+    if "requestBody" in operation and ErrorCode.LOTE_DEMASIADO_GRANDE not in codes:
+        codes.append(ErrorCode.CUERPO_DEMASIADO_GRANDE)
     codes.append(ErrorCode.ERROR_INTERNO)
 
     by_status: dict[str, list[ErrorCode]] = defaultdict(list)
