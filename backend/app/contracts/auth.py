@@ -33,6 +33,23 @@ class WhoAmI(ContractModel):
     scopes: list[ApiScope] = Field(default_factory=list)
 
 
+class LoginRequest(ContractModel):
+    """``POST /api/v1/auth/login``: email + password → session token."""
+
+    email: str = Field(min_length=3, max_length=120)
+    password: str = Field(min_length=1, max_length=256)
+
+
+class LoginResponse(ContractModel):
+    """Successful login: a short-lived Bearer token and the caller's identity."""
+
+    token: str = Field(description="Bearer token for subsequent requests.")
+    expires_at: BogotaDatetime
+    roles: list[Role] = Field(min_length=1)
+    staff_user_id: UUID4
+    nombre: str
+
+
 class StaffUserCreateRequest(ContractModel):
     email: str = Field(min_length=3, max_length=120)
     nombre: str = Field(min_length=1, max_length=120)

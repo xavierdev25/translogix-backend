@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.contracts.common import ContractError, ErrorCode
 from app.contracts.ports import Clock
 from app.contracts.staff import STAFF_ROLES, Role
+from app.shared.passwords import hash_password, verify_password
 from app.staff.domain.models import (
     TOKEN_MAX_DAYS,
     StaffContext,
@@ -45,7 +46,14 @@ class StaffAdminService:
         self._tokens = StaffTokenRepository(session)
         self._clock = clock
 
-    async def create_user(self, email: str, nombre: str, roles: Iterable[Role]) -> StaffUser:
+    async def create_user(
+        self,
+        email: str,
+        nombre: str,
+        roles: Iterable[Role],
+        *,
+        password: str | None = None,
+    ) -> StaffUser:
         try:
             normalized = normalize_email(email)
         except ValueError:
@@ -62,7 +70,8 @@ class StaffAdminService:
             created_at=now,
             updated_at=now,
         )
-        await self._users.add(user)
+        pw_hash = hash_password(password) if password else None
+        await self._users.add(user, password_hash=pw_hash)
         return user
 
     async def set_roles(self, user_id: UUID, roles: Iterable[Role]) -> bool:
@@ -70,6 +79,53 @@ class StaffAdminService:
 
     async def set_status(self, user_id: UUID, estado: StaffStatus) -> bool:
         return await self._users.update(user_id, self._clock.now(), estado=estado)
+
+    async def set_password(self, user_id: UUID, password: str) -> bool:
+        """Set or change the password of a staff user."""
+        if len(password) < 8:
+            raise ContractError(
+                ErrorCode.VALIDACION, "La contraseña debe tener al menos 8 caracteres."
+            )
+        return await self._users.set_password_hash(
+            user_id,
+            hash_password(password),
+            self._clock.now(),
+        )
+
+    async def login(
+        self,
+        email: str,
+        password: str,
+        *,
+        session_days: int = 1,
+    ) -> tuple[StaffTokenRecord, str, StaffUser]:
+        """Email + password → (token record, full token, user). The token is short-lived (1 day)."""
+        try:
+            normalized = normalize_email(email)
+        except ValueError:
+            raise ContractError(ErrorCode.NO_AUTENTICADO) from None
+        found = await self._users.get_password_hash(normalized)
+        if found is None:
+            raise ContractError(ErrorCode.NO_AUTENTICADO)
+        user, pw_hash = found
+        if pw_hash is None or not verify_password(password, pw_hash):
+            raise ContractError(ErrorCode.NO_AUTENTICADO)
+        if user.estado is not StaffStatus.ACTIVE:
+            raise ContractError(ErrorCode.NO_AUTENTICADO)
+        # Issue a short-lived session token
+        prefix, full_token = new_staff_token()
+        now = self._clock.now()
+        record = StaffTokenRecord(
+            id=uuid4(),
+            staff_user_id=user.id,
+            key_prefix=prefix,
+            created_at=now,
+            expires_at=now + timedelta(days=session_days),
+            last_used_at=None,
+            revoked_at=None,
+        )
+        await self._tokens.add(record, hash_staff_token(full_token))
+        return record, full_token, user
 
     async def issue_token(
         self, user_id: UUID, *, expires_in_days: int

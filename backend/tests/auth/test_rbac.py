@@ -114,6 +114,7 @@ PUBLIC = {
     ("POST", "/api/v1/channels/pbx/turns"),
     ("POST", "/api/v1/channels/pbx/simulate"),
     ("GET", "/api/v1/metrics/channels"),
+    ("POST", "/api/v1/auth/login"),  # CR-007: email + password; the credential is the body
     ("GET", "/health"),
     ("GET", "/ready"),
 }
@@ -485,5 +486,5 @@ def test_every_route_is_protected_or_explicitly_public(app: FastAPI) -> None:
         for method in route.methods or ()
     }
 
-    assert len(routes) == 31  # 18 protected + 13 public: a new route must land in one set
+    assert len(routes) == 33  # 19 protected + 14 public: a new route must land in one set
     assert unprotected == PUBLIC

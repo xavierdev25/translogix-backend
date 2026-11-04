@@ -45,6 +45,9 @@ def _parser() -> argparse.ArgumentParser:
     status = commands.add_parser("set-status")
     status.add_argument("--user-id", type=UUID, required=True)
     status.add_argument("--estado", required=True, choices=[s.value for s in StaffStatus])
+    pw = commands.add_parser("set-password")
+    pw.add_argument("--user-id", type=UUID, required=True)
+    pw.add_argument("--password", required=True, help="Mínimo 8 caracteres")
     show = commands.add_parser("show")
     show.add_argument("--user-id", type=UUID, required=True)
     return parser
@@ -84,6 +87,11 @@ async def _run(args: argparse.Namespace) -> int:
                     print("Usuario no encontrado.", file=sys.stderr)
                     return 1
                 print(f"estado={args.estado}")
+            elif args.command == "set-password":
+                if not await admin.set_password(args.user_id, args.password):
+                    print("Usuario no encontrado.", file=sys.stderr)
+                    return 1
+                print("Contraseña actualizada.")
             else:
                 found = await admin.describe(args.user_id)
                 if found is None:

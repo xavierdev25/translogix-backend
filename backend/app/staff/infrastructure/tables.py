@@ -15,6 +15,7 @@ class StaffUserRow(Base):
     nombre: Mapped[str] = mapped_column(String(120))
     roles: Mapped[list[str]] = mapped_column(Json)
     estado: Mapped[str] = mapped_column(String(16))
+    password_hash: Mapped[str | None] = mapped_column(String(256), nullable=True)
     created_at: Mapped[datetime]
     updated_at: Mapped[datetime]
 

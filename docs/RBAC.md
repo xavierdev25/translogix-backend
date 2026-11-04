@@ -163,6 +163,8 @@ repositorio.
 - WhatsApp (`GET`/`POST /webhook`, protegido por la firma HMAC de Meta; `POST /simulate`);
 - PBX (`/turns` y `/simulate`);
 - `GET /metrics/channels` (agregados, sin PII; el front lo usa sin token);
+- `POST /auth/login` (CR-007: email y contraseña de personal; devuelve un token de 1 día).
+  `POST /auth/logout` sí está protegida (revoca el token con que se llama);
 - `/health` y `/ready`.
 
 **Riesgos abiertos que este cambio no resuelve:**

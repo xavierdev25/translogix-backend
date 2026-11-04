@@ -12,3 +12,4 @@ node_modules/
 # Runtime data (uploaded attachments) and OS files
 var/
 .DS_Store
+.coverage

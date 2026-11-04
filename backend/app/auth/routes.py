@@ -29,6 +29,8 @@ from app.contracts.auth import (
     DangerousGoodsList,
     DangerousGoodsReview,
     DangerousGoodsReviewRequest,
+    LoginRequest,
+    LoginResponse,
     ReviewDecision,
     StaffRolesUpdateRequest,
     StaffUserCreateRequest,
@@ -82,6 +84,67 @@ async def get_current_principal(principal: Anyone) -> WhoAmI:
         client_id=principal.client_id,
         scopes=sorted(principal.scopes),
     )
+
+
+@router.post("/auth/login", tags=["autenticación"], operation_id="login")
+async def login(body: LoginRequest, request: Request) -> LoginResponse:
+    """Email + password → short-lived Bearer token (1 day). No prior credential required."""
+    box = request.app.state.container
+    status = 500
+    try:
+        async with box.sessions() as session:
+            admin = StaffAdminService(session, box.clock)
+            record, full_token, user = await admin.login(body.email, body.password)
+            await session.commit()
+        status = 200
+        return LoginResponse(
+            token=full_token,
+            expires_at=record.expires_at,
+            roles=sorted(user.roles),
+            staff_user_id=user.id,
+            nombre=user.nombre,
+        )
+    except ContractError as error:
+        status = error.http_status
+        raise
+    finally:
+        await audit(
+            request,
+            None,
+            AuditAction.AUTH_FAILED if status == 401 else AuditAction.AUTH_LOGIN,
+            status,
+            resource_type="auth",
+            resource_id=body.email[:64],
+        )
+
+
+@router.post("/auth/logout", tags=["autenticación"], operation_id="logout")
+async def logout(principal: Anyone, request: Request) -> dict[str, str]:
+    """Revoke the token used in this request. Requires a valid Bearer token."""
+    box = request.app.state.container
+    status = 500
+    try:
+        if principal.token_id is None:
+            # Legacy X-Admin-Token: nothing to revoke
+            status = 200
+            return {"message": "ok"}
+        async with box.sessions() as session:
+            admin = StaffAdminService(session, box.clock)
+            await admin.revoke_token(principal.token_id)
+            await session.commit()
+        status = 200
+        return {"message": "ok"}
+    except ContractError as error:
+        status = error.http_status
+        raise
+    finally:
+        await audit(
+            request,
+            principal,
+            AuditAction.AUTH_LOGOUT,
+            status,
+            resource_type="auth",
+        )
 
 
 @router.post(

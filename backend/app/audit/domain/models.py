@@ -32,6 +32,9 @@ class AuditAction(StrEnum):
     ATTACHMENT_DOWNLOAD = "attachment.download"
     ATTACHMENT_LINK = "attachment.link"
     RAG_REINDEX_QUEUED = "rag.reindex.queued"
+    # 2.2.0 (CR-007): email + password login
+    AUTH_LOGIN = "auth.login"
+    AUTH_LOGOUT = "auth.logout"
 
 
 @dataclass(frozen=True)

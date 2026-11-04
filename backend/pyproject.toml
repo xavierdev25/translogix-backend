@@ -57,6 +57,8 @@ select = [
 "app/privacy/cli.py" = ["T201"]
 "app/storage/cli.py" = ["T201"]
 "app/worker/__main__.py" = ["T201"]
+# Demo fixture: progress output, and long literal SQL / chat texts that are data, not code.
+"scripts/seed_demo_data.py" = ["T201", "E501"]
 # "›" is the context separator the ingestion spec prescribes ("[DOC › sección]").
 "app/modules/rag/*.py" = ["RUF001", "RUF003"]
 

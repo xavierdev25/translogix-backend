@@ -42,7 +42,7 @@ class StaffUserRepository:
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
 
-    async def add(self, user: StaffUser) -> None:
+    async def add(self, user: StaffUser, password_hash: str | None = None) -> None:
         self._session.add(
             StaffUserRow(
                 id=user.id,
@@ -50,6 +50,7 @@ class StaffUserRepository:
                 nombre=user.nombre,
                 roles=_roles(user.roles),
                 estado=user.estado.value,
+                password_hash=password_hash,
                 created_at=user.created_at,
                 updated_at=user.updated_at,
             )
@@ -63,6 +64,21 @@ class StaffUserRepository:
     async def get_by_email(self, email: str) -> StaffUser | None:
         row = await self._session.scalar(select(StaffUserRow).where(StaffUserRow.email == email))
         return _user(row) if row else None
+
+    async def get_password_hash(self, email: str) -> tuple[StaffUser, str | None] | None:
+        """Return (user, password_hash) for the given email, or None."""
+        row = await self._session.scalar(select(StaffUserRow).where(StaffUserRow.email == email))
+        if row is None:
+            return None
+        return _user(row), row.password_hash
+
+    async def set_password_hash(self, user_id: UUID, password_hash: str, at: datetime) -> bool:
+        result = await self._session.execute(
+            update(StaffUserRow)
+            .where(StaffUserRow.id == user_id)
+            .values(password_hash=password_hash, updated_at=at)
+        )
+        return bool(result.rowcount)  # type: ignore[attr-defined]
 
     async def update(
         self,
