@@ -11,11 +11,11 @@ from typing import Annotated, Any, Literal, NoReturn
 from uuid import UUID
 
 from fastapi import APIRouter, Body, FastAPI, File, Form, Header, Path, Query, Security, UploadFile
-from fastapi.responses import PlainTextResponse
+from fastapi.responses import PlainTextResponse, Response
 from fastapi.security import APIKeyHeader, HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import AwareDatetime
 
-from app.contracts.attachments import AttachmentUploadResponse
+from app.contracts.attachments import AttachmentLink, AttachmentUploadResponse
 from app.contracts.auth import (
     AuditEventPage,
     DangerousGoodsList,
@@ -43,6 +43,7 @@ from app.contracts.ops import (
     HandoffListResponse,
     HealthResponse,
     ReadinessResponse,
+    ReindexJob,
     ReindexRequest,
     ReindexResponse,
 )
@@ -238,6 +239,51 @@ async def upload_attachment(
     client: ClientIdDep,
     declared_doc_code: Annotated[DocumentoCodigo | None, Form()] = None,
 ) -> AttachmentUploadResponse:
+    _spec_only()
+
+
+@attachments.get(
+    "/attachments/{attachment_id}/content",
+    summary="Descarga el contenido de un adjunto (2.1.0)",
+    description=(
+        "El dueño de la sesión (`X-Client-Id`), un ADMIN o un REVIEWER con un caso de esa "
+        "sesión. Otro adjunto o uno inexistente, 404. Se verifica el SHA-256 antes de servirlo."
+    ),
+    response_class=Response,
+    responses={
+        200: {
+            "content": {"application/pdf": {}, "image/jpeg": {}},
+            "description": "Bytes del adjunto (`Content-Disposition: attachment`).",
+        }
+    },
+    **_route(
+        "downloadAttachment",
+        priority="P1",
+        errors=(*_RBAC_ERRORS, ErrorCode.NO_ENCONTRADO, ErrorCode.ALMACENAMIENTO_NO_DISPONIBLE),
+    ),
+)
+async def download_attachment(
+    attachment_id: str, client: ClientIdDep, staff: StaffTokenDep, token: AdminTokenDep
+) -> Response:
+    _spec_only()
+
+
+@attachments.get(
+    "/attachments/{attachment_id}/link",
+    summary="URL prefirmada de S3 para descargar un adjunto (2.1.0)",
+    description=(
+        "Mismas reglas que `/content`. Válida `S3_PRESIGN_TTL_SECONDS` (60 s por defecto); no la "
+        "guardes. Con almacenamiento local responde 503 `NO_CONFIGURADO`: usa `/content`."
+    ),
+    **_route(
+        "getAttachmentLink",
+        priority="P1",
+        errors=(*_RBAC_ERRORS, ErrorCode.NO_ENCONTRADO, ErrorCode.NO_CONFIGURADO),
+    ),
+)
+async def get_attachment_link(
+    attachment_id: str, client: ClientIdDep, staff: StaffTokenDep, token: AdminTokenDep
+) -> AttachmentLink:
     _spec_only()
 
 
@@ -475,10 +521,15 @@ async def get_channel_metrics(
 @ops.post(
     "/admin/rag/reindex",
     summary="Reindexación del corpus RAG",
+    description=(
+        "Síncrona por defecto (200). 2.1.0: `asincrono: true` encola un trabajo (202) que procesa "
+        "el worker SQS; consulta su estado en `GET /admin/rag/jobs/{job_id}`."
+    ),
+    responses={202: {"model": ReindexJob, "description": "Trabajo en cola (asincrono=true)"}},
     **_route(
         "reindexRag",
         priority="P0",
-        errors=(*_RBAC_ERRORS, ErrorCode.LLM_NO_DISPONIBLE),
+        errors=(*_RBAC_ERRORS, ErrorCode.LLM_NO_DISPONIBLE, ErrorCode.NO_CONFIGURADO),
     ),
 )
 async def reindex_rag(
@@ -486,6 +537,15 @@ async def reindex_rag(
     staff: StaffTokenDep,
     body: Annotated[ReindexRequest | None, Body()] = None,
 ) -> ReindexResponse:
+    _spec_only()
+
+
+@ops.get(
+    "/admin/rag/jobs/{job_id}",
+    summary="Estado de un trabajo de reindexación asíncrona (ADMIN, 2.1.0)",
+    **_route("getReindexJob", priority="P1", errors=(*_RBAC_ERRORS, ErrorCode.NO_ENCONTRADO)),
+)
+async def get_reindex_job(job_id: UUID, staff: StaffTokenDep, token: AdminTokenDep) -> ReindexJob:
     _spec_only()
 
 

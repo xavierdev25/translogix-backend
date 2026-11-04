@@ -15,10 +15,23 @@ class PiiRedactingFormatter(logging.Formatter):
             "logger": record.name,
             "msg": redact_pii(record.getMessage()),
         }
-        for key in ("request_id", "trace_id", "channel", "intent"):
+        # 2.1.0 (CR-011): operational fields of storage, outbox and worker; closed values that
+        # still go through the redactor.
+        for key in (
+            "request_id",
+            "trace_id",
+            "channel",
+            "intent",
+            "job_kind",
+            "attempt",
+            "attempts",
+            "error_type",
+            "topic",
+            "storage",
+        ):
             value = getattr(record, key, None)
             if value is not None:
-                entry[key] = str(value)
+                entry[key] = redact_pii(str(value))
         if record.exc_info and record.exc_info[0] is not None:
             # Exception type only: messages and tracebacks may carry user data.
             entry["exc_type"] = record.exc_info[0].__name__

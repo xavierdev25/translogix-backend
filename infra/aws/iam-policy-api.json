@@ -1,0 +1,31 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AttachmentsObjectsOnly",
+      "Effect": "Allow",
+      "Action": ["s3:PutObject", "s3:GetObject", "s3:DeleteObject"],
+      "Resource": "arn:aws:s3:::${BUCKET}/attachments/*"
+    },
+    {
+      "Sid": "HeadReturns404InsteadOf403",
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": "arn:aws:s3:::${BUCKET}",
+      "Condition": {"StringLike": {"s3:prefix": ["attachments/*"]}}
+    },
+    {
+      "Sid": "KmsOnlyThroughS3",
+      "Effect": "Allow",
+      "Action": ["kms:GenerateDataKey", "kms:Decrypt"],
+      "Resource": "${KMS_KEY_ARN}",
+      "Condition": {"StringEquals": {"kms:ViaService": "s3.${REGION}.amazonaws.com"}}
+    },
+    {
+      "Sid": "EnqueueDocumentJobs",
+      "Effect": "Allow",
+      "Action": ["sqs:SendMessage", "sqs:GetQueueAttributes"],
+      "Resource": "${QUEUE_ARN}"
+    }
+  ]
+}

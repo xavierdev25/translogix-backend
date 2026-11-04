@@ -28,7 +28,7 @@ from app.contracts.normalizers import NUMERO_GUIA_PATTERN
 from app.contracts.pii import find_pii
 from app.contracts.timezone import to_bogota
 
-CONTRACT_VERSION = "2.0.0"
+CONTRACT_VERSION = "2.1.0"
 REQUEST_ID_HEADER = "X-Request-ID"
 CLIENT_ID_HEADER = "X-Client-Id"  # 2.0.0: identity of the web-chat user (SEC-01, SEC-06)
 REQUEST_ID_PATTERN = r"^[A-Za-z0-9._-]{1,128}$"
@@ -112,6 +112,8 @@ class ErrorCode(StrEnum):
     CUERPO_DEMASIADO_GRANDE = "CUERPO_DEMASIADO_GRANDE"
     # 2.0.0 (CR-010, CAP-01): the server is saturated (DB pool); retry later.
     SERVICIO_SATURADO = "SERVICIO_SATURADO"
+    # 2.1.0 (CR-011): the object storage (S3 or disk) did not answer; retry later.
+    ALMACENAMIENTO_NO_DISPONIBLE = "ALMACENAMIENTO_NO_DISPONIBLE"
 
 
 # One HTTP status per code, so every service answers the same failure the same way.
@@ -142,6 +144,7 @@ ERROR_HTTP_STATUS: Mapping[ErrorCode, int] = MappingProxyType(
         ErrorCode.ARCHIVO_INVALIDO: 422,
         ErrorCode.CUERPO_DEMASIADO_GRANDE: 413,
         ErrorCode.SERVICIO_SATURADO: 503,
+        ErrorCode.ALMACENAMIENTO_NO_DISPONIBLE: 503,
     }
 )
 
@@ -194,6 +197,9 @@ DEFAULT_ERROR_MESSAGES: Mapping[ErrorCode, str] = MappingProxyType(
         ErrorCode.CUERPO_DEMASIADO_GRANDE: "La solicitud supera el tamaño máximo permitido.",
         ErrorCode.SERVICIO_SATURADO: (
             "El servicio está saturado en este momento. Intenta de nuevo en unos segundos."
+        ),
+        ErrorCode.ALMACENAMIENTO_NO_DISPONIBLE: (
+            "No pudimos guardar ni leer el archivo en este momento. Intenta de nuevo."
         ),
     }
 )

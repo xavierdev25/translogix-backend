@@ -25,6 +25,7 @@ from fastapi import (
     Path,
     Query,
     Request,
+    Response,
     UploadFile,
 )
 from fastapi.middleware.cors import CORSMiddleware
@@ -46,7 +47,7 @@ from app.contracts.api_spec import (
     TITLE,
     build_contract_app,
 )
-from app.contracts.attachments import AttachmentUploadResponse
+from app.contracts.attachments import AttachmentLink, AttachmentUploadResponse
 from app.contracts.channels_http import (
     ChannelTurnResult,
     PbxSimulateRequest,
@@ -87,6 +88,7 @@ from app.contracts.ops import (
     HealthResponse,
     ReadinessChecks,
     ReadinessResponse,
+    ReindexJob,
     ReindexRequest,
     ReindexResponse,
 )
@@ -102,6 +104,7 @@ from app.contracts.shipment_batches import ShipmentBatchRequest
 from app.contracts.staff import Role
 from app.contracts.tariffs import TipoPerfil
 from app.contracts.tracking import TrackingResponse
+from app.db.models import AttachmentRow
 from app.db.repositories import (
     AttachmentRepository,
     AuditRepository,
@@ -113,6 +116,7 @@ from app.db.repositories import (
     RagRepository,
 )
 from app.db.session import create_engine, create_session_factory
+from app.jobs.service import JobService, to_contract
 from app.modules.conversation.intents import IntentDetector
 from app.modules.conversation.orchestrator import DialogueOrchestrator
 from app.modules.conversation.service import ConversationService, hash_user, reply_text
@@ -126,6 +130,7 @@ from app.modules.quotation.service import QuotationService
 from app.modules.rag.corpus import load_zones
 from app.modules.rag.service import IngestionService, RagService
 from app.modules.tracking.service import DatasetTmsAdapter, StateMap
+from app.shared import metrics
 from app.shared.business_days import load_holidays
 from app.shared.clock import build_clock
 from app.shared.config import REPO_ROOT, Settings, get_settings
@@ -139,6 +144,12 @@ from app.shared.http import (
 from app.shared.llm import OllamaChat, OllamaEmbedding
 from app.shared.logging import configure_logging
 from app.shared.ratelimit import LocalRateLimiter, PostgresRateLimiter, RateLimiter
+from app.shared.storage import (
+    LocalObjectStorage,
+    ObjectStorage,
+    StorageError,
+    build_storage,
+)
 from app.shipments.application.service import ShipmentService, tariff_version
 from app.tariffs.api import routes as tariff_routes
 from app.tariffs.application.service import TariffQuotationService
@@ -173,6 +184,7 @@ class Container:
     batch_limiter: RateLimiter
     attachments_limiter: RateLimiter
     limiter_engine: AsyncEngine | None
+    storage: ObjectStorage
     tariff_quotes: TariffQuotationService
 
     def pqrs(self, session: AsyncSession) -> PqrsService:
@@ -331,6 +343,7 @@ def build_container(settings: Settings) -> Container:
         batch_limiter=limiter(settings.batch_rate_limit_per_minute),
         attachments_limiter=limiter(settings.attachments_rate_limit_per_minute),
         limiter_engine=limiter_engine,
+        storage=build_storage(settings),
         tariff_quotes=TariffQuotationService(
             sessions, tariffs, clock, environment=TipoPerfil(settings.tariff_environment)
         ),
@@ -423,12 +436,16 @@ async def upload_attachment(
             raise ContractError(ErrorCode.NO_ENCONTRADO, details={"recurso": "session"})
         limit = box.settings.attachments_max_bytes
         data = await file.read(limit + 1)
-        service = AttachmentService(
-            AttachmentRepository(db), box.settings.attachments_dir, limit, box.clock
-        )
-        stored = await service.store(data, declared=declared_doc_code, session_id=session_id)
-        await db.commit()
+        service = AttachmentService(AttachmentRepository(db), box.storage, limit, box.clock)
+        stored, key = await service.store(data, declared=declared_doc_code, session_id=session_id)
+        try:
+            await db.commit()
+        except Exception:
+            await service.discard(key)  # partial failure: never an object without its row
+            raise
         status, attachment_id = 201, stored.attachment_id
+        metrics.emit("AttachmentUploads", 1, backend=box.storage.backend, outcome="ok")
+        metrics.emit("AttachmentBytes", stored.size_bytes, "Bytes", backend=box.storage.backend)
         return stored
     except ContractError as error:
         status = error.http_status
@@ -441,6 +458,128 @@ async def upload_attachment(
             status,
             resource_type="attachment",
             resource_id=attachment_id or str(session_id),
+        )
+
+
+async def _readable_attachment(
+    attachment_id: str, caller: ChatCaller, db: AsyncSession
+) -> AttachmentRow:
+    """2.1.0 (CR-011): the same rule as the history. The owner of the session it was uploaded
+    to, an ADMIN, or a REVIEWER with a case of that session; otherwise 404 (no oracle)."""
+    row = await AttachmentRepository(db).get(attachment_id)
+    session = (
+        await ConversationRepository(db).get(row.session_id) if row and row.session_id else None
+    )
+    allowed = False
+    if row is not None and session is not None:
+        principal = caller.principal
+        if caller.user_hash is not None:
+            allowed = session.external_user_id_hash == caller.user_hash
+        elif principal is not None and principal.has(Role.ADMIN):
+            allowed = True
+        elif principal is not None:
+            allowed = await HandoffRepository(db).visible_for_session(
+                session.session_id, principal.staff_user_id
+            )
+    if row is None or not allowed:
+        raise ContractError(ErrorCode.NO_ENCONTRADO, details={"recurso": "attachment"})
+    return row
+
+
+def _storage_for(box: Container, row: AttachmentRow) -> ObjectStorage:
+    """A row keeps the backend it was written to; the local disk stays readable during the
+    migration to S3."""
+    if row.storage_backend == box.storage.backend:
+        return box.storage
+    if row.storage_backend == "local":
+        return LocalObjectStorage(box.settings.attachments_dir)
+    raise ContractError(ErrorCode.ALMACENAMIENTO_NO_DISPONIBLE)
+
+
+@api.get(
+    "/attachments/{attachment_id}/content",
+    tags=["adjuntos"],
+    operation_id="downloadAttachment",
+    response_class=Response,
+)
+async def download_attachment(
+    attachment_id: str, request: Request, caller: HistoryReader, box: Box, db: Db
+) -> Response:
+    status = 500
+    try:
+        row = await _readable_attachment(attachment_id, caller, db)
+        try:
+            data = await _storage_for(box, row).get(row.storage_ref)
+        except StorageError as error:
+            raise ContractError(ErrorCode.ALMACENAMIENTO_NO_DISPONIBLE) from error
+        if hashlib.sha256(data).hexdigest() != row.sha256:  # integrity, whatever the backend
+            raise ContractError(
+                ErrorCode.ALMACENAMIENTO_NO_DISPONIBLE, details={"motivo": "integridad"}
+            )
+        status = 200
+        extension = "pdf" if row.mime_type == "application/pdf" else "jpg"
+        return Response(
+            content=data,
+            media_type=row.mime_type,
+            headers={
+                "Content-Disposition": f'attachment; filename="{row.attachment_id}.{extension}"',
+                "Cache-Control": "no-store",
+                "X-Content-Type-Options": "nosniff",
+            },
+        )
+    except ContractError as error:
+        status = error.http_status
+        raise
+    finally:
+        await audit(
+            request,
+            caller.principal,
+            AuditAction.ATTACHMENT_DOWNLOAD,
+            status,
+            resource_type="attachment",
+            resource_id=attachment_id[:64],
+        )
+        metrics.emit(
+            "AttachmentDownloads",
+            1,
+            backend=box.storage.backend,
+            outcome="ok" if status == 200 else "denied" if status in (401, 403, 404) else "error",
+        )
+
+
+@api.get("/attachments/{attachment_id}/link", tags=["adjuntos"], operation_id="getAttachmentLink")
+async def get_attachment_link(
+    attachment_id: str, request: Request, caller: HistoryReader, box: Box, db: Db
+) -> AttachmentLink:
+    """Presigned S3 URL, short-lived (``S3_PRESIGN_TTL_SECONDS``). Local storage does not issue
+    links (NO_CONFIGURADO): use ``/content``."""
+    status = 500
+    try:
+        row = await _readable_attachment(attachment_id, caller, db)
+        extension = "pdf" if row.mime_type == "application/pdf" else "jpg"
+        url = await _storage_for(box, row).presigned_get(
+            row.storage_ref,
+            filename=f"{row.attachment_id}.{extension}",
+            content_type=row.mime_type,
+            ttl=box.settings.s3_presign_ttl_seconds,
+        )
+        if url is None:
+            raise ContractError(
+                ErrorCode.NO_CONFIGURADO, details={"variable": "ATTACHMENTS_STORAGE"}
+            )
+        status = 200
+        return AttachmentLink(url=url, expira_en_segundos=box.settings.s3_presign_ttl_seconds)
+    except ContractError as error:
+        status = error.http_status
+        raise
+    finally:
+        await audit(
+            request,
+            caller.principal,
+            AuditAction.ATTACHMENT_LINK,
+            status,
+            resource_type="attachment",
+            resource_id=attachment_id[:64],
         )
 
 
@@ -873,16 +1012,43 @@ async def get_channel_metrics(
     )
 
 
-@api.post("/admin/rag/reindex", tags=["operación"], operation_id="reindexRag")
+@api.post(
+    "/admin/rag/reindex",
+    tags=["operación"],
+    operation_id="reindexRag",
+    response_model=ReindexResponse,
+    responses={202: {"model": ReindexJob, "description": "En cola (asincrono=true)"}},
+)
 async def reindex_rag(
     principal: AdminOnly,
     request: Request,
     box: Box,
     body: Annotated[ReindexRequest | None, Body()] = None,
-) -> ReindexResponse:
+) -> ReindexResponse | JSONResponse:
+    wanted = body or ReindexRequest()
+    if wanted.asincrono:
+        # 2.1.0 (CR-011): job + outbox in one transaction; the worker indexes with the same
+        # IngestionService. SQS adds no inference capacity: Ollama is still the limit.
+        if box.settings.jobs_backend != "sqs":
+            raise ContractError(ErrorCode.NO_CONFIGURADO, details={"variable": "JOBS_BACKEND"})
+        job = await JobService(box.sessions).enqueue_reindex(
+            doc_codes=wanted.doc_codes,
+            force=wanted.force,
+            staff_user_id=principal.staff_user_id,
+            request_id=request_id_of(request),
+            now=box.clock.now(),
+        )
+        await audit(
+            request,
+            principal,
+            AuditAction.RAG_REINDEX_QUEUED,
+            202,
+            resource_type="job",
+            resource_id=job.id,
+        )
+        return JSONResponse(status_code=202, content=to_contract(job).model_dump(mode="json"))
     if box.ingestion is None or box.rag is None:
         raise ContractError(ErrorCode.NO_CONFIGURADO, details={"variable": "OLLAMA_BASE_URL"})
-    wanted = body or ReindexRequest()
     report = await box.ingestion.reindex(
         now=box.clock.now(), doc_codes=wanted.doc_codes, force=wanted.force
     )
@@ -896,6 +1062,14 @@ async def reindex_rag(
         embed_model=box.settings.ollama_embed_model or "",
         embed_dim=box.settings.embed_dim,
     )
+
+
+@api.get("/admin/rag/jobs/{job_id}", tags=["operación"], operation_id="getReindexJob")
+async def get_reindex_job(job_id: UUID, principal: AdminOnly, box: Box) -> ReindexJob:
+    job = await JobService(box.sessions).get(job_id)
+    if job is None:
+        raise ContractError(ErrorCode.NO_ENCONTRADO, details={"recurso": "job"})
+    return to_contract(job)
 
 
 @root.get("/health", operation_id="getHealth")
@@ -950,6 +1124,9 @@ def _publish_raw_body_schemas(app: FastAPI) -> None:
 def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or get_settings()
     configure_logging(settings.log_level)
+    metrics.configure(
+        namespace=settings.metrics_namespace, service="api", enabled=settings.metrics_enabled
+    )
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:

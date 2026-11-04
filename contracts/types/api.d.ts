@@ -104,6 +104,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/attachments/{attachment_id}/content": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Descarga el contenido de un adjunto (2.1.0)
+         * @description El dueño de la sesión (`X-Client-Id`), un ADMIN o un REVIEWER con un caso de esa sesión. Otro adjunto o uno inexistente, 404. Se verifica el SHA-256 antes de servirlo.
+         */
+        get: operations["downloadAttachment"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/attachments/{attachment_id}/link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * URL prefirmada de S3 para descargar un adjunto (2.1.0)
+         * @description Mismas reglas que `/content`. Válida `S3_PRESIGN_TTL_SECONDS` (60 s por defecto); no la guardes. Con almacenamiento local responde 503 `NO_CONFIGURADO`: usa `/content`.
+         */
+        get: operations["getAttachmentLink"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/chat/messages": {
         parameters: {
             query?: never;
@@ -352,8 +392,28 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Reindexación del corpus RAG */
+        /**
+         * Reindexación del corpus RAG
+         * @description Síncrona por defecto (200). 2.1.0: `asincrono: true` encola un trabajo (202) que procesa el worker SQS; consulta su estado en `GET /admin/rag/jobs/{job_id}`.
+         */
         post: operations["reindexRag"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/rag/jobs/{job_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Estado de un trabajo de reindexación asíncrona (ADMIN, 2.1.0) */
+        get: operations["getReindexJob"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -520,6 +580,16 @@ export interface components {
          * @enum {string}
          */
         ApiScope: "shipments:create" | "shipments:read" | "batches:create" | "batches:read";
+        /**
+         * AttachmentLink
+         * @description 2.1.0 (CR-011): presigned download URL from S3, short-lived. Do not store it.
+         */
+        AttachmentLink: {
+            /** Url */
+            url: string;
+            /** Expira En Segundos */
+            expira_en_segundos: number;
+        };
         /**
          * AttachmentRef
          * @description Attachment already stored by the platform, referenced by id.
@@ -1152,7 +1222,7 @@ export interface components {
          * ErrorCode
          * @enum {string}
          */
-        ErrorCode: "VALIDACION" | "GUIA_FORMATO_INVALIDO" | "GUIA_NO_ENCONTRADA" | "RUTA_SIN_TARIFA" | "CIUDAD_NO_RECONOCIDA" | "SERVICIO_NO_DISPONIBLE" | "EXCEDE_LIMITE_COBERTURA" | "LLM_NO_DISPONIBLE" | "RAG_SIN_EVIDENCIA" | "FIRMA_INVALIDA" | "LIMITE_DE_TASA" | "NO_ENCONTRADO" | "ERROR_INTERNO" | "NO_CONFIGURADO" | "NO_AUTORIZADO" | "NO_AUTENTICADO" | "IDEMPOTENCIA_CONFLICTO" | "LOTE_DEMASIADO_GRANDE" | "REFERENCIA_DUPLICADA" | "CIUDAD_NO_CUBIERTA" | "TARIFA_NO_DISPONIBLE" | "ARCHIVO_INVALIDO" | "CUERPO_DEMASIADO_GRANDE" | "SERVICIO_SATURADO";
+        ErrorCode: "VALIDACION" | "GUIA_FORMATO_INVALIDO" | "GUIA_NO_ENCONTRADA" | "RUTA_SIN_TARIFA" | "CIUDAD_NO_RECONOCIDA" | "SERVICIO_NO_DISPONIBLE" | "EXCEDE_LIMITE_COBERTURA" | "LLM_NO_DISPONIBLE" | "RAG_SIN_EVIDENCIA" | "FIRMA_INVALIDA" | "LIMITE_DE_TASA" | "NO_ENCONTRADO" | "ERROR_INTERNO" | "NO_CONFIGURADO" | "NO_AUTORIZADO" | "NO_AUTENTICADO" | "IDEMPOTENCIA_CONFLICTO" | "LOTE_DEMASIADO_GRANDE" | "REFERENCIA_DUPLICADA" | "CIUDAD_NO_CUBIERTA" | "TARIFA_NO_DISPONIBLE" | "ARCHIVO_INVALIDO" | "CUERPO_DEMASIADO_GRANDE" | "SERVICIO_SATURADO" | "ALMACENAMIENTO_NO_DISPONIBLE";
         /**
          * EscalationAction
          * @enum {string}
@@ -1461,6 +1531,12 @@ export interface components {
              */
             field: string | null;
         };
+        /**
+         * JobStatus
+         * @description 2.1.0 (CR-011): life of an asynchronous document job.
+         * @enum {string}
+         */
+        JobStatus: "PENDING" | "PROCESSING" | "DONE" | "FAILED" | "DEAD_LETTER";
         /** LiquidacionPreliminar */
         LiquidacionPreliminar: {
             /**
@@ -1731,6 +1807,37 @@ export interface components {
          * @enum {string}
          */
         RecargoCodigo: "CADENA_FRIO" | "MERCANCIA_PELIGROSA";
+        /** ReindexJob */
+        ReindexJob: {
+            /**
+             * Job Id
+             * Format: uuid4
+             */
+            job_id: string;
+            estado: components["schemas"]["JobStatus"];
+            /** Intentos */
+            intentos: number;
+            /**
+             * Creado En
+             * Format: date-time
+             */
+            creado_en: string;
+            /**
+             * Actualizado En
+             * Format: date-time
+             */
+            actualizado_en: string;
+            /** Iniciado En */
+            iniciado_en: string | null;
+            /** Terminado En */
+            terminado_en: string | null;
+            resultado: components["schemas"]["ReindexResponse"] | null;
+            /**
+             * Error
+             * @description Tipo de fallo, sin datos personales ni contenido.
+             */
+            error: string | null;
+        };
         /** ReindexRequest */
         ReindexRequest: {
             /**
@@ -1744,6 +1851,12 @@ export interface components {
              * @default false
              */
             force: boolean;
+            /**
+             * Asincrono
+             * @description 2.1.0: true → 202 con un trabajo en cola (SQS); el estado se consulta en `GET /admin/rag/jobs/{job_id}`. Requiere JOBS_BACKEND=sqs.
+             * @default false
+             */
+            asincrono: boolean;
         };
         /** ReindexResponse */
         ReindexResponse: {
@@ -3176,6 +3289,179 @@ export interface operations {
             };
         };
     };
+    downloadAttachment: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Identificador de correlación; se genera si falta. */
+                "X-Request-ID"?: components["parameters"]["XRequestId"];
+            };
+            path: {
+                attachment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Bytes del adjunto (`Content-Disposition: attachment`). */
+            200: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/pdf": unknown;
+                    "image/jpeg": unknown;
+                };
+            };
+            /** @description Códigos: NO_AUTENTICADO */
+            401: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: NO_AUTORIZADO */
+            403: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: NO_ENCONTRADO */
+            404: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: VALIDACION */
+            422: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: ERROR_INTERNO */
+            500: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: ALMACENAMIENTO_NO_DISPONIBLE, SERVICIO_SATURADO */
+            503: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    getAttachmentLink: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Identificador de correlación; se genera si falta. */
+                "X-Request-ID"?: components["parameters"]["XRequestId"];
+            };
+            path: {
+                attachment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttachmentLink"];
+                };
+            };
+            /** @description Códigos: NO_AUTENTICADO */
+            401: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: NO_AUTORIZADO */
+            403: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: NO_ENCONTRADO */
+            404: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: VALIDACION */
+            422: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: ERROR_INTERNO */
+            500: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: NO_CONFIGURADO, SERVICIO_SATURADO */
+            503: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
     postChatMessage: {
         parameters: {
             query?: never;
@@ -4351,6 +4637,16 @@ export interface operations {
                     "application/json": components["schemas"]["ReindexResponse"];
                 };
             };
+            /** @description Trabajo en cola (asincrono=true) */
+            202: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReindexJob"];
+                };
+            };
             /** @description Códigos: NO_AUTENTICADO */
             401: {
                 headers: {
@@ -4401,7 +4697,93 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
-            /** @description Códigos: LLM_NO_DISPONIBLE, SERVICIO_SATURADO */
+            /** @description Códigos: LLM_NO_DISPONIBLE, NO_CONFIGURADO, SERVICIO_SATURADO */
+            503: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    getReindexJob: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Identificador de correlación; se genera si falta. */
+                "X-Request-ID"?: components["parameters"]["XRequestId"];
+            };
+            path: {
+                job_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReindexJob"];
+                };
+            };
+            /** @description Códigos: NO_AUTENTICADO */
+            401: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: NO_AUTORIZADO */
+            403: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: NO_ENCONTRADO */
+            404: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: VALIDACION */
+            422: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: ERROR_INTERNO */
+            500: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: SERVICIO_SATURADO */
             503: {
                 headers: {
                     "X-Request-ID": components["headers"]["XRequestId"];

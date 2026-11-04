@@ -15,7 +15,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel
 
-from app.contracts.attachments import AttachmentUploadResponse
+from app.contracts.attachments import AttachmentLink, AttachmentUploadResponse
 from app.contracts.auth import (
     AuditEventPage,
     DangerousGoodsList,
@@ -49,6 +49,7 @@ from app.contracts.ops import (
     HandoffListResponse,
     HealthResponse,
     ReadinessResponse,
+    ReindexJob,
     ReindexRequest,
     ReindexResponse,
 )
@@ -168,6 +169,27 @@ EXAMPLES: tuple[Example, ...] = (
     ),
     # --- quotation ------------------------------------------------------
     Example("cotizar.request", "Bogotá → Medellín", CotizacionRequest, (req("createQuote", "S7"),)),
+    # 2.1.0 (CR-011): hybrid AWS
+    Example(
+        "attachment.content.response",
+        "Bytes del PDF (binario; aquí como texto)",
+        None,
+        (res("downloadAttachment"),),
+    ),
+    Example(
+        "attachment.link",
+        "URL prefirmada (SigV4, 60 s)",
+        AttachmentLink,
+        (res("getAttachmentLink"),),
+        pending="la URL y su firma las genera S3",
+    ),
+    Example(
+        "reindex.job",
+        "Reindexación asíncrona terminada",
+        ReindexJob,
+        (res("getReindexJob"), res("reindexRag", 202)),
+        pending="ids, fechas y conteos: los genera el servicio real",
+    ),
     # 1.7.0 (CR-009): RBAC
     Example(
         "auth.me.response", "Token personal de un REVIEWER", WhoAmI, (res("getCurrentPrincipal"),)

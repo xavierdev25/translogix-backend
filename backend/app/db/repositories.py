@@ -305,11 +305,13 @@ class AttachmentRepository:
         session_id: UUID | None,
         storage_ref: str,
         at: datetime,
+        storage_backend: str = "local",
     ) -> None:
         self._session.add(
             AttachmentRow(
                 attachment_id=attachment.attachment_id,
                 session_id=session_id,
+                storage_backend=storage_backend,
                 kind=attachment.kind,
                 mime_type=attachment.mime_type,
                 size_bytes=attachment.size_bytes,
@@ -322,6 +324,10 @@ class AttachmentRepository:
             )
         )
         await self._session.flush()
+
+    async def get(self, attachment_id: str) -> AttachmentRow | None:
+        row: AttachmentRow | None = await self._session.get(AttachmentRow, attachment_id)
+        return row
 
     async def owned_by(self, attachment_ids: Sequence[str], user_hash: str) -> set[str]:
         """Ids among ``attachment_ids`` uploaded into a conversation of ``user_hash`` (SEC-06)."""
@@ -417,6 +423,14 @@ class AuditRepository:
 class RagRepository:
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
+
+    async def index_version(self) -> tuple[int, object]:
+        row = (
+            await self._session.execute(
+                select(func.count(RagDocumentRow.doc_code), func.max(RagDocumentRow.ingested_at))
+            )
+        ).one()
+        return int(row[0]), row[1]
 
     async def document_hashes(self) -> dict[str, str]:
         rows = await self._session.execute(

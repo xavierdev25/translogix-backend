@@ -1,8 +1,9 @@
 """Operational endpoints: health, readiness, channel metrics, RAG reindex, handoff inbox."""
 
+from enum import StrEnum
 from typing import Literal
 
-from pydantic import Field
+from pydantic import UUID4, Field
 
 from app.contracts.common import BogotaDatetime, ChannelType, ContractModel
 from app.contracts.escalation import HandoffSummary
@@ -44,6 +45,13 @@ class ChannelMetricsResponse(ContractModel):
 class ReindexRequest(ContractModel):
     doc_codes: list[DocCode] | None = Field(default=None, description="null = todos.")
     force: bool = Field(default=False, description="Reindexar aunque el contenido no cambie.")
+    asincrono: bool = Field(
+        default=False,
+        description=(
+            "2.1.0: true → 202 con un trabajo en cola (SQS); el estado se consulta en "
+            "`GET /admin/rag/jobs/{job_id}`. Requiere JOBS_BACKEND=sqs."
+        ),
+    )
 
 
 class ReindexResponse(ContractModel):
@@ -54,6 +62,28 @@ class ReindexResponse(ContractModel):
     duracion_ms: int = Field(ge=0)
     embed_model: str
     embed_dim: int = Field(gt=0)
+
+
+class JobStatus(StrEnum):
+    """2.1.0 (CR-011): life of an asynchronous document job."""
+
+    PENDING = "PENDING"  # in the outbox or the queue
+    PROCESSING = "PROCESSING"
+    DONE = "DONE"
+    FAILED = "FAILED"  # failed attempt; SQS will deliver it again
+    DEAD_LETTER = "DEAD_LETTER"  # retries exhausted: it is in the DLQ
+
+
+class ReindexJob(ContractModel):
+    job_id: UUID4
+    estado: JobStatus
+    intentos: int = Field(ge=0)
+    creado_en: BogotaDatetime
+    actualizado_en: BogotaDatetime
+    iniciado_en: BogotaDatetime | None
+    terminado_en: BogotaDatetime | None
+    resultado: ReindexResponse | None
+    error: str | None = Field(description="Tipo de fallo, sin datos personales ni contenido.")
 
 
 class HandoffListResponse(ContractModel):

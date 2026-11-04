@@ -22,7 +22,7 @@ info:
     * Todo error usa el sobre `ErrorEnvelope` con un `code` estable (`x-error-codes` por respuesta).
 
     '
-  version: 2.0.0
+  version: 2.1.0
 paths:
   /api/v1/tracking/{guia}:
     get:
@@ -1258,6 +1258,346 @@ paths:
       x-priority: P1
       parameters:
       - $ref: '#/components/parameters/XRequestId'
+  /api/v1/attachments/{attachment_id}/content:
+    get:
+      tags:
+      - adjuntos
+      summary: Descarga el contenido de un adjunto (2.1.0)
+      description: El dueño de la sesión (`X-Client-Id`), un ADMIN o un REVIEWER con un caso de esa sesión.
+        Otro adjunto o uno inexistente, 404. Se verifica el SHA-256 antes de servirlo.
+      operationId: downloadAttachment
+      security:
+      - ClientId: []
+      - StaffToken: []
+      - AdminToken: []
+      parameters:
+      - $ref: '#/components/parameters/XRequestId'
+      - name: attachment_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Attachment Id
+      responses:
+        '200':
+          description: 'Bytes del adjunto (`Content-Disposition: attachment`).'
+          content:
+            application/pdf:
+              examples:
+                attachment.content.response:
+                  summary: Bytes del PDF (binario; aquí como texto)
+                  value: '%PDF-1.4
+
+                    1 0 obj
+
+                    <<>>
+
+                    endobj
+
+                    %%EOF
+
+                    '
+            image/jpeg: {}
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '401':
+          description: 'Códigos: NO_AUTENTICADO'
+          x-error-codes:
+          - NO_AUTENTICADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                NO_AUTENTICADO:
+                  value:
+                    error:
+                      code: NO_AUTENTICADO
+                      message: Falta la credencial de acceso o no es válida.
+                      details: {}
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '403':
+          description: 'Códigos: NO_AUTORIZADO'
+          x-error-codes:
+          - NO_AUTORIZADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                NO_AUTORIZADO:
+                  value:
+                    error:
+                      code: NO_AUTORIZADO
+                      message: No tienes autorización para realizar esta operación.
+                      details: {}
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '404':
+          description: 'Códigos: NO_ENCONTRADO'
+          x-error-codes:
+          - NO_ENCONTRADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                NO_ENCONTRADO:
+                  value:
+                    error:
+                      code: NO_ENCONTRADO
+                      message: No encontramos el recurso solicitado.
+                      details: {}
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '422':
+          description: 'Códigos: VALIDACION'
+          x-error-codes:
+          - VALIDACION
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                VALIDACION:
+                  value:
+                    error:
+                      code: VALIDACION
+                      message: 'Revisa los datos enviados: hay campos inválidos o incompletos.'
+                      details:
+                        campos:
+                        - loc:
+                          - body
+                          - alto_cm
+                          msg: Input should be greater than 0
+                          type: greater_than
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '500':
+          description: 'Códigos: ERROR_INTERNO'
+          x-error-codes:
+          - ERROR_INTERNO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                ERROR_INTERNO:
+                  value:
+                    error:
+                      code: ERROR_INTERNO
+                      message: Ocurrió un error inesperado. Intenta de nuevo más tarde.
+                      details: {}
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '503':
+          description: 'Códigos: ALMACENAMIENTO_NO_DISPONIBLE, SERVICIO_SATURADO'
+          x-error-codes:
+          - ALMACENAMIENTO_NO_DISPONIBLE
+          - SERVICIO_SATURADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                ALMACENAMIENTO_NO_DISPONIBLE:
+                  value:
+                    error:
+                      code: ALMACENAMIENTO_NO_DISPONIBLE
+                      message: No pudimos guardar ni leer el archivo en este momento. Intenta de nuevo.
+                      details: {}
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+                SERVICIO_SATURADO:
+                  value:
+                    error:
+                      code: SERVICIO_SATURADO
+                      message: El servicio está saturado en este momento. Intenta de nuevo en unos segundos.
+                      details:
+                        reintentar_en_segundos: 5
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+      x-priority: P1
+  /api/v1/attachments/{attachment_id}/link:
+    get:
+      tags:
+      - adjuntos
+      summary: URL prefirmada de S3 para descargar un adjunto (2.1.0)
+      description: 'Mismas reglas que `/content`. Válida `S3_PRESIGN_TTL_SECONDS` (60 s por defecto);
+        no la guardes. Con almacenamiento local responde 503 `NO_CONFIGURADO`: usa `/content`.'
+      operationId: getAttachmentLink
+      security:
+      - ClientId: []
+      - StaffToken: []
+      - AdminToken: []
+      parameters:
+      - $ref: '#/components/parameters/XRequestId'
+      - name: attachment_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Attachment Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttachmentLink'
+              examples:
+                attachment.link:
+                  summary: URL prefirmada (SigV4, 60 s)
+                  value:
+                    url: https://translogix-dev-attachments.s3.us-east-1.amazonaws.com/attachments/2026/11/0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e.pdf?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Expires=60&X-Amz-Signature=…
+                    expira_en_segundos: 60
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '401':
+          description: 'Códigos: NO_AUTENTICADO'
+          x-error-codes:
+          - NO_AUTENTICADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                NO_AUTENTICADO:
+                  value:
+                    error:
+                      code: NO_AUTENTICADO
+                      message: Falta la credencial de acceso o no es válida.
+                      details: {}
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '403':
+          description: 'Códigos: NO_AUTORIZADO'
+          x-error-codes:
+          - NO_AUTORIZADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                NO_AUTORIZADO:
+                  value:
+                    error:
+                      code: NO_AUTORIZADO
+                      message: No tienes autorización para realizar esta operación.
+                      details: {}
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '404':
+          description: 'Códigos: NO_ENCONTRADO'
+          x-error-codes:
+          - NO_ENCONTRADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                NO_ENCONTRADO:
+                  value:
+                    error:
+                      code: NO_ENCONTRADO
+                      message: No encontramos el recurso solicitado.
+                      details: {}
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '422':
+          description: 'Códigos: VALIDACION'
+          x-error-codes:
+          - VALIDACION
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                VALIDACION:
+                  value:
+                    error:
+                      code: VALIDACION
+                      message: 'Revisa los datos enviados: hay campos inválidos o incompletos.'
+                      details:
+                        campos:
+                        - loc:
+                          - body
+                          - alto_cm
+                          msg: Input should be greater than 0
+                          type: greater_than
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '500':
+          description: 'Códigos: ERROR_INTERNO'
+          x-error-codes:
+          - ERROR_INTERNO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                ERROR_INTERNO:
+                  value:
+                    error:
+                      code: ERROR_INTERNO
+                      message: Ocurrió un error inesperado. Intenta de nuevo más tarde.
+                      details: {}
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '503':
+          description: 'Códigos: NO_CONFIGURADO, SERVICIO_SATURADO'
+          x-error-codes:
+          - NO_CONFIGURADO
+          - SERVICIO_SATURADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                NO_CONFIGURADO:
+                  value:
+                    error:
+                      code: NO_CONFIGURADO
+                      message: Esta función no está configurada en este entorno.
+                      details:
+                        funcion: ASR
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+                SERVICIO_SATURADO:
+                  value:
+                    error:
+                      code: SERVICIO_SATURADO
+                      message: El servicio está saturado en este momento. Intenta de nuevo en unos segundos.
+                      details:
+                        reintentar_en_segundos: 5
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+      x-priority: P1
   /api/v1/chat/messages:
     post:
       tags:
@@ -4980,6 +5320,8 @@ paths:
       tags:
       - operación
       summary: Reindexación del corpus RAG
+      description: 'Síncrona por defecto (200). 2.1.0: `asincrono: true` encola un trabajo (202) que procesa
+        el worker SQS; consulta su estado en `GET /admin/rag/jobs/{job_id}`.'
       operationId: reindexRag
       requestBody:
         content:
@@ -5013,6 +5355,35 @@ paths:
                     duracion_ms: 18342
                     embed_model: modelo-de-embeddings-ejemplo
                     embed_dim: 768
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '202':
+          description: Trabajo en cola (asincrono=true)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReindexJob'
+              examples:
+                reindex.job:
+                  summary: Reindexación asíncrona terminada
+                  value:
+                    job_id: 5e2f8a1c-3b4d-4e6f-9a0b-1c2d3e4f5a6b
+                    estado: DONE
+                    intentos: 1
+                    creado_en: '2026-11-04T09:00:00-05:00'
+                    actualizado_en: '2026-11-04T09:00:07-05:00'
+                    iniciado_en: '2026-11-04T09:00:01-05:00'
+                    terminado_en: '2026-11-04T09:00:07-05:00'
+                    resultado:
+                      status: COMPLETED
+                      documentos: 4
+                      chunks: 84
+                      omitidos_sin_cambios: 0
+                      duracion_ms: 5870
+                      embed_model: qwen3-embedding:0.6b
+                      embed_dim: 1024
+                    error: null
           headers:
             X-Request-ID:
               $ref: '#/components/headers/XRequestId'
@@ -5119,9 +5490,10 @@ paths:
             X-Request-ID:
               $ref: '#/components/headers/XRequestId'
         '503':
-          description: 'Códigos: LLM_NO_DISPONIBLE, SERVICIO_SATURADO'
+          description: 'Códigos: LLM_NO_DISPONIBLE, NO_CONFIGURADO, SERVICIO_SATURADO'
           x-error-codes:
           - LLM_NO_DISPONIBLE
+          - NO_CONFIGURADO
           - SERVICIO_SATURADO
           content:
             application/json:
@@ -5135,6 +5507,14 @@ paths:
                       message: El asistente no está disponible en este momento. Intenta de nuevo en unos
                         minutos.
                       details: {}
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+                NO_CONFIGURADO:
+                  value:
+                    error:
+                      code: NO_CONFIGURADO
+                      message: Esta función no está configurada en este entorno.
+                      details:
+                        funcion: ASR
                       request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
                 SERVICIO_SATURADO:
                   value:
@@ -5153,6 +5533,176 @@ paths:
       x-priority: P0
       parameters:
       - $ref: '#/components/parameters/XRequestId'
+  /api/v1/admin/rag/jobs/{job_id}:
+    get:
+      tags:
+      - operación
+      summary: Estado de un trabajo de reindexación asíncrona (ADMIN, 2.1.0)
+      operationId: getReindexJob
+      security:
+      - StaffToken: []
+      - AdminToken: []
+      parameters:
+      - $ref: '#/components/parameters/XRequestId'
+      - name: job_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Job Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReindexJob'
+              examples:
+                reindex.job:
+                  summary: Reindexación asíncrona terminada
+                  value:
+                    job_id: 5e2f8a1c-3b4d-4e6f-9a0b-1c2d3e4f5a6b
+                    estado: DONE
+                    intentos: 1
+                    creado_en: '2026-11-04T09:00:00-05:00'
+                    actualizado_en: '2026-11-04T09:00:07-05:00'
+                    iniciado_en: '2026-11-04T09:00:01-05:00'
+                    terminado_en: '2026-11-04T09:00:07-05:00'
+                    resultado:
+                      status: COMPLETED
+                      documentos: 4
+                      chunks: 84
+                      omitidos_sin_cambios: 0
+                      duracion_ms: 5870
+                      embed_model: qwen3-embedding:0.6b
+                      embed_dim: 1024
+                    error: null
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '401':
+          description: 'Códigos: NO_AUTENTICADO'
+          x-error-codes:
+          - NO_AUTENTICADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                NO_AUTENTICADO:
+                  value:
+                    error:
+                      code: NO_AUTENTICADO
+                      message: Falta la credencial de acceso o no es válida.
+                      details: {}
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '403':
+          description: 'Códigos: NO_AUTORIZADO'
+          x-error-codes:
+          - NO_AUTORIZADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                NO_AUTORIZADO:
+                  value:
+                    error:
+                      code: NO_AUTORIZADO
+                      message: No tienes autorización para realizar esta operación.
+                      details: {}
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '404':
+          description: 'Códigos: NO_ENCONTRADO'
+          x-error-codes:
+          - NO_ENCONTRADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                NO_ENCONTRADO:
+                  value:
+                    error:
+                      code: NO_ENCONTRADO
+                      message: No encontramos el recurso solicitado.
+                      details: {}
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '422':
+          description: 'Códigos: VALIDACION'
+          x-error-codes:
+          - VALIDACION
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                VALIDACION:
+                  value:
+                    error:
+                      code: VALIDACION
+                      message: 'Revisa los datos enviados: hay campos inválidos o incompletos.'
+                      details:
+                        campos:
+                        - loc:
+                          - body
+                          - alto_cm
+                          msg: Input should be greater than 0
+                          type: greater_than
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '500':
+          description: 'Códigos: ERROR_INTERNO'
+          x-error-codes:
+          - ERROR_INTERNO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                ERROR_INTERNO:
+                  value:
+                    error:
+                      code: ERROR_INTERNO
+                      message: Ocurrió un error inesperado. Intenta de nuevo más tarde.
+                      details: {}
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '503':
+          description: 'Códigos: SERVICIO_SATURADO'
+          x-error-codes:
+          - SERVICIO_SATURADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                SERVICIO_SATURADO:
+                  value:
+                    error:
+                      code: SERVICIO_SATURADO
+                      message: El servicio está saturado en este momento. Intenta de nuevo en unos segundos.
+                      details:
+                        reintentar_en_segundos: 5
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+      x-priority: P1
   /api/v1/auth/me:
     get:
       tags:
@@ -6262,6 +6812,23 @@ components:
       - batches:create
       - batches:read
       title: ApiScope
+    AttachmentLink:
+      properties:
+        url:
+          type: string
+          minLength: 1
+          title: Url
+        expira_en_segundos:
+          type: integer
+          exclusiveMinimum: 0.0
+          title: Expira En Segundos
+      additionalProperties: false
+      type: object
+      required:
+      - url
+      - expira_en_segundos
+      title: AttachmentLink
+      description: '2.1.0 (CR-011): presigned download URL from S3, short-lived. Do not store it.'
     AttachmentRef:
       properties:
         attachment_id:
@@ -7398,6 +7965,7 @@ components:
       - ARCHIVO_INVALIDO
       - CUERPO_DEMASIADO_GRANDE
       - SERVICIO_SATURADO
+      - ALMACENAMIENTO_NO_DISPONIBLE
       title: ErrorCode
     EscalationAction:
       type: string
@@ -7923,6 +8491,16 @@ components:
       - field
       title: ItemError
       description: 'Error de un ítem: código y campo, nunca el valor enviado.'
+    JobStatus:
+      type: string
+      enum:
+      - PENDING
+      - PROCESSING
+      - DONE
+      - FAILED
+      - DEAD_LETTER
+      title: JobStatus
+      description: '2.1.0 (CR-011): life of an asynchronous document job.'
     LiquidacionPreliminar:
       properties:
         base_cop:
@@ -8409,6 +8987,61 @@ components:
       - CADENA_FRIO
       - MERCANCIA_PELIGROSA
       title: RecargoCodigo
+    ReindexJob:
+      properties:
+        job_id:
+          type: string
+          format: uuid4
+          title: Job Id
+        estado:
+          $ref: '#/components/schemas/JobStatus'
+        intentos:
+          type: integer
+          minimum: 0.0
+          title: Intentos
+        creado_en:
+          type: string
+          format: date-time
+          title: Creado En
+        actualizado_en:
+          type: string
+          format: date-time
+          title: Actualizado En
+        iniciado_en:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Iniciado En
+        terminado_en:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Terminado En
+        resultado:
+          anyOf:
+          - $ref: '#/components/schemas/ReindexResponse'
+          - type: 'null'
+        error:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Error
+          description: Tipo de fallo, sin datos personales ni contenido.
+      additionalProperties: false
+      type: object
+      required:
+      - job_id
+      - estado
+      - intentos
+      - creado_en
+      - actualizado_en
+      - iniciado_en
+      - terminado_en
+      - resultado
+      - error
+      title: ReindexJob
     ReindexRequest:
       properties:
         doc_codes:
@@ -8423,6 +9056,12 @@ components:
           type: boolean
           title: Force
           description: Reindexar aunque el contenido no cambie.
+          default: false
+        asincrono:
+          type: boolean
+          title: Asincrono
+          description: '2.1.0: true → 202 con un trabajo en cola (SQS); el estado se consulta en `GET
+            /admin/rag/jobs/{job_id}`. Requiere JOBS_BACKEND=sqs.'
           default: false
       additionalProperties: false
       type: object

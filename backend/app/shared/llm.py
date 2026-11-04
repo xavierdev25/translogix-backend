@@ -15,6 +15,7 @@ import httpx
 
 from app.contracts.common import ContractError, ErrorCode
 from app.contracts.ports import LlmCompletion, LlmMessage
+from app.shared import metrics
 
 logger = logging.getLogger("app.llm")
 _THINK = re.compile(r"<think>.*?</think>", re.DOTALL)
@@ -41,18 +42,23 @@ class _OllamaClient:
         )
 
     async def post(self, path: str, body: dict[str, Any]) -> dict[str, Any]:
+        operation = path.rsplit("/", 1)[-1]  # chat | embed
         for attempt in (1, 2):
             try:
-                response = await self._client.post(path, json=body)
+                with metrics.timer("OllamaLatency", operation=operation):
+                    response = await self._client.post(path, json=body)
                 response.raise_for_status()
                 data: dict[str, Any] = response.json()
             except httpx.ConnectError as error:
                 if attempt == 1:
+                    metrics.emit("OllamaRetries", 1, operation=operation)
                     await asyncio.sleep(CONNECT_RETRY_DELAY_SECONDS)
                     continue
+                metrics.emit("InfrastructureErrors", 1, component="ollama", operation=operation)
                 logger.warning("ollama %s failed after retry: %s", path, type(error).__name__)
                 raise ContractError(ErrorCode.LLM_NO_DISPONIBLE) from error
             except (httpx.HTTPError, ValueError) as error:
+                metrics.emit("InfrastructureErrors", 1, component="ollama", operation=operation)
                 logger.warning("ollama %s failed: %s", path, type(error).__name__)
                 raise ContractError(ErrorCode.LLM_NO_DISPONIBLE) from error
             return data

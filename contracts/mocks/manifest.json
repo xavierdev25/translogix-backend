@@ -1,5 +1,5 @@
 {
-  "contract_version": "2.0.0",
+  "contract_version": "2.1.0",
   "match_semantics": {
     "path": "valores exactos de parámetros de ruta",
     "body": "subconjunto exacto del cuerpo JSON de la petición",
@@ -407,6 +407,110 @@
           "status": 500,
           "code": "ERROR_INTERNO",
           "example": "examples/error.error-interno.json"
+        },
+        {
+          "status": 503,
+          "code": "SERVICIO_SATURADO",
+          "example": "examples/error.servicio-saturado.json"
+        }
+      ]
+    },
+    {
+      "operationId": "downloadAttachment",
+      "method": "GET",
+      "path": "/api/v1/attachments/{attachment_id}/content",
+      "requests": [],
+      "responses": [
+        {
+          "status": 200,
+          "example": "examples/attachment.content.response.json",
+          "scenario": null,
+          "match": null,
+          "pendiente_de_servicio_real": null
+        }
+      ],
+      "errors": [
+        {
+          "status": 401,
+          "code": "NO_AUTENTICADO",
+          "example": "examples/error.no-autenticado.json"
+        },
+        {
+          "status": 403,
+          "code": "NO_AUTORIZADO",
+          "example": "examples/error.no-autorizado.json"
+        },
+        {
+          "status": 404,
+          "code": "NO_ENCONTRADO",
+          "example": "examples/error.no-encontrado.json"
+        },
+        {
+          "status": 422,
+          "code": "VALIDACION",
+          "example": "examples/error.validacion.json"
+        },
+        {
+          "status": 500,
+          "code": "ERROR_INTERNO",
+          "example": "examples/error.error-interno.json"
+        },
+        {
+          "status": 503,
+          "code": "ALMACENAMIENTO_NO_DISPONIBLE",
+          "example": "examples/error.almacenamiento-no-disponible.json"
+        },
+        {
+          "status": 503,
+          "code": "SERVICIO_SATURADO",
+          "example": "examples/error.servicio-saturado.json"
+        }
+      ]
+    },
+    {
+      "operationId": "getAttachmentLink",
+      "method": "GET",
+      "path": "/api/v1/attachments/{attachment_id}/link",
+      "requests": [],
+      "responses": [
+        {
+          "status": 200,
+          "example": "examples/attachment.link.json",
+          "scenario": null,
+          "match": null,
+          "pendiente_de_servicio_real": "la URL y su firma las genera S3"
+        }
+      ],
+      "errors": [
+        {
+          "status": 401,
+          "code": "NO_AUTENTICADO",
+          "example": "examples/error.no-autenticado.json"
+        },
+        {
+          "status": 403,
+          "code": "NO_AUTORIZADO",
+          "example": "examples/error.no-autorizado.json"
+        },
+        {
+          "status": 404,
+          "code": "NO_ENCONTRADO",
+          "example": "examples/error.no-encontrado.json"
+        },
+        {
+          "status": 422,
+          "code": "VALIDACION",
+          "example": "examples/error.validacion.json"
+        },
+        {
+          "status": 500,
+          "code": "ERROR_INTERNO",
+          "example": "examples/error.error-interno.json"
+        },
+        {
+          "status": 503,
+          "code": "NO_CONFIGURADO",
+          "example": "examples/error.no-configurado.json"
         },
         {
           "status": 503,
@@ -1269,6 +1373,13 @@
       ],
       "responses": [
         {
+          "status": 202,
+          "example": "examples/reindex.job.json",
+          "scenario": null,
+          "match": null,
+          "pendiente_de_servicio_real": "ids, fechas y conteos: los genera el servicio real"
+        },
+        {
           "status": 200,
           "example": "examples/reindex.response.json",
           "scenario": null,
@@ -1306,6 +1417,58 @@
           "status": 503,
           "code": "LLM_NO_DISPONIBLE",
           "example": "examples/error.llm-no-disponible.json"
+        },
+        {
+          "status": 503,
+          "code": "NO_CONFIGURADO",
+          "example": "examples/error.no-configurado.json"
+        },
+        {
+          "status": 503,
+          "code": "SERVICIO_SATURADO",
+          "example": "examples/error.servicio-saturado.json"
+        }
+      ]
+    },
+    {
+      "operationId": "getReindexJob",
+      "method": "GET",
+      "path": "/api/v1/admin/rag/jobs/{job_id}",
+      "requests": [],
+      "responses": [
+        {
+          "status": 200,
+          "example": "examples/reindex.job.json",
+          "scenario": null,
+          "match": null,
+          "pendiente_de_servicio_real": "ids, fechas y conteos: los genera el servicio real"
+        }
+      ],
+      "errors": [
+        {
+          "status": 401,
+          "code": "NO_AUTENTICADO",
+          "example": "examples/error.no-autenticado.json"
+        },
+        {
+          "status": 403,
+          "code": "NO_AUTORIZADO",
+          "example": "examples/error.no-autorizado.json"
+        },
+        {
+          "status": 404,
+          "code": "NO_ENCONTRADO",
+          "example": "examples/error.no-encontrado.json"
+        },
+        {
+          "status": 422,
+          "code": "VALIDACION",
+          "example": "examples/error.validacion.json"
+        },
+        {
+          "status": 500,
+          "code": "ERROR_INTERNO",
+          "example": "examples/error.error-interno.json"
         },
         {
           "status": 503,

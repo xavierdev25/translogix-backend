@@ -128,6 +128,8 @@ class AttachmentRow(Base):
     declared_doc_code: Mapped[str | None] = mapped_column(String(32))
     storage_ref: Mapped[str] = mapped_column(String(256))
     created_at: Mapped[datetime]
+    # 2.1.0 (CR-011): where storage_ref lives: "local" (var/attachments) or "s3" (object key).
+    storage_backend: Mapped[str] = mapped_column(String(8), default="local", server_default="local")
 
 
 class RagDocumentRow(Base):
@@ -162,3 +164,60 @@ class RateLimitCounterRow(Base):
     key: Mapped[str] = mapped_column(String(128), primary_key=True)
     window_start: Mapped[datetime] = mapped_column(primary_key=True)
     hits: Mapped[int]
+
+
+class AttachmentStorageMigrationRow(Base):
+    """Result of copying an attachment from local disk to S3 (2.1.0). Lets a re-run resume
+    without uploading twice; the local original is kept until the copy is VERIFIED."""
+
+    __tablename__ = "attachment_storage_migrations"
+
+    attachment_id: Mapped[str] = mapped_column(
+        String(64), ForeignKey("attachments.attachment_id"), primary_key=True
+    )
+    target_backend: Mapped[str] = mapped_column(String(8))
+    target_key: Mapped[str] = mapped_column(String(256))
+    source_ref: Mapped[str] = mapped_column(String(256))
+    status: Mapped[str] = mapped_column(String(16))  # COPIED | VERIFIED | FAILED
+    attempts: Mapped[int]
+    last_error: Mapped[str | None] = mapped_column(String(200))
+    updated_at: Mapped[datetime]
+
+
+class ProcessingJobRow(Base):
+    """Asynchronous document job (2.1.0): only RAG_REINDEX for now. Holds the state the API
+    reports; the SQS message only carries the id."""
+
+    __tablename__ = "processing_jobs"
+
+    id: Mapped[UUID] = mapped_column(primary_key=True)
+    kind: Mapped[str] = mapped_column(String(32))
+    status: Mapped[str] = mapped_column(String(16), index=True)
+    params_json: Mapped[dict[str, Any]] = mapped_column(Json)
+    attempts: Mapped[int]
+    last_error: Mapped[str | None] = mapped_column(String(300))
+    result_json: Mapped[dict[str, Any] | None] = mapped_column(Json)
+    requested_by_staff_user_id: Mapped[UUID | None]
+    request_id: Mapped[str | None] = mapped_column(String(128))
+    created_at: Mapped[datetime]
+    updated_at: Mapped[datetime]
+    started_at: Mapped[datetime | None]
+    finished_at: Mapped[datetime | None]
+
+
+class OutboxMessageRow(Base):
+    """Transactional outbox (2.1.0): written in the same transaction as the job, published to
+    SQS by the relay. Ids only, never PII nor documents."""
+
+    __tablename__ = "outbox_messages"
+    __table_args__ = (
+        Index("ix_outbox_messages_pending", "created_at", postgresql_where="published_at IS NULL"),
+    )
+
+    id: Mapped[UUID] = mapped_column(primary_key=True)
+    topic: Mapped[str] = mapped_column(String(64))
+    payload_json: Mapped[dict[str, Any]] = mapped_column(Json)
+    created_at: Mapped[datetime]
+    published_at: Mapped[datetime | None]
+    attempts: Mapped[int] = mapped_column(default=0)
+    last_error: Mapped[str | None] = mapped_column(String(300))

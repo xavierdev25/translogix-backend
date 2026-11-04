@@ -88,6 +88,21 @@ class Settings(BaseSettings):
     batch_max_body_bytes: int = Field(default=2 * 1024 * 1024, gt=0)
     batch_rate_limit_per_minute: int = Field(default=10, ge=0)  # 0 = sin límite
     batch_lease_seconds: int = Field(default=60, gt=0)
+    # 2.1.0 (CR-011): hybrid AWS. Credentials come from boto3's default chain, never from here.
+    attachments_storage: Literal["local", "s3"] = "local"
+    aws_region: str | None = None
+    s3_bucket: str | None = None
+    s3_kms_key_id: str | None = None
+    s3_presign_ttl_seconds: int = Field(default=60, ge=10, le=900)
+    jobs_backend: Literal["disabled", "sqs"] = "disabled"
+    sqs_queue_url: str | None = None
+    sqs_dlq_url: str | None = None
+    # Must equal the queue's redrive maxReceiveCount: the last attempt marks the job FAILED.
+    worker_max_attempts: int = Field(default=3, ge=1, le=10)
+    worker_visibility_timeout_seconds: int = Field(default=300, ge=30, le=43200)
+    worker_wait_seconds: int = Field(default=20, ge=0, le=20)  # SQS long polling
+    metrics_namespace: str = "TransLogix"
+    metrics_enabled: bool = True
     # Tariff profiles (contract 1.5.0): only profiles of this type are used.
     tariff_environment: Literal["TEST_ONLY", "COMMERCIAL"] = "TEST_ONLY"
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"

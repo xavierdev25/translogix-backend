@@ -1,0 +1,19 @@
+{
+  "job_id": "5e2f8a1c-3b4d-4e6f-9a0b-1c2d3e4f5a6b",
+  "estado": "DONE",
+  "intentos": 1,
+  "creado_en": "2026-11-04T09:00:00-05:00",
+  "actualizado_en": "2026-11-04T09:00:07-05:00",
+  "iniciado_en": "2026-11-04T09:00:01-05:00",
+  "terminado_en": "2026-11-04T09:00:07-05:00",
+  "resultado": {
+    "status": "COMPLETED",
+    "documentos": 4,
+    "chunks": 84,
+    "omitidos_sin_cambios": 0,
+    "duracion_ms": 5870,
+    "embed_model": "qwen3-embedding:0.6b",
+    "embed_dim": 1024
+  },
+  "error": null
+}

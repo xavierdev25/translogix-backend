@@ -80,3 +80,18 @@ de otro usuario responde 404 con `details.attachment_ids`.
 4. Mostrar `estado_revision` en el panel de lotes (cliente) y en el de mercancía peligrosa (revisor).
 5. Tratar el 503 `SERVICIO_SATURADO` como un error temporal que se puede reintentar.
 6. Confirmarnos cuándo publicar 2.0.0 en el túnel.
+
+## 5. Novedades de 2.1.0 (aditivas, opcionales)
+
+- **Descargar un adjunto:**
+  - `GET /api/v1/attachments/{attachment_id}/content`, con la misma cabecera `X-Client-Id` que la
+    subida (o el token de ADMIN o REVIEWER). Devuelve los bytes; muéstrenlos con un *blob URL*.
+  - `GET /api/v1/attachments/{attachment_id}/link`: solo si el backend usa S3. Devuelve
+    `{url, expira_en_segundos: 60}`, una URL prefirmada que se abre directamente sin cabeceras.
+    Con almacenamiento local responde 503 `NO_CONFIGURADO`.
+- **Reindexación asíncrona (panel ADMIN):**
+  - `POST /api/v1/admin/rag/reindex` con `{"asincrono": true}` → 202 `{job_id, estado}`;
+  - consulten `GET /api/v1/admin/rag/jobs/{job_id}` hasta `DONE` o `DEAD_LETTER`.
+- **Error nuevo:** `503 ALMACENAMIENTO_NO_DISPONIBLE` al subir o bajar un archivo. Es temporal: se
+  puede reintentar.
+

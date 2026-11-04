@@ -11,6 +11,20 @@ partir de la Puerta A** (contrato congelado):
 Antes de la Puerta A las versiones pueden incluir ajustes no aditivos (nadie consume todavía).
 Los demás agentes proponen cambios en [`docs/contract-change-requests.md`](../docs/contract-change-requests.md).
 
+## 2.1.0 — 2026-11-04 · integración híbrida AWS: S3, SQS y CloudWatch (CR-011)
+
+Cambio **aditivo** (MINOR): ninguna operación existente cambia de forma. PostgreSQL y Ollama siguen
+locales. Sin AWS configurado (valores por defecto) el comportamiento es el de 2.0.0. Detalle en
+[`docs/audits/AWS_INTEGRATION_REPORT.md`](../docs/audits/AWS_INTEGRATION_REPORT.md).
+
+| Cambio | Motivo |
+|---|---|
+| `GET /attachments/{id}/content` (bytes, con el SHA-256 verificado) y `GET /attachments/{id}/link` (URL prefirmada de S3, SigV4, 60 s). Pueden leerlos el dueño (`X-Client-Id`), ADMIN o un REVIEWER con un caso de esa sesión; si no, 404 | S3 y descarga autorizada |
+| `ReindexRequest.asincrono` → **202** con `ReindexJob`. `GET /admin/rag/jobs/{job_id}` (ADMIN) | Procesamiento documental asíncrono (outbox → SQS → worker) |
+| `ErrorCode.ALMACENAMIENTO_NO_DISPONIBLE` (503) | Fallo de S3 o del disco |
+| `EnvVar`: `ATTACHMENTS_STORAGE`, `AWS_REGION`, `S3_BUCKET`, `S3_KMS_KEY_ID`, `JOBS_BACKEND`, `SQS_QUEUE_URL`, `SQS_DLQ_URL` y `METRICS_NAMESPACE`. Ninguna credencial AWS | Configuración AWS |
+| Ejemplos: `attachment.link`, `attachment.content.response`, `reindex.job` y `error.almacenamiento-no-disponible` | *Mocks* |
+
 ## 2.0.0 — 2026-11-04 · remediación prioritaria de seguridad, negocio y capacidad (CR-010)
 
 **MAJOR:** dos operaciones endurecen su validación. Guía para el front en

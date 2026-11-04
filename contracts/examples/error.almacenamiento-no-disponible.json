@@ -1,0 +1,8 @@
+{
+  "error": {
+    "code": "ALMACENAMIENTO_NO_DISPONIBLE",
+    "message": "No pudimos guardar ni leer el archivo en este momento. Intenta de nuevo.",
+    "details": {},
+    "request_id": "0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e"
+  }
+}

@@ -28,6 +28,10 @@ class AuditAction(StrEnum):
     # 2.0.0 (CR-010)
     ATTACHMENT_UPLOAD = "attachment.upload"
     CHAT_HISTORY_READ = "chat.history.read"
+    # 2.1.0 (CR-011)
+    ATTACHMENT_DOWNLOAD = "attachment.download"
+    ATTACHMENT_LINK = "attachment.link"
+    RAG_REINDEX_QUEUED = "rag.reindex.queued"
 
 
 @dataclass(frozen=True)

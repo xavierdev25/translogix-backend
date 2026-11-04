@@ -188,12 +188,18 @@ class RagService:
         self._top_k = top_k
         self._lexical = _Lexical()
         self._lexical_ready = False
+        self._lexical_version: tuple[int, object] | None = None
 
     async def _ensure_lexical(self, repo: RagRepository) -> None:
-        if not self._lexical_ready:
+        """2.1.0 (CR-011): the index may change in another process (the SQS worker). A tiny
+        query (count and latest ``ingested_at`` of 4 documents) tells this process when its
+        in-memory BM25 is stale."""
+        version = await repo.index_version()
+        if not self._lexical_ready or version != self._lexical_version:
             rows = await repo.all_chunks()
             self._lexical.build([(cid, text, meta.aliases) for cid, text, meta in rows])
             self._lexical_ready = True
+            self._lexical_version = version
 
     def invalidate(self) -> None:
         self._lexical_ready = False

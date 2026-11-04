@@ -27,6 +27,7 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.contracts.common import ContractError, ErrorCode
+from app.shared import metrics
 from app.shared.http import SlidingWindowRateLimiter
 
 logger = logging.getLogger("app.ratelimit")
@@ -82,6 +83,7 @@ class PostgresRateLimiter:
                 await session.commit()
         except Exception as error:  # the shared store failed: degrade, do not fail open
             logger.warning("rate limiter degraded to per-process: %s", type(error).__name__)
+            metrics.emit("InfrastructureErrors", 1, component="ratelimit", operation="degraded")
             self._fallback.check(key)
             return
         if hits > self._limit:

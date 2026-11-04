@@ -21,6 +21,7 @@ from app.contracts.common import (
     ContractError,
     ErrorCode,
 )
+from app.shared import metrics
 
 logger = logging.getLogger("app.http")
 _REQUEST_ID = re.compile(REQUEST_ID_PATTERN)
@@ -174,6 +175,7 @@ async def _pool_exhausted(request: Request, exc: Exception) -> JSONResponse:
     """2.0.0 (CR-010, CAP-01): the DB pool did not free a connection in time. Saturation is
     temporary: 503 with Retry-After, not an unexpected 500."""
     logger.warning("db pool exhausted", extra={"request_id": request_id_of(request)})
+    metrics.emit("InfrastructureErrors", 1, component="postgres", operation="pool")
     error = ContractError(ErrorCode.SERVICIO_SATURADO, details={"reintentar_en_segundos": 5})
     response = error_response(request, error)
     response.headers["Retry-After"] = "5"

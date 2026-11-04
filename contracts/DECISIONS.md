@@ -181,3 +181,16 @@ una decisión de negocio; los valores salen de mediciones de esa auditoría.
 | DEC-PII1 | Fernet/MultiFernet sobre `shipment_recipients` (`nombre`, `numero_documento`, `telefono`, `email`, `direccion`) y `messages.content_json`. Las claves solo vienen del entorno (`PII_ENCRYPTION_KEYS`) y sin clave la app no arranca. No hay índice ciego, porque hoy no hay búsquedas por esos campos (lo añadirá CR-007 si las necesita) | PII-01 / Q5 | CONFIRMADA |
 | DEC-PII2 | Retención: **plazo pendiente de la decisión legal**. Hay un mecanismo bajo demanda (`app.privacy.cli`): purga de conversaciones sin caso abierto y borrado del destinatario a petición del titular (se conserva el envío) | PII-01 / Q5 | BLOQUEADA (legal) |
 
+## 11. Integración híbrida AWS (2.1.0, CR-011)
+
+| Id | Decisión | Fuente | Estado |
+|----|----------|--------|--------|
+| DEC-AWS1 | `ObjectStorage` con adaptadores local y S3. La clave del objeto la genera el servidor (`attachments/<yyyy>/<mm>/<id>.<ext>`) y nunca se acepta del cliente. Escritura condicional (`If-None-Match: *`): nunca se sobrescribe y un reintento con el mismo SHA-256 es idempotente | Seguridad e idempotencia | CONFIRMADA |
+| DEC-AWS2 | S3 cifra con **SSE-KMS y una clave gestionada por el cliente**, con rotación y Bucket Key. Es independiente del cifrado de aplicación (Fernet): no comparten clave. En el disco local los archivos siguen sin cifrar (riesgo ya registrado) | Decisión del usuario del 2026-11-04 | CONFIRMADA |
+| DEC-AWS3 | Las URL prefirmadas usan SigV4 (obligatorio con SSE-KMS) y viven 60 s | Prueba real | CONFIRMADA |
+| DEC-AWS4 | Primero se escribe el objeto y después la fila; si la fila falla, se borra el objeto. La migración local → S3 copia, verifica SHA-256 y tamaño, registra cada intento y conserva el original hasta `verify` + `cleanup --confirm` | Fallos parciales | CONFIRMADA |
+| DEC-AWS5 | Un único flujo SQS: la reindexación RAG. Transactional Outbox (trabajo y mensaje en una transacción), cola Standard con *long polling* y DLQ tras 3 recepciones. Consumidor idempotente por `job_id` y lease de visibilidad. El mensaje solo lleva ids. El worker reutiliza `IngestionService` y el mismo Ollama. **SQS no añade capacidad de inferencia** | CR-011 | CONFIRMADA |
+| DEC-AWS6 | Índice BM25 en memoria: cada proceso detecta con una consulta mínima (número de documentos y último `ingested_at`) que otro proceso reindexó | Worker en otro proceso | CONFIRMADA |
+| DEC-AWS7 | Métricas EMF en stdout, que recoge el agente o awslogs; ninguna llamada a CloudWatch en el *request*. Dimensiones de vocabulario cerrado: un valor con espacios, `@` o de más de 64 caracteres se descarta | CR-011 | CONFIRMADA |
+| DEC-AWS8 | IAM de mínimo privilegio y separado: la API solo escribe y lee `attachments/*` y envía a la cola; el worker solo consume la cola y la DLQ. KMS solo a través de S3 (`kms:ViaService`) | Seguridad | PROPUESTA (las políticas están en `infra/aws/`; hoy se usa el perfil del desarrollador) |
+

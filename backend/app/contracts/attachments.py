@@ -31,3 +31,10 @@ class AttachmentUploadResponse(ContractModel):
         if _KIND_BY_MIME[self.mime_type] != self.kind:
             raise ValueError("kind must be DOCUMENT for PDF and IMAGE for JPG")
         return self
+
+
+class AttachmentLink(ContractModel):
+    """2.1.0 (CR-011): presigned download URL from S3, short-lived. Do not store it."""
+
+    url: str = Field(min_length=1)
+    expira_en_segundos: int = Field(gt=0)

@@ -7,11 +7,11 @@ loads the calendar). The LLM never decides eligibility.
 """
 
 import hashlib
+import logging
 import re
 from collections.abc import Collection
 from datetime import date
 from decimal import Decimal
-from pathlib import Path
 from uuid import UUID, uuid4
 
 from app.contracts.attachments import AttachmentUploadResponse
@@ -36,8 +36,12 @@ from app.contracts.rag import DocCode
 from app.contracts.timezone import to_bogota
 from app.contracts.tms import TmsShipment
 from app.db.repositories import AttachmentRepository, PqrsRepository
+from app.shared import metrics
 from app.shared.business_days import NO_CALENDAR_NOTE, add_business_days
+from app.shared.storage import ObjectStorage, StorageError, object_key
 from app.shared.text import fold
+
+logger = logging.getLogger("app.attachments")
 
 DEDUCTIBLE_THRESHOLD_COP = 2_000_000
 DEDUCTIBLE_PCT = 5
@@ -276,19 +280,26 @@ _PDF, _JPEG = b"%PDF-", b"\xff\xd8\xff"
 
 
 class AttachmentService:
-    """Stores PDF/JPG uploads (P1). Type is sniffed from content; client file names are not kept."""
+    """Stores PDF/JPG uploads. Type is sniffed from content; client file names are not kept.
+
+    2.1.0 (CR-011): the bytes go to an ``ObjectStorage`` (local disk or S3, SSE-KMS) under a key
+    generated here. The object is written first and the row second. If the row cannot be
+    written, the object is deleted (compensation), so no orphan is left behind.
+    """
 
     def __init__(
-        self, repo: AttachmentRepository, storage_dir: Path, max_bytes: int, clock: Clock
+        self, repo: AttachmentRepository, storage: ObjectStorage, max_bytes: int, clock: Clock
     ) -> None:
         self._repo = repo
-        self._dir = storage_dir
+        self._storage = storage
         self._max = max_bytes
         self._clock = clock
 
     async def store(
         self, data: bytes, *, declared: DocumentoCodigo | None, session_id: UUID | None
-    ) -> AttachmentUploadResponse:
+    ) -> tuple[AttachmentUploadResponse, str]:
+        """(response, object key). The caller commits, and calls ``discard(key)`` if the
+        commit fails."""
         if not data:
             raise ContractError(ErrorCode.VALIDACION, "El archivo está vacío.")
         if len(data) > self._max:
@@ -308,18 +319,41 @@ class AttachmentService:
         else:
             raise ContractError(ErrorCode.VALIDACION, "Solo se aceptan archivos PDF o JPG.")
         attachment_id = str(uuid4())
-        name = f"{attachment_id}.{extension}"
-        self._dir.mkdir(parents=True, exist_ok=True)
-        (self._dir / name).write_bytes(data)
+        now = self._clock.now()
+        key = object_key(attachment_id, extension, now)
+        digest = hashlib.sha256(data).hexdigest()
+        try:
+            await self._storage.put(key, data, content_type=mime, sha256=digest)
+        except StorageError as error:
+            raise ContractError(ErrorCode.ALMACENAMIENTO_NO_DISPONIBLE) from error
         response = AttachmentUploadResponse(
             attachment_id=attachment_id,
             kind=kind,  # type: ignore[arg-type]
             mime_type=mime,  # type: ignore[arg-type]
             size_bytes=len(data),
             declared_doc_code=declared,
-            sha256=hashlib.sha256(data).hexdigest(),
+            sha256=digest,
         )
-        await self._repo.add(
-            response, session_id=session_id, storage_ref=name, at=self._clock.now()
-        )
-        return response
+        try:
+            await self._repo.add(
+                response,
+                session_id=session_id,
+                storage_ref=key,
+                storage_backend=self._storage.backend,
+                at=now,
+            )
+        except Exception:
+            await self.discard(key)
+            raise
+        return response, key
+
+    async def discard(self, key: str) -> None:
+        """Compensation for a write that will not be committed. A failure is logged and
+        counted; the object would be an orphan, never a row without its file."""
+        try:
+            await self._storage.delete(key)
+        except StorageError:
+            logger.warning(
+                "attachment compensation failed", extra={"storage": self._storage.backend}
+            )
+            metrics.emit("InfrastructureErrors", 1, component="storage", operation="compensate")

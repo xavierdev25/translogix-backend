@@ -45,6 +45,10 @@ EXPECTED_SURFACE = {
     ("get", "/api/v1/internal/audit-events"),
     ("get", "/api/v1/internal/dangerous-goods"),
     ("post", "/api/v1/internal/shipments/{shipment_id}/dangerous-goods-review"),
+    # 2.1.0: hybrid AWS (CR-011)
+    ("get", "/api/v1/attachments/{attachment_id}/content"),
+    ("get", "/api/v1/attachments/{attachment_id}/link"),
+    ("get", "/api/v1/admin/rag/jobs/{job_id}"),
 }
 
 
@@ -145,6 +149,9 @@ EXPECTED_SECURITY = {
     # 2.0.0 (CR-010): the web-chat user proves ownership with X-Client-Id (SEC-01, SEC-06).
     "getSessionHistory": {"ClientId", "StaffToken", "AdminToken"},
     "uploadAttachment": {"ClientId"},
+    "downloadAttachment": {"ClientId", "StaffToken", "AdminToken"},
+    "getAttachmentLink": {"ClientId", "StaffToken", "AdminToken"},
+    "getReindexJob": STAFF_OR_ADMIN_TOKEN,
     "getShipmentBatch": {"ApiKey", "StaffToken", "AdminToken"},
     "listShipmentBatchItems": {"ApiKey", "StaffToken", "AdminToken"},
 }

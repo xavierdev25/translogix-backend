@@ -380,8 +380,8 @@ Códigos de error nuevos que comparten:
   `asesor-backend-faltantes.md`. La reconciliación con el backend está en
   [`REVISION_SOLICITUD_ASESOR.md`](REVISION_SOLICITUD_ASESOR.md).
 - **Fecha:** 2026-11-04
-- **Versión destino:** contrato **2.1.0** y migración **0008** (`down_revision="0007"`), en dos entregas.
-  Re-asignada otra vez: 2.0.0 la tomó CR-010 (remediación prioritaria).
+- **Versión destino:** contrato **2.2.0** y migración **0009** (`down_revision="0008"`), en dos entregas.
+  Re-asignada otra vez: 2.0.0 la tomó CR-010 y 2.1.0/0008, CR-011 (AWS).
   Re-asignada dos veces: 1.6.0 la tomó CR-008 y 1.7.0/0005, CR-009 (RBAC). Los roles del CRM pasan a ser
   ADMIN y REVIEWER.
   (P0a y P0b). P1 va en otro CR.
@@ -558,4 +558,16 @@ Códigos de error nuevos que comparten:
 - **Versión:** contrato **2.0.0**, migraciones **0006** y **0007**.
 - **Estado:** IMPLEMENTADA en el código. El despliegue en `:8000` está pendiente de aviso al front y de
   la clave del entorno.
+
+### CR-011 — Integración híbrida AWS: S3, SQS y CloudWatch
+
+- **Solicitante:** equipo, 2026-11-04.
+- **Qué cambia:** ver CHANGELOG 2.1.0 y DECISIONS §11.
+  - Adjuntos en S3 con SSE-KMS (opcional; por defecto en disco).
+  - Reindexación RAG asíncrona por SQS con outbox y DLQ.
+  - Métricas EMF para CloudWatch.
+  - Migración 0008.
+- **Compatibilidad:** aditivo. Sin variables AWS, todo funciona como en 2.0.0.
+- **Versión:** contrato **2.1.0**, migración **0008**. CR-007 pasa a 2.2.0 / 0009.
+- **Estado:** IMPLEMENTADA. Probada con moto y contra AWS real (cuenta de desarrollo, us-east-1).
 

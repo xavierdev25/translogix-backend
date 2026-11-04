@@ -6,6 +6,7 @@ requires-python = ">=3.12,<3.13"
 dependencies = [
     "alembic>=1.14",
     "asyncpg>=0.30",
+    "boto3>=1.35.20",
     "cryptography>=44",
     "fastapi>=0.115",
     "httpx>=0.28",
@@ -30,6 +31,8 @@ dev = [
     "jsonschema>=4.23",
     "types-jsonschema>=4.23",
     "pytest-cov>=6",
+    "moto[s3,sqs]>=5.0",
+    "boto3-stubs[s3,sqs]>=1.35",
 ]
 
 [tool.uv]
@@ -52,6 +55,8 @@ select = [
 "app/staff/cli.py" = ["T201"]
 "app/tariffs/cli.py" = ["T201"]
 "app/privacy/cli.py" = ["T201"]
+"app/storage/cli.py" = ["T201"]
+"app/worker/__main__.py" = ["T201"]
 # "›" is the context separator the ingestion spec prescribes ("[DOC › sección]").
 "app/modules/rag/*.py" = ["RUF001", "RUF003"]
 
@@ -73,3 +78,4 @@ addopts = "-ra --strict-markers"
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
 filterwarnings = ["error"]
+markers = ["aws: real AWS resources; run only with TRANSLOGIX_AWS_TESTS=1 and the S3/SQS settings"]

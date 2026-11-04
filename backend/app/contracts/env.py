@@ -39,6 +39,16 @@ class EnvVar(StrEnum):
     TARIFF_ENVIRONMENT = "TARIFF_ENVIRONMENT"
     # Added in 2.0.0 (CR-010): authenticated encryption of personal data (PII-01).
     PII_ENCRYPTION_KEYS = "PII_ENCRYPTION_KEYS"
+    # Added in 2.1.0 (CR-011): hybrid AWS (S3 attachments, SQS jobs, CloudWatch metrics).
+    # AWS credentials are never read by name: boto3 uses its default chain (role, profile).
+    ATTACHMENTS_STORAGE = "ATTACHMENTS_STORAGE"
+    AWS_REGION = "AWS_REGION"
+    S3_BUCKET = "S3_BUCKET"
+    S3_KMS_KEY_ID = "S3_KMS_KEY_ID"
+    JOBS_BACKEND = "JOBS_BACKEND"
+    SQS_QUEUE_URL = "SQS_QUEUE_URL"
+    SQS_DLQ_URL = "SQS_DLQ_URL"
+    METRICS_NAMESPACE = "METRICS_NAMESPACE"
 
 
 SECRET_ENV_VARS = frozenset(

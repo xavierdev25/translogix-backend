@@ -485,5 +485,5 @@ def test_every_route_is_protected_or_explicitly_public(app: FastAPI) -> None:
         for method in route.methods or ()
     }
 
-    assert len(routes) == 28  # 15 protected + 13 public: a new route must land in one set
+    assert len(routes) == 31  # 18 protected + 13 public: a new route must land in one set
     assert unprotected == PUBLIC
