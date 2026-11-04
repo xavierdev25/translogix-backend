@@ -90,6 +90,9 @@ def _document_errors(operation: dict[str, Any]) -> None:
     # 1.6.0 (CR-008): every body is size-limited; the batch route answers its own 413.
     if "requestBody" in operation and ErrorCode.LOTE_DEMASIADO_GRANDE not in codes:
         codes.append(ErrorCode.CUERPO_DEMASIADO_GRANDE)
+    # 2.0.0 (CR-010, CAP-01): any operation that waits for the DB pool may answer 503.
+    if operation.get("operationId") != "getHealth":
+        codes.append(ErrorCode.SERVICIO_SATURADO)
     codes.append(ErrorCode.ERROR_INTERNO)
 
     by_status: dict[str, list[ErrorCode]] = defaultdict(list)

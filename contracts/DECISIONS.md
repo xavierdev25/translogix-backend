@@ -166,3 +166,18 @@ una decisión de negocio; los valores salen de mediciones de esa auditoría.
 | DEC-RBAC5 | Solo REVIEWER decide sobre mercancía peligrosa (separación de funciones). La decisión se registra pero **no bloquea** el envío hasta resolver Q1 / CR-006 | Matriz y Q1 pendiente | PROVISIONAL |
 | DEC-RBAC6 | 401 sin credencial o con una inválida; 403 con credencial válida sin el rol. Ambos se auditan (`auth.failed` y `access.denied`) en `api_audit_events` | Requisitos de seguridad | CONFIRMADA |
 
+## 10. Remediación prioritaria (2.0.0, CR-010)
+
+| Id | Decisión | Fuente | Estado |
+|----|----------|--------|--------|
+| DEC-SEC1 | La identidad del usuario del web chat es el `client_id` del navegador (`X-Client-Id`). Prueba la propiedad de una sesión junto con su `session_id`, porque el backend compara el HMAC guardado. Una sesión ajena o inexistente responde 404 | SEC-01; recomendación Q2 | CONFIRMADA |
+| DEC-SEC2 | El historial lo leen el dueño, un ADMIN (cualquiera) o un REVIEWER (solo sesiones con un caso PENDING o asignado a él). Toda lectura de personal y toda denegación se audita (`chat.history.read`) | SEC-01 | CONFIRMADA |
+| DEC-SEC3 | Un adjunto se sube a una conversación de web chat del mismo usuario (`session_id` + `X-Client-Id`), con un límite de 10 por minuto por usuario. Solo ese usuario puede referenciarlo después | SEC-06; recomendación Q3 (b) | CONFIRMADA |
+| DEC-BIZ1 | `mercancia_peligrosa=true` → `review_status=PENDIENTE` al crear el envío. Solo la decisión registrada de un REVIEWER lo pasa a APROBADA o RECHAZADA. `can_advance()` solo deja avanzar NO_REQUERIDA y APROBADA. El sistema no clasifica mercancía peligrosa y el LLM no aprueba | BIZ-01 / Q1 (CR-006) | CONFIRMADA |
+| DEC-BIZ2 | No existe todavía una transición de despacho (DEC-SHP5). La que llegue (CR-005) debe llamar a `can_advance()` | BIZ-01 | PROVISIONAL |
+| DEC-OPS1 | *Rate limit* compartido en PostgreSQL, con ventana fija de 1 minuto y un pool propio de 2+3 conexiones con *timeout* de 2 s. Si PostgreSQL falla, se degrada al limitador por proceso, que no deja pasar todo. Sin Redis | OPS-01 | CONFIRMADA |
+| DEC-LLM1 | Un único reintento a los 0,25 s, y solo ante `ConnectError`, dentro del mismo *slot* de admisión. Nunca ante *timeout* ni error HTTP | LLM-01 | CONFIRMADA |
+| DEC-CAP1 | Pool principal configurable (`db_pool_size=5`, `db_max_overflow=10`, `db_pool_timeout_seconds=10`). Si se agota, responde 503 `SERVICIO_SATURADO` con `Retry-After: 5` | CAP-01 | CONFIRMADA |
+| DEC-PII1 | Fernet/MultiFernet sobre `shipment_recipients` (`nombre`, `numero_documento`, `telefono`, `email`, `direccion`) y `messages.content_json`. Las claves solo vienen del entorno (`PII_ENCRYPTION_KEYS`) y sin clave la app no arranca. No hay índice ciego, porque hoy no hay búsquedas por esos campos (lo añadirá CR-007 si las necesita) | PII-01 / Q5 | CONFIRMADA |
+| DEC-PII2 | Retención: **plazo pendiente de la decisión legal**. Hay un mecanismo bajo demanda (`app.privacy.cli`): purga de conversaciones sin caso abierto y borrado del destinatario a petición del titular (se conserva el envío) | PII-01 / Q5 | BLOQUEADA (legal) |
+

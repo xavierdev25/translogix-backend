@@ -35,7 +35,7 @@ from app.contracts.channels_http import (
     WhatsAppWebhookPayload,
 )
 from app.contracts.chat import ChatMessageRequest, ChatMessageResponse, SessionHistory
-from app.contracts.common import CONTRACT_VERSION, ErrorCode
+from app.contracts.common import CLIENT_ID_HEADER, CONTRACT_VERSION, ErrorCode
 from app.contracts.escalation import HandoffPayload, HandoffStatus, HandoffStatusUpdate
 from app.contracts.ops import (
     ADMIN_TOKEN_HEADER,
@@ -121,6 +121,16 @@ StaffTokenDep = Annotated[HTTPAuthorizationCredentials | None, Security(staff_to
 
 # 1.7.0 (CR-009): 401 without a valid credential, 403 when its role is not allowed.
 _RBAC_ERRORS = (ErrorCode.NO_AUTENTICADO, ErrorCode.NO_AUTORIZADO)
+
+# 2.0.0 (CR-010): the web-chat user's stable browser UUID. It is the same value as
+# `client_id` in POST /chat/messages and proves who owns a session (SEC-01, SEC-06).
+client_id_header = APIKeyHeader(
+    name=CLIENT_ID_HEADER,
+    scheme_name="ClientId",
+    description="UUID estable del navegador (el mismo `client_id` de `POST /chat/messages`).",
+    auto_error=False,
+)
+ClientIdDep = Annotated[str | None, Security(client_id_header)]
 
 tracking = APIRouter(tags=["tracking"])
 quotation = APIRouter(tags=["cotización"])
@@ -211,15 +221,22 @@ async def create_pqrs_ticket(body: PqrsTicketRequest) -> PqrsTicketResponse:
     status_code=201,
     summary="Sube un adjunto (PDF o JPG) y devuelve su attachment_id",
     description=(
-        "Tipo validado por contenido; límite de tamaño configurable; el nombre de archivo del "
-        "cliente no se conserva y el contenido no se registra en logs."
+        "2.0.0: exige `X-Client-Id` y el `session_id` de una conversación de web chat de ese "
+        "mismo usuario; si no, 404 (sin oráculo). Tipo validado por contenido (PDF completo o "
+        "JPG); límite de tamaño y de frecuencia por usuario. El nombre de archivo del cliente no "
+        "se conserva y el contenido no se registra en logs."
     ),
-    **_route("uploadAttachment", priority="P1", errors=(ErrorCode.NO_ENCONTRADO,)),
+    **_route(
+        "uploadAttachment",
+        priority="P1",
+        errors=(ErrorCode.NO_AUTENTICADO, ErrorCode.NO_ENCONTRADO, ErrorCode.LIMITE_DE_TASA),
+    ),
 )
 async def upload_attachment(
     file: Annotated[UploadFile, File(description="PDF o JPG.")],
+    session_id: Annotated[UUID, Form(description="Conversación del mismo usuario (2.0.0).")],
+    client: ClientIdDep,
     declared_doc_code: Annotated[DocumentoCodigo | None, Form()] = None,
-    session_id: Annotated[UUID | None, Form()] = None,
 ) -> AttachmentUploadResponse:
     _spec_only()
 
@@ -241,9 +258,16 @@ async def post_chat_message(body: ChatMessageRequest) -> ChatMessageResponse:
 @chat.get(
     "/chat/sessions/{session_id}/history",
     summary="Historial de una sesión",
-    **_route("getSessionHistory", priority="P0", errors=(ErrorCode.NO_ENCONTRADO,)),
+    description=(
+        "2.0.0 (SEC-01): el dueño con `X-Client-Id`; un ADMIN (cualquier sesión) o un REVIEWER "
+        "(sesiones con un caso en su bandeja) con su token. Sin credencial, 401. Una sesión ajena "
+        "o inexistente, 404 (sin oráculo)."
+    ),
+    **_route("getSessionHistory", priority="P0", errors=(*_RBAC_ERRORS, ErrorCode.NO_ENCONTRADO)),
 )
-async def get_session_history(session_id: UUID) -> SessionHistory:
+async def get_session_history(
+    session_id: UUID, client: ClientIdDep, staff: StaffTokenDep, token: AdminTokenDep
+) -> SessionHistory:
     _spec_only()
 
 

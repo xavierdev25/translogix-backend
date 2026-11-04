@@ -36,7 +36,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 from app.audit.application.service import ApiAuditService
 from app.audit.domain.models import AuditAction
 from app.auth import routes as auth_routes
-from app.auth.dependencies import audit, require
+from app.auth.dependencies import ChatCaller, audit, chat_history_reader, require, web_chat_user
 from app.auth.principal import Principal
 from app.batches.api import routes as batch_routes
 from app.batches.application.service import BatchService
@@ -129,15 +129,16 @@ from app.modules.tracking.service import DatasetTmsAdapter, StateMap
 from app.shared.business_days import load_holidays
 from app.shared.clock import build_clock
 from app.shared.config import REPO_ROOT, Settings, get_settings
+from app.shared.crypto import configure as configure_pii
 from app.shared.http import (
     BodySizeLimitMiddleware,
     RequestIdMiddleware,
-    SlidingWindowRateLimiter,
     register_error_handlers,
     request_id_of,
 )
 from app.shared.llm import OllamaChat, OllamaEmbedding
 from app.shared.logging import configure_logging
+from app.shared.ratelimit import LocalRateLimiter, PostgresRateLimiter, RateLimiter
 from app.shipments.application.service import ShipmentService, tariff_version
 from app.tariffs.api import routes as tariff_routes
 from app.tariffs.application.service import TariffQuotationService
@@ -163,13 +164,15 @@ class Container:
     rag: RagService | None
     ingestion: IngestionService | None
     intents: IntentDetector
-    limiter: SlidingWindowRateLimiter
+    limiter: RateLimiter
     engine: AsyncEngine
     rag_engine: AsyncEngine | None
     audit: ApiAuditService
     shipments: ShipmentService
     batches: BatchService
-    batch_limiter: SlidingWindowRateLimiter
+    batch_limiter: RateLimiter
+    attachments_limiter: RateLimiter
+    limiter_engine: AsyncEngine | None
     tariff_quotes: TariffQuotationService
 
     def pqrs(self, session: AsyncSession) -> PqrsService:
@@ -233,8 +236,30 @@ def build_container(settings: Settings) -> Container:
         crit003_mode=settings.crit003_mode,
         crit005_mode=settings.crit005_mode,
     )
-    engine = create_engine(settings)
+    # 2.0.0 (PII-01): without keys no personal data is stored; the app does not start.
+    configure_pii(
+        settings.pii_encryption_keys.get_secret_value() if settings.pii_encryption_keys else None
+    )
+    engine = create_engine(
+        settings,
+        pool_size=settings.db_pool_size,
+        max_overflow=settings.db_max_overflow,
+        pool_timeout=settings.db_pool_timeout_seconds,
+    )
     sessions = create_session_factory(engine)
+    # 2.0.0 (OPS-01): limits shared between instances, on their own small pool (a chat turn
+    # already holds a connection of the main pool; see REL-01). Short timeout: if PostgreSQL
+    # does not answer, the limiter degrades to per-process instead of blocking the request.
+    limiter_engine = None
+    if settings.rate_limit_backend == "postgres":
+        limiter_engine = create_engine(settings, pool_size=2, max_overflow=3, pool_timeout=2.0)
+        limiter_sessions = create_session_factory(limiter_engine)
+
+    def limiter(per_minute: int) -> RateLimiter:
+        if limiter_engine is None:
+            return LocalRateLimiter(per_minute)
+        return PostgresRateLimiter(limiter_sessions, per_minute)
+
     quotation = QuotationService(tariffs, insurance_min_source=settings.insurance_min_source)
     shipments = ShipmentService(
         tariffs,
@@ -295,7 +320,7 @@ def build_container(settings: Settings) -> Container:
         rag=rag,
         ingestion=ingestion,
         intents=IntentDetector(llm, tariffs),
-        limiter=SlidingWindowRateLimiter(settings.chat_rate_limit_per_minute),
+        limiter=limiter(settings.chat_rate_limit_per_minute),
         engine=engine,
         rag_engine=rag_engine,
         audit=ApiAuditService(sessions),
@@ -303,7 +328,9 @@ def build_container(settings: Settings) -> Container:
         batches=BatchService(
             sessions, shipments, clock, lease_seconds=settings.batch_lease_seconds
         ),
-        batch_limiter=SlidingWindowRateLimiter(settings.batch_rate_limit_per_minute),
+        batch_limiter=limiter(settings.batch_rate_limit_per_minute),
+        attachments_limiter=limiter(settings.attachments_rate_limit_per_minute),
+        limiter_engine=limiter_engine,
         tariff_quotes=TariffQuotationService(
             sessions, tariffs, clock, environment=TipoPerfil(settings.tariff_environment)
         ),
@@ -331,6 +358,9 @@ Db = Annotated[AsyncSession, Depends(db_session)]
 # 1.7.0 (CR-009): RBAC. X-Admin-Token is still accepted as ADMIN (compatibility).
 AdminOnly = Annotated[Principal, Depends(require(Role.ADMIN))]
 AdminOrReviewer = Annotated[Principal, Depends(require(Role.ADMIN, Role.REVIEWER))]
+# 2.0.0 (CR-010): web-chat identity (X-Client-Id), for history and attachments.
+WebChatUser = Annotated[str, Depends(web_chat_user())]
+HistoryReader = Annotated[ChatCaller, Depends(chat_history_reader())]
 
 
 def reviewer_scope(principal: Principal) -> UUID | None:
@@ -372,20 +402,46 @@ async def create_pqrs_ticket(body: PqrsTicketRequest, box: Box, db: Db) -> PqrsT
 
 @api.post("/attachments", status_code=201, tags=["adjuntos"], operation_id="uploadAttachment")
 async def upload_attachment(
+    request: Request,
     box: Box,
     db: Db,
+    user_hash: WebChatUser,
     file: Annotated[UploadFile, File(description="PDF o JPG.")],
+    session_id: Annotated[UUID, Form()],
     declared_doc_code: Annotated[DocumentoCodigo | None, Form()] = None,
-    session_id: Annotated[UUID | None, Form()] = None,
 ) -> AttachmentUploadResponse:
-    limit = box.settings.attachments_max_bytes
-    data = await file.read(limit + 1)
-    service = AttachmentService(
-        AttachmentRepository(db), box.settings.attachments_dir, limit, box.clock
-    )
-    stored = await service.store(data, declared=declared_doc_code, session_id=session_id)
-    await db.commit()
-    return stored
+    """2.0.0 (SEC-06): only into an open web-chat conversation of the same user."""
+    status, attachment_id = 500, None
+    try:
+        await box.attachments_limiter.check(f"attachments:{user_hash}")
+        state = await ConversationRepository(db).get(session_id)
+        if (
+            state is None
+            or state.channel is not ChannelType.WEB_CHAT
+            or state.external_user_id_hash != user_hash
+        ):
+            raise ContractError(ErrorCode.NO_ENCONTRADO, details={"recurso": "session"})
+        limit = box.settings.attachments_max_bytes
+        data = await file.read(limit + 1)
+        service = AttachmentService(
+            AttachmentRepository(db), box.settings.attachments_dir, limit, box.clock
+        )
+        stored = await service.store(data, declared=declared_doc_code, session_id=session_id)
+        await db.commit()
+        status, attachment_id = 201, stored.attachment_id
+        return stored
+    except ContractError as error:
+        status = error.http_status
+        raise
+    finally:
+        await audit(
+            request,
+            None,
+            AuditAction.ATTACHMENT_UPLOAD,
+            status,
+            resource_type="attachment",
+            resource_id=attachment_id or str(session_id),
+        )
 
 
 @api.post("/chat/messages", tags=["web chat"], operation_id="postChatMessage")
@@ -393,7 +449,14 @@ async def post_chat_message(
     body: ChatMessageRequest, request: Request, box: Box, db: Db
 ) -> ChatMessageResponse:
     message_type = MessageType.TEXT if body.text and body.text.strip() else MessageType.DOCUMENT
-    known = await AttachmentRepository(db).existing([a.attachment_id for a in body.attachments])
+    # 2.0.0 (SEC-06): only attachments uploaded by this same user; another user's id is
+    # reported as missing (no oracle).
+    owner = hash_user(
+        box.settings.pii_hash_salt.get_secret_value(), ChannelType.WEB_CHAT, str(body.client_id)
+    )
+    known = await AttachmentRepository(db).owned_by(
+        [a.attachment_id for a in body.attachments], owner
+    )
     missing = [a.attachment_id for a in body.attachments if a.attachment_id not in known]
     if missing:
         raise ContractError(ErrorCode.NO_ENCONTRADO, details={"attachment_ids": missing})
@@ -426,16 +489,31 @@ async def post_chat_message(
 
 @api.get("/chat/sessions/{session_id}/history", tags=["web chat"], operation_id="getSessionHistory")
 async def get_session_history(
-    session_id: UUID,
-    box: Box,
-    db: Db,
-    client_id: Annotated[UUID | None, Header(alias="X-Client-Id")] = None,
+    session_id: UUID, request: Request, caller: HistoryReader, box: Box, db: Db
 ) -> SessionHistory:
+    """2.0.0 (SEC-01): the owner, an ADMIN, or a REVIEWER with a case of this session in their
+    inbox. Anything else is reported as missing (404, no oracle)."""
     state = await ConversationRepository(db).get(session_id)
-    if state is not None and client_id is not None:
-        salt = box.settings.pii_hash_salt.get_secret_value()
-        if hash_user(salt, state.channel, str(client_id)) != state.external_user_id_hash:
-            state = None  # someone else's session: indistinguishable from a missing one
+    principal = caller.principal
+    if state is not None:
+        if caller.user_hash is not None:
+            allowed = state.external_user_id_hash == caller.user_hash
+        elif principal is not None and principal.has(Role.ADMIN):
+            allowed = True
+        else:
+            allowed = principal is not None and await HandoffRepository(db).visible_for_session(
+                session_id, principal.staff_user_id
+            )
+        state = state if allowed else None
+    if principal is not None or state is None:
+        await audit(
+            request,
+            principal,
+            AuditAction.CHAT_HISTORY_READ,
+            200 if state is not None else 404,
+            resource_type="session",
+            resource_id=session_id,
+        )
     if state is None:
         raise ContractError(ErrorCode.NO_ENCONTRADO, details={"recurso": "session"})
     entries = []
@@ -881,7 +959,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         for client in (box.llm, box.embedding):
             if client is not None:
                 await client.aclose()
-        for engine in (box.engine, box.rag_engine):
+        for engine in (box.engine, box.rag_engine, box.limiter_engine):
             if engine is not None:
                 await engine.dispose()
 

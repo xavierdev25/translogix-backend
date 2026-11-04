@@ -13,7 +13,7 @@ from enum import StrEnum
 from uuid import UUID
 
 from app.contracts.quotation import CotizacionRequest, CotizacionResponse
-from app.contracts.shipment_batches import Destinatario
+from app.contracts.shipment_batches import Destinatario, ReviewStatus
 
 GUIDE_SEQUENCE_NAME = "shipment_guide_seq"
 GUIDE_MIN = 200_000
@@ -23,6 +23,17 @@ GUIDE_MAX = 299_999
 class ShipmentStatus(StrEnum):
     # Provisional (DEC-SHP5): the business still has to define "confirmed for dispatch".
     REGISTRADO = "REGISTRADO"
+
+
+def initial_review_status(mercancia_peligrosa: bool) -> ReviewStatus:
+    """BIZ-01: dangerous goods are never approved automatically, nor classified by the system."""
+    return ReviewStatus.PENDIENTE if mercancia_peligrosa else ReviewStatus.NO_REQUERIDA
+
+
+def can_advance(status: ReviewStatus) -> bool:
+    """Gate for any operational step (dispatch…). There is no dispatch transition yet
+    (DEC-SHP5, CR-005); whichever lands must call this first."""
+    return status in (ReviewStatus.NO_REQUERIDA, ReviewStatus.APROBADA)
 
 
 def format_guia(number: int) -> str:

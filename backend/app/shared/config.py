@@ -35,6 +35,11 @@ class Settings(BaseSettings):
     # that the turn degrades at once (LLM_NO_DISPONIBLE) instead of exhausting the pool (500).
     llm_max_inflight: int = Field(default=4, gt=0)
     llm_max_queue: int = Field(default=8, ge=0)
+    # 2.0.0 (CAP-01): main pool. A wait longer than db_pool_timeout_seconds answers
+    # 503 SERVICIO_SATURADO instead of 500.
+    db_pool_size: int = Field(default=5, gt=0)
+    db_max_overflow: int = Field(default=10, ge=0)
+    db_pool_timeout_seconds: float = Field(default=10.0, gt=0)
 
     rag_top_k: int = Field(default=5, ge=1, le=20)
     confidence_threshold: float = Field(default=0.75, ge=0, le=1)
@@ -57,6 +62,12 @@ class Settings(BaseSettings):
 
     admin_token: SecretStr = Field(min_length=16)
     pii_hash_salt: SecretStr = Field(min_length=16)
+    # 2.0.0 (CR-010, PII-01): Fernet keys, comma separated; the first encrypts, all decrypt.
+    # They come from the environment / secret manager only. Without them the app does not start.
+    pii_encryption_keys: SecretStr | None = None
+    # Retention is a legal decision (Ley 1581 de 2012) still pending: None = nothing is purged
+    # automatically; app.privacy.cli purges on demand.
+    conversation_retention_days: int | None = Field(default=None, gt=0)
 
     data_source_dir: Path = REPO_ROOT / "data" / "source"
     accounts_file: Path | None = REPO_ROOT / "data" / "fixtures" / "cuentas_simuladas.json"
@@ -68,6 +79,10 @@ class Settings(BaseSettings):
 
     cors_allow_origins: Annotated[list[str], NoDecode] = Field(default_factory=list)
     chat_rate_limit_per_minute: int = Field(default=30, ge=0)  # 0 = sin límite
+    # 2.0.0 (SEC-06): uploads per web-chat user per minute.
+    attachments_rate_limit_per_minute: int = Field(default=10, ge=0)  # 0 = sin límite
+    # 2.0.0 (OPS-01): "postgres" shares the limits between instances; "memory" is per process.
+    rate_limit_backend: Literal["postgres", "memory"] = "postgres"
     # Bulk shipments (B2B API, contract 1.3.0).
     batch_max_items: int = Field(default=500, gt=0)
     batch_max_body_bytes: int = Field(default=2 * 1024 * 1024, gt=0)

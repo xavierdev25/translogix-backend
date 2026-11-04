@@ -10,6 +10,8 @@ from sqlalchemy import JSON, DateTime, ForeignKey, Index, MetaData, String, Text
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
+from app.shared.crypto import EncryptedJson
+
 NAMING_CONVENTION = {
     "ix": "ix_%(table_name)s_%(column_0_N_name)s",
     "uq": "uq_%(table_name)s_%(column_0_N_name)s",
@@ -55,7 +57,8 @@ class MessageRow(Base):
     # Outbound rows point to the inbound message they answer (idempotent replays).
     in_reply_to: Mapped[str | None] = mapped_column(String(256), index=True)
     message_type: Mapped[str | None] = mapped_column(String(24))
-    content_json: Mapped[dict[str, Any]] = mapped_column(Json)
+    # 2.0.0 (PII-01): encrypted at rest; the code still reads a plain dict.
+    content_json: Mapped[dict[str, Any]] = mapped_column(EncryptedJson)
     delivery_mode: Mapped[str] = mapped_column(String(16))
     created_at: Mapped[datetime] = mapped_column(index=True)
 
@@ -149,3 +152,13 @@ class RagChunkRow(Base):
     metadata_json: Mapped[dict[str, Any]] = mapped_column(Json)
     content_hash: Mapped[str] = mapped_column(String(64), index=True)
     embedding: Mapped[list[float]] = mapped_column(Vector(EMBED_DIM))
+
+
+class RateLimitCounterRow(Base):
+    """One-minute window per key, shared by every instance (2.0.0, OPS-01)."""
+
+    __tablename__ = "rate_limit_counters"
+
+    key: Mapped[str] = mapped_column(String(128), primary_key=True)
+    window_start: Mapped[datetime] = mapped_column(primary_key=True)
+    hits: Mapped[int]

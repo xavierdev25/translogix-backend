@@ -6,6 +6,7 @@ from sqlalchemy import BigInteger, ForeignKey, Numeric, Sequence, String, Unique
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.models import Base
+from app.shared.crypto import EncryptedText
 from app.shipments.domain.models import GUIDE_MAX, GUIDE_MIN, GUIDE_SEQUENCE_NAME
 
 GUIDE_SEQUENCE = Sequence(
@@ -43,6 +44,11 @@ class ShipmentRow(Base):
     valor_declarado_cop: Mapped[int] = mapped_column(BigInteger)
     requiere_cadena_frio: Mapped[bool]
     mercancia_peligrosa: Mapped[bool]
+    # 2.0.0 (BIZ-01): NO_REQUERIDA | PENDIENTE | APROBADA | RECHAZADA. Dangerous goods start
+    # PENDIENTE; only a REVIEWER's decision changes it (never the LLM nor the client).
+    review_status: Mapped[str] = mapped_column(
+        String(16), default="NO_REQUERIDA", server_default="NO_REQUERIDA"
+    )
     cotizacion_id: Mapped[UUID | None] = mapped_column(ForeignKey("quotes.cotizacion_id"))
     flete_total_cop: Mapped[int | None] = mapped_column(BigInteger)
     formula_version: Mapped[str | None] = mapped_column(String(32))
@@ -60,12 +66,14 @@ class ShipmentRecipientRow(Base):
 
     id: Mapped[UUID] = mapped_column(primary_key=True)
     shipment_id: Mapped[UUID] = mapped_column(ForeignKey("shipments.id"), unique=True)
-    nombre: Mapped[str] = mapped_column(String(120))
-    tipo_documento: Mapped[str | None] = mapped_column(String(10))
-    numero_documento: Mapped[str | None] = mapped_column(String(20))
-    telefono: Mapped[str] = mapped_column(String(16))
-    email: Mapped[str | None] = mapped_column(String(120))
-    direccion: Mapped[str] = mapped_column(String(200))
+    # 2.0.0 (PII-01): personal data encrypted at rest. Lengths are validated by the
+    # contract before encryption; the ciphertext is longer, so the columns are TEXT.
+    nombre: Mapped[str] = mapped_column(EncryptedText)
+    tipo_documento: Mapped[str | None] = mapped_column(String(10))  # CC/NIT: not personal
+    numero_documento: Mapped[str | None] = mapped_column(EncryptedText)
+    telefono: Mapped[str] = mapped_column(EncryptedText)
+    email: Mapped[str | None] = mapped_column(EncryptedText)
+    direccion: Mapped[str] = mapped_column(EncryptedText)
     created_at: Mapped[datetime]
     updated_at: Mapped[datetime]
 

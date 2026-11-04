@@ -25,6 +25,9 @@ class AuditAction(StrEnum):
     AUDIT_READ = "audit.read"
     DANGEROUS_GOODS_READ = "dangerous_goods.read"
     DANGEROUS_GOODS_REVIEW = "dangerous_goods.review"
+    # 2.0.0 (CR-010)
+    ATTACHMENT_UPLOAD = "attachment.upload"
+    CHAT_HISTORY_READ = "chat.history.read"
 
 
 @dataclass(frozen=True)

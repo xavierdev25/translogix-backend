@@ -12,6 +12,7 @@ from typing import Any, cast
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from sqlalchemy.exc import TimeoutError as SqlAlchemyTimeout
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.contracts.common import (
@@ -169,7 +170,18 @@ async def _unexpected_error(request: Request, exc: Exception) -> JSONResponse:
     return error_response(request, ContractError(ErrorCode.ERROR_INTERNO))
 
 
+async def _pool_exhausted(request: Request, exc: Exception) -> JSONResponse:
+    """2.0.0 (CR-010, CAP-01): the DB pool did not free a connection in time. Saturation is
+    temporary: 503 with Retry-After, not an unexpected 500."""
+    logger.warning("db pool exhausted", extra={"request_id": request_id_of(request)})
+    error = ContractError(ErrorCode.SERVICIO_SATURADO, details={"reintentar_en_segundos": 5})
+    response = error_response(request, error)
+    response.headers["Retry-After"] = "5"
+    return response
+
+
 def register_error_handlers(app: FastAPI) -> None:
+    app.add_exception_handler(SqlAlchemyTimeout, _pool_exhausted)
     app.add_exception_handler(ContractError, _contract_error)
     app.add_exception_handler(RequestValidationError, _validation_error)
     app.add_exception_handler(StarletteHTTPException, _http_error)

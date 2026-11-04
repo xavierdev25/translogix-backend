@@ -11,6 +11,23 @@ partir de la Puerta A** (contrato congelado):
 Antes de la Puerta A las versiones pueden incluir ajustes no aditivos (nadie consume todavía).
 Los demás agentes proponen cambios en [`docs/contract-change-requests.md`](../docs/contract-change-requests.md).
 
+## 2.0.0 — 2026-11-04 · remediación prioritaria de seguridad, negocio y capacidad (CR-010)
+
+**MAJOR:** dos operaciones endurecen su validación. Guía para el front en
+[`docs/FRONTEND_CAMBIOS_2_0_0.md`](../docs/FRONTEND_CAMBIOS_2_0_0.md) y decisiones en
+[`DECISIONS.md`](DECISIONS.md) §10.
+
+| Cambio | Tipo | Motivo |
+|---|---|---|
+| `GET /chat/sessions/{id}/history` exige el dueño (`X-Client-Id`) o un token de ADMIN o REVIEWER. Sin credencial: 401; sesión ajena: 404; API key: 403 | **Incompatible** | SEC-01 |
+| `POST /attachments`: `session_id` obligatorio (de una conversación de web chat del mismo usuario) y `X-Client-Id` obligatorio. Límite por usuario: 429. PDF incompleto: 422 | **Incompatible** | SEC-06 |
+| `POST /chat/messages`: solo puede referenciar adjuntos del mismo usuario (otro → 404) | Comportamiento | SEC-06 (IDOR) |
+| Esquema de seguridad `ClientId` (cabecera `X-Client-Id`) | Aditivo | SEC-01 y SEC-06 |
+| `ShipmentBatchItemResult.estado_revision` (`NO_REQUERIDA`, `PENDIENTE`, `APROBADA`, `RECHAZADA`) y `ReviewStatus`. La mercancía peligrosa nace `PENDIENTE` y solo la decisión de un REVIEWER la cambia | Aditivo | BIZ-01 / Q1 |
+| `ErrorCode.SERVICIO_SATURADO` (503 + `Retry-After`) cuando el pool de BD se agota; documentado en toda operación salvo `/health` | Aditivo | CAP-01 |
+| `EnvVar.PII_ENCRYPTION_KEYS` (secreto). Sin ella la app no arranca | Aditivo | PII-01 |
+| Sin cambio de forma: PII cifrada en reposo, *rate limit* compartido en PostgreSQL y un reintento de Ollama ante `ConnectError` | Interno | PII-01, OPS-01 y LLM-01 |
+
 ## 1.7.0 — 2026-11-04 · RBAC mínimo: ADMIN, CLIENT, REVIEWER (CR-009)
 
 Cambio **aditivo** (MINOR) en la forma: se añaden 6 operaciones y alternativas de credencial en 6

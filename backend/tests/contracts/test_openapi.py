@@ -142,6 +142,9 @@ EXPECTED_SECURITY = {
     "reviewDangerousGoods": {"StaffToken"},
     "getCurrentPrincipal": {"ApiKey", "StaffToken", "AdminToken"},
     "createShipmentBatch": {"ApiKey"},
+    # 2.0.0 (CR-010): the web-chat user proves ownership with X-Client-Id (SEC-01, SEC-06).
+    "getSessionHistory": {"ClientId", "StaffToken", "AdminToken"},
+    "uploadAttachment": {"ClientId"},
     "getShipmentBatch": {"ApiKey", "StaffToken", "AdminToken"},
     "listShipmentBatchItems": {"ApiKey", "StaffToken", "AdminToken"},
 }

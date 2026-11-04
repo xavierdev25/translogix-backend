@@ -169,8 +169,8 @@ repositorio.
 
 | Riesgo | Por qué sigue abierto |
 |---|---|
-| `GET /chat/sessions/{id}/history` | Sigue accesible con el `session_id`: `X-Client-Id` es opcional (SEC-01). Exigirlo rompe el contrato (MAJOR) y depende de la decisión Q2 |
-| `POST /attachments` | Sigue sin autenticación ni límite de tasa (SEC-06, decisión Q3) |
+| `GET /chat/sessions/{id}/history` | **Cerrado en 2.0.0 (CR-010):** dueño con `X-Client-Id`, ADMIN o REVIEWER con un caso de esa sesión |
+| `POST /attachments` | **Cerrado en 2.0.0 (CR-010):** `X-Client-Id` y `session_id` del mismo usuario, más límite por usuario |
 | `POST /channels/*/simulate` | Deberían desactivarse o protegerse en producción |
 
 **Partes de la matriz no implementadas** (no existe el endpoint o el modelo):

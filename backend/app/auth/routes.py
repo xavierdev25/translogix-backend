@@ -36,6 +36,7 @@ from app.contracts.auth import (
     WhoAmI,
 )
 from app.contracts.common import ContractError, ErrorCode
+from app.contracts.shipment_batches import ReviewStatus
 from app.contracts.staff import Role
 from app.shipments.infrastructure.repositories import ShipmentReviewRepository
 from app.shipments.infrastructure.tables import ShipmentReviewRow
@@ -235,7 +236,10 @@ async def review_dangerous_goods(
                 raise ContractError(
                     ErrorCode.VALIDACION, "El envío no está declarado como mercancía peligrosa."
                 )
-            if await repo.review_of(shipment_id) is not None:
+            if (
+                await repo.review_of(shipment_id) is not None
+                or shipment.review_status != ReviewStatus.PENDIENTE.value
+            ):
                 raise ContractError(ErrorCode.VALIDACION, "El envío ya tiene una decisión.")
             if principal.staff_user_id is None:  # REVIEWER only comes from a staff token
                 raise ContractError(ErrorCode.NO_AUTORIZADO)

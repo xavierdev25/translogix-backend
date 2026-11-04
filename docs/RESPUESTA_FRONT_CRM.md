@@ -13,7 +13,7 @@ y en el cambio de contrato [CR-007](contract-change-requests.md).
   | 1.4.0 | Usuarios internos con roles `ASESOR` y `SUPERVISOR` |
   | 1.5.0 | Cotización por perfiles tarifarios con IVA |
 
-- La solicitud quedó registrada como **CR-007 (PROPUESTA)**: contrato **1.8.0** y migración **0006**.
+- La solicitud quedó registrada como **CR-007 (PROPUESTA)**: contrato **2.1.0** y migración **0008**.
   La 1.7.0 trajo el RBAC (CR-009): los roles internos son ahora `ADMIN` y `REVIEWER`, no ASESOR y
   SUPERVISOR. Ver [`RBAC.md`](RBAC.md).
   La 1.6.0 la tomó CR-008 (endurecimiento de la auditoría): añade el error 413

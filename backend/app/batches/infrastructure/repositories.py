@@ -11,7 +11,7 @@ from app.batches.infrastructure.tables import ShipmentBatchItemRow, ShipmentBatc
 from app.contracts.shipment_batches import BatchItemStatus, BatchStatus, ItemError
 from app.shipments.infrastructure.tables import ShipmentRow
 
-ResultRow = tuple[ShipmentBatchItemRow, str | None, int | None, str | None]
+ResultRow = tuple[ShipmentBatchItemRow, str | None, int | None, str | None, str | None]
 
 
 class BatchRepository:
@@ -192,6 +192,7 @@ class BatchRepository:
                 ShipmentRow.numero_guia,
                 ShipmentRow.flete_total_cop,
                 ShipmentRow.formula_version,
+                ShipmentRow.review_status,
             )
             .outerjoin(ShipmentRow, ShipmentRow.id == ShipmentBatchItemRow.shipment_id)
             .where(
@@ -205,4 +206,7 @@ class BatchRepository:
         if limit is not None:
             query = query.limit(limit)
         rows = await self._session.execute(query)
-        return [(item, guia, flete, formula) for item, guia, flete, formula in rows.tuples()]
+        return [
+            (item, guia, flete, formula, review)
+            for item, guia, flete, formula, review in rows.tuples()
+        ]

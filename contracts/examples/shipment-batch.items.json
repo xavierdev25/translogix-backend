@@ -12,7 +12,8 @@
           "code": "TARIFA_NO_DISPONIBLE",
           "field": "destino"
         }
-      ]
+      ],
+      "estado_revision": null
     },
     {
       "linea": 3,
@@ -26,7 +27,8 @@
           "code": "REFERENCIA_DUPLICADA",
           "field": "referencia_cliente"
         }
-      ]
+      ],
+      "estado_revision": null
     }
   ],
   "next_cursor": null

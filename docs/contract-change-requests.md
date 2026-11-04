@@ -380,7 +380,8 @@ Códigos de error nuevos que comparten:
   `asesor-backend-faltantes.md`. La reconciliación con el backend está en
   [`REVISION_SOLICITUD_ASESOR.md`](REVISION_SOLICITUD_ASESOR.md).
 - **Fecha:** 2026-11-04
-- **Versión destino:** contrato **1.8.0** y migración **0006** (`down_revision="0005"`), en dos entregas.
+- **Versión destino:** contrato **2.1.0** y migración **0008** (`down_revision="0007"`), en dos entregas.
+  Re-asignada otra vez: 2.0.0 la tomó CR-010 (remediación prioritaria).
   Re-asignada dos veces: 1.6.0 la tomó CR-008 y 1.7.0/0005, CR-009 (RBAC). Los roles del CRM pasan a ser
   ADMIN y REVIEWER.
   (P0a y P0b). P1 va en otro CR.
@@ -536,4 +537,25 @@ Códigos de error nuevos que comparten:
   - token de personal en `POST /shipment-batches` → 403 (antes 401).
 - **Versión:** contrato **1.7.0**, migración **0005**.
 - **Estado:** IMPLEMENTADA
+
+### CR-010 — Remediación prioritaria: SEC-01, SEC-06, PII-01, BIZ-01, CAP-01, OPS-01 y LLM-01
+
+- **Solicitante:** equipo (remediación prioritaria del backend), 2026-11-04.
+- **Qué cambia:** ver CHANGELOG 2.0.0 y DECISIONS §10.
+  - Historial y adjuntos ligados al dueño (`X-Client-Id`).
+  - Estado de revisión de la mercancía peligrosa.
+  - `SERVICIO_SATURADO`.
+  - Cifrado de la PII en reposo.
+  - *Rate limit* compartido.
+  - Reintento acotado de Ollama.
+  - Migraciones 0006 (revisión y *rate limit*) y 0007 (cifrado, reversible con la clave).
+- **Compatibilidad:** **MAJOR**. `GET /chat/sessions/{id}/history` y `POST /attachments` exigen
+  `X-Client-Id`, y los adjuntos además `session_id`. Lo demás es aditivo. Guía:
+  [`FRONTEND_CAMBIOS_2_0_0.md`](FRONTEND_CAMBIOS_2_0_0.md).
+- **Coordinación:**
+  - CR-008 (1.6.0) ya está implementada.
+  - CR-007 pasa a 2.1.0 / 0008.
+- **Versión:** contrato **2.0.0**, migraciones **0006** y **0007**.
+- **Estado:** IMPLEMENTADA en el código. El despliegue en `:8000` está pendiente de aviso al front y de
+  la clave del entorno.
 

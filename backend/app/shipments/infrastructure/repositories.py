@@ -5,7 +5,12 @@ from sqlalchemy import exists, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.repositories import QuoteRepository
-from app.shipments.domain.models import ShipmentDraft, ShipmentStatus, format_guia
+from app.shipments.domain.models import (
+    ShipmentDraft,
+    ShipmentStatus,
+    format_guia,
+    initial_review_status,
+)
 from app.shipments.infrastructure.tables import (
     GUIDE_SEQUENCE,
     ShipmentRecipientRow,
@@ -62,6 +67,7 @@ class ShipmentRepository:
                 valor_declarado_cop=draft.request.valor_declarado_cop,
                 requiere_cadena_frio=draft.request.requiere_cadena_frio,
                 mercancia_peligrosa=draft.request.mercancia_peligrosa,
+                review_status=initial_review_status(draft.request.mercancia_peligrosa).value,
                 cotizacion_id=draft.quote.cotizacion_id,
                 flete_total_cop=calc.flete_total_cop,
                 formula_version=draft.quote.formula_version,
@@ -127,5 +133,10 @@ class ShipmentReviewRepository:
         return row
 
     async def add(self, review: ShipmentReviewRow) -> None:
+        """Records the REVIEWER's decision and moves the shipment out of PENDIENTE in the same
+        transaction. It is the only writer of ``review_status`` after creation (BIZ-01)."""
         self._session.add(review)
+        await self._session.flush()
+        shipment = await self._session.get_one(ShipmentRow, review.shipment_id)
+        shipment.review_status = review.decision  # APROBADA | RECHAZADA
         await self._session.flush()

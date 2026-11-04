@@ -86,6 +86,15 @@ class ItemError(ContractModel):
     field: str | None = Field(examples=["destino"])
 
 
+class ReviewStatus(StrEnum):
+    """2.0.0 (CR-010, BIZ-01): specialised review of a shipment."""
+
+    NO_REQUERIDA = "NO_REQUERIDA"
+    PENDIENTE = "PENDIENTE"  # dangerous goods waiting for a REVIEWER: cannot advance
+    APROBADA = "APROBADA"
+    RECHAZADA = "RECHAZADA"
+
+
 class ShipmentBatchItemResult(ContractModel):
     linea: int = Field(ge=1, description="Posición del envío en `envios`, desde 1.")
     referencia_cliente: str | None = Field(description="null si el ítem no la traía válida.")
@@ -96,6 +105,13 @@ class ShipmentBatchItemResult(ContractModel):
         description="`provisional-v1`: no es una tarifa comercial oficial."
     )
     errores: list[ItemError]
+    estado_revision: ReviewStatus | None = Field(
+        default=None,
+        description=(
+            "2.0.0: solo si status=CREATED. `PENDIENTE` = mercancía peligrosa a la espera de "
+            "un REVIEWER; el envío no avanza hasta que se apruebe."
+        ),
+    )
 
 
 class ShipmentBatchSummary(ContractModel):

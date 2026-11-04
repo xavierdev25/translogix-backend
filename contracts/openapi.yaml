@@ -22,7 +22,7 @@ info:
     * Todo error usa el sobre `ErrorEnvelope` con un `code` estable (`x-error-codes` por respuesta).
 
     '
-  version: 1.7.0
+  version: 2.0.0
 paths:
   /api/v1/tracking/{guia}:
     get:
@@ -335,6 +335,26 @@ paths:
           headers:
             X-Request-ID:
               $ref: '#/components/headers/XRequestId'
+        '503':
+          description: 'Códigos: SERVICIO_SATURADO'
+          x-error-codes:
+          - SERVICIO_SATURADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                SERVICIO_SATURADO:
+                  value:
+                    error:
+                      code: SERVICIO_SATURADO
+                      message: El servicio está saturado en este momento. Intenta de nuevo en unos segundos.
+                      details:
+                        reintentar_en_segundos: 5
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
       x-priority: P0
   /api/v1/cotizar:
     post:
@@ -597,6 +617,26 @@ paths:
           headers:
             X-Request-ID:
               $ref: '#/components/headers/XRequestId'
+        '503':
+          description: 'Códigos: SERVICIO_SATURADO'
+          x-error-codes:
+          - SERVICIO_SATURADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                SERVICIO_SATURADO:
+                  value:
+                    error:
+                      code: SERVICIO_SATURADO
+                      message: El servicio está saturado en este momento. Intenta de nuevo en unos segundos.
+                      details:
+                        reintentar_en_segundos: 5
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
       x-priority: P0
       parameters:
       - $ref: '#/components/parameters/XRequestId'
@@ -759,9 +799,10 @@ paths:
             X-Request-ID:
               $ref: '#/components/headers/XRequestId'
         '503':
-          description: 'Códigos: NO_CONFIGURADO'
+          description: 'Códigos: NO_CONFIGURADO, SERVICIO_SATURADO'
           x-error-codes:
           - NO_CONFIGURADO
+          - SERVICIO_SATURADO
           content:
             application/json:
               schema:
@@ -774,6 +815,14 @@ paths:
                       message: Esta función no está configurada en este entorno.
                       details:
                         funcion: ASR
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+                SERVICIO_SATURADO:
+                  value:
+                    error:
+                      code: SERVICIO_SATURADO
+                      message: El servicio está saturado en este momento. Intenta de nuevo en unos segundos.
+                      details:
+                        reintentar_en_segundos: 5
                       request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
           headers:
             X-Request-ID:
@@ -1002,6 +1051,26 @@ paths:
           headers:
             X-Request-ID:
               $ref: '#/components/headers/XRequestId'
+        '503':
+          description: 'Códigos: SERVICIO_SATURADO'
+          x-error-codes:
+          - SERVICIO_SATURADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                SERVICIO_SATURADO:
+                  value:
+                    error:
+                      code: SERVICIO_SATURADO
+                      message: El servicio está saturado en este momento. Intenta de nuevo en unos segundos.
+                      details:
+                        reintentar_en_segundos: 5
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
       x-priority: P0
       parameters:
       - $ref: '#/components/parameters/XRequestId'
@@ -1010,8 +1079,10 @@ paths:
       tags:
       - adjuntos
       summary: Sube un adjunto (PDF o JPG) y devuelve su attachment_id
-      description: Tipo validado por contenido; límite de tamaño configurable; el nombre de archivo del
-        cliente no se conserva y el contenido no se registra en logs.
+      description: '2.0.0: exige `X-Client-Id` y el `session_id` de una conversación de web chat de ese
+        mismo usuario; si no, 404 (sin oráculo). Tipo validado por contenido (PDF completo o JPG); límite
+        de tamaño y de frecuencia por usuario. El nombre de archivo del cliente no se conserva y el contenido
+        no se registra en logs.'
       operationId: uploadAttachment
       requestBody:
         content:
@@ -1036,6 +1107,25 @@ paths:
                     size_bytes: 184233
                     declared_doc_code: FACTURA_COMERCIAL
                     sha256: 3a7bd3e2360a3d29eea436fcfb7e44c735d117c42d1c1835420b6b9942dd4f1b
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '401':
+          description: 'Códigos: NO_AUTENTICADO'
+          x-error-codes:
+          - NO_AUTENTICADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                NO_AUTENTICADO:
+                  value:
+                    error:
+                      code: NO_AUTENTICADO
+                      message: Falta la credencial de acceso o no es válida.
+                      details: {}
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
           headers:
             X-Request-ID:
               $ref: '#/components/headers/XRequestId'
@@ -1103,6 +1193,27 @@ paths:
           headers:
             X-Request-ID:
               $ref: '#/components/headers/XRequestId'
+        '429':
+          description: 'Códigos: LIMITE_DE_TASA'
+          x-error-codes:
+          - LIMITE_DE_TASA
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                LIMITE_DE_TASA:
+                  value:
+                    error:
+                      code: LIMITE_DE_TASA
+                      message: Recibimos demasiadas solicitudes seguidas. Espera un momento e intenta
+                        de nuevo.
+                      details:
+                        reintentar_en_segundos: 30
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
         '500':
           description: 'Códigos: ERROR_INTERNO'
           x-error-codes:
@@ -1122,6 +1233,28 @@ paths:
           headers:
             X-Request-ID:
               $ref: '#/components/headers/XRequestId'
+        '503':
+          description: 'Códigos: SERVICIO_SATURADO'
+          x-error-codes:
+          - SERVICIO_SATURADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                SERVICIO_SATURADO:
+                  value:
+                    error:
+                      code: SERVICIO_SATURADO
+                      message: El servicio está saturado en este momento. Intenta de nuevo en unos segundos.
+                      details:
+                        reintentar_en_segundos: 5
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+      security:
+      - ClientId: []
       x-priority: P1
       parameters:
       - $ref: '#/components/parameters/XRequestId'
@@ -2171,6 +2304,26 @@ paths:
           headers:
             X-Request-ID:
               $ref: '#/components/headers/XRequestId'
+        '503':
+          description: 'Códigos: SERVICIO_SATURADO'
+          x-error-codes:
+          - SERVICIO_SATURADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                SERVICIO_SATURADO:
+                  value:
+                    error:
+                      code: SERVICIO_SATURADO
+                      message: El servicio está saturado en este momento. Intenta de nuevo en unos segundos.
+                      details:
+                        reintentar_en_segundos: 5
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
       x-priority: P0
       parameters:
       - $ref: '#/components/parameters/XRequestId'
@@ -2179,7 +2332,14 @@ paths:
       tags:
       - web chat
       summary: Historial de una sesión
+      description: '2.0.0 (SEC-01): el dueño con `X-Client-Id`; un ADMIN (cualquier sesión) o un REVIEWER
+        (sesiones con un caso en su bandeja) con su token. Sin credencial, 401. Una sesión ajena o inexistente,
+        404 (sin oráculo).'
       operationId: getSessionHistory
+      security:
+      - ClientId: []
+      - StaffToken: []
+      - AdminToken: []
       parameters:
       - $ref: '#/components/parameters/XRequestId'
       - name: session_id
@@ -2256,6 +2416,44 @@ paths:
           headers:
             X-Request-ID:
               $ref: '#/components/headers/XRequestId'
+        '401':
+          description: 'Códigos: NO_AUTENTICADO'
+          x-error-codes:
+          - NO_AUTENTICADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                NO_AUTENTICADO:
+                  value:
+                    error:
+                      code: NO_AUTENTICADO
+                      message: Falta la credencial de acceso o no es válida.
+                      details: {}
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '403':
+          description: 'Códigos: NO_AUTORIZADO'
+          x-error-codes:
+          - NO_AUTORIZADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                NO_AUTORIZADO:
+                  value:
+                    error:
+                      code: NO_AUTORIZADO
+                      message: No tienes autorización para realizar esta operación.
+                      details: {}
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
         '404':
           description: 'Códigos: NO_ENCONTRADO'
           x-error-codes:
@@ -2315,6 +2513,26 @@ paths:
                       code: ERROR_INTERNO
                       message: Ocurrió un error inesperado. Intenta de nuevo más tarde.
                       details: {}
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '503':
+          description: 'Códigos: SERVICIO_SATURADO'
+          x-error-codes:
+          - SERVICIO_SATURADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                SERVICIO_SATURADO:
+                  value:
+                    error:
+                      code: SERVICIO_SATURADO
+                      message: El servicio está saturado en este momento. Intenta de nuevo en unos segundos.
+                      details:
+                        reintentar_en_segundos: 5
                       request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
           headers:
             X-Request-ID:
@@ -2420,6 +2638,26 @@ paths:
                       code: ERROR_INTERNO
                       message: Ocurrió un error inesperado. Intenta de nuevo más tarde.
                       details: {}
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '503':
+          description: 'Códigos: SERVICIO_SATURADO'
+          x-error-codes:
+          - SERVICIO_SATURADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                SERVICIO_SATURADO:
+                  value:
+                    error:
+                      code: SERVICIO_SATURADO
+                      message: El servicio está saturado en este momento. Intenta de nuevo en unos segundos.
+                      details:
+                        reintentar_en_segundos: 5
                       request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
           headers:
             X-Request-ID:
@@ -2567,6 +2805,26 @@ paths:
                       code: ERROR_INTERNO
                       message: Ocurrió un error inesperado. Intenta de nuevo más tarde.
                       details: {}
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '503':
+          description: 'Códigos: SERVICIO_SATURADO'
+          x-error-codes:
+          - SERVICIO_SATURADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                SERVICIO_SATURADO:
+                  value:
+                    error:
+                      code: SERVICIO_SATURADO
+                      message: El servicio está saturado en este momento. Intenta de nuevo en unos segundos.
+                      details:
+                        reintentar_en_segundos: 5
                       request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
           headers:
             X-Request-ID:
@@ -2920,6 +3178,26 @@ paths:
           headers:
             X-Request-ID:
               $ref: '#/components/headers/XRequestId'
+        '503':
+          description: 'Códigos: SERVICIO_SATURADO'
+          x-error-codes:
+          - SERVICIO_SATURADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                SERVICIO_SATURADO:
+                  value:
+                    error:
+                      code: SERVICIO_SATURADO
+                      message: El servicio está saturado en este momento. Intenta de nuevo en unos segundos.
+                      details:
+                        reintentar_en_segundos: 5
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
       x-priority: P1
       parameters:
       - $ref: '#/components/parameters/XRequestId'
@@ -3103,9 +3381,10 @@ paths:
             X-Request-ID:
               $ref: '#/components/headers/XRequestId'
         '503':
-          description: 'Códigos: NO_CONFIGURADO'
+          description: 'Códigos: NO_CONFIGURADO, SERVICIO_SATURADO'
           x-error-codes:
           - NO_CONFIGURADO
+          - SERVICIO_SATURADO
           content:
             application/json:
               schema:
@@ -3118,6 +3397,14 @@ paths:
                       message: Esta función no está configurada en este entorno.
                       details:
                         funcion: ASR
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+                SERVICIO_SATURADO:
+                  value:
+                    error:
+                      code: SERVICIO_SATURADO
+                      message: El servicio está saturado en este momento. Intenta de nuevo en unos segundos.
+                      details:
+                        reintentar_en_segundos: 5
                       request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
           headers:
             X-Request-ID:
@@ -3296,6 +3583,26 @@ paths:
           headers:
             X-Request-ID:
               $ref: '#/components/headers/XRequestId'
+        '503':
+          description: 'Códigos: SERVICIO_SATURADO'
+          x-error-codes:
+          - SERVICIO_SATURADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                SERVICIO_SATURADO:
+                  value:
+                    error:
+                      code: SERVICIO_SATURADO
+                      message: El servicio está saturado en este momento. Intenta de nuevo en unos segundos.
+                      details:
+                        reintentar_en_segundos: 5
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
       x-priority: P1
       parameters:
       - $ref: '#/components/parameters/XRequestId'
@@ -3462,6 +3769,26 @@ paths:
                       code: ERROR_INTERNO
                       message: Ocurrió un error inesperado. Intenta de nuevo más tarde.
                       details: {}
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '503':
+          description: 'Códigos: SERVICIO_SATURADO'
+          x-error-codes:
+          - SERVICIO_SATURADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                SERVICIO_SATURADO:
+                  value:
+                    error:
+                      code: SERVICIO_SATURADO
+                      message: El servicio está saturado en este momento. Intenta de nuevo en unos segundos.
+                      details:
+                        reintentar_en_segundos: 5
                       request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
           headers:
             X-Request-ID:
@@ -3664,6 +3991,26 @@ paths:
           headers:
             X-Request-ID:
               $ref: '#/components/headers/XRequestId'
+        '503':
+          description: 'Códigos: SERVICIO_SATURADO'
+          x-error-codes:
+          - SERVICIO_SATURADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                SERVICIO_SATURADO:
+                  value:
+                    error:
+                      code: SERVICIO_SATURADO
+                      message: El servicio está saturado en este momento. Intenta de nuevo en unos segundos.
+                      details:
+                        reintentar_en_segundos: 5
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
       x-priority: P1
   /api/v1/handoffs:
     get:
@@ -3798,6 +4145,26 @@ paths:
           headers:
             X-Request-ID:
               $ref: '#/components/headers/XRequestId'
+        '503':
+          description: 'Códigos: SERVICIO_SATURADO'
+          x-error-codes:
+          - SERVICIO_SATURADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                SERVICIO_SATURADO:
+                  value:
+                    error:
+                      code: SERVICIO_SATURADO
+                      message: El servicio está saturado en este momento. Intenta de nuevo en unos segundos.
+                      details:
+                        reintentar_en_segundos: 5
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
       x-priority: P1
   /api/v1/shipment-batches:
     post:
@@ -3914,6 +4281,7 @@ paths:
                       flete_total_cop: 21000
                       formula_version: provisional-v1
                       errores: []
+                      estado_revision: NO_REQUERIDA
                     - linea: 2
                       referencia_cliente: PEDIDO-1002
                       status: REJECTED
@@ -3923,6 +4291,7 @@ paths:
                       errores:
                       - code: TARIFA_NO_DISPONIBLE
                         field: destino
+                      estado_revision: null
                     - linea: 3
                       referencia_cliente: PEDIDO-1001
                       status: REJECTED
@@ -3932,6 +4301,7 @@ paths:
                       errores:
                       - code: REFERENCIA_DUPLICADA
                         field: referencia_cliente
+                      estado_revision: null
           headers:
             X-Request-ID:
               $ref: '#/components/headers/XRequestId'
@@ -4088,6 +4458,26 @@ paths:
           headers:
             X-Request-ID:
               $ref: '#/components/headers/XRequestId'
+        '503':
+          description: 'Códigos: SERVICIO_SATURADO'
+          x-error-codes:
+          - SERVICIO_SATURADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                SERVICIO_SATURADO:
+                  value:
+                    error:
+                      code: SERVICIO_SATURADO
+                      message: El servicio está saturado en este momento. Intenta de nuevo en unos segundos.
+                      details:
+                        reintentar_en_segundos: 5
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
       x-priority: P0
   /api/v1/shipment-batches/{batch_id}:
     get:
@@ -4235,6 +4625,26 @@ paths:
           headers:
             X-Request-ID:
               $ref: '#/components/headers/XRequestId'
+        '503':
+          description: 'Códigos: SERVICIO_SATURADO'
+          x-error-codes:
+          - SERVICIO_SATURADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                SERVICIO_SATURADO:
+                  value:
+                    error:
+                      code: SERVICIO_SATURADO
+                      message: El servicio está saturado en este momento. Intenta de nuevo en unos segundos.
+                      details:
+                        reintentar_en_segundos: 5
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
       x-priority: P0
   /api/v1/shipment-batches/{batch_id}/items:
     get:
@@ -4304,6 +4714,7 @@ paths:
                       errores:
                       - code: TARIFA_NO_DISPONIBLE
                         field: destino
+                      estado_revision: null
                     - linea: 3
                       referencia_cliente: PEDIDO-1001
                       status: REJECTED
@@ -4313,6 +4724,7 @@ paths:
                       errores:
                       - code: REFERENCIA_DUPLICADA
                         field: referencia_cliente
+                      estado_revision: null
                     next_cursor: null
           headers:
             X-Request-ID:
@@ -4418,6 +4830,26 @@ paths:
           headers:
             X-Request-ID:
               $ref: '#/components/headers/XRequestId'
+        '503':
+          description: 'Códigos: SERVICIO_SATURADO'
+          x-error-codes:
+          - SERVICIO_SATURADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                SERVICIO_SATURADO:
+                  value:
+                    error:
+                      code: SERVICIO_SATURADO
+                      message: El servicio está saturado en este momento. Intenta de nuevo en unos segundos.
+                      details:
+                        reintentar_en_segundos: 5
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
       x-priority: P0
   /api/v1/metrics/channels:
     get:
@@ -4518,6 +4950,26 @@ paths:
                       code: ERROR_INTERNO
                       message: Ocurrió un error inesperado. Intenta de nuevo más tarde.
                       details: {}
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '503':
+          description: 'Códigos: SERVICIO_SATURADO'
+          x-error-codes:
+          - SERVICIO_SATURADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                SERVICIO_SATURADO:
+                  value:
+                    error:
+                      code: SERVICIO_SATURADO
+                      message: El servicio está saturado en este momento. Intenta de nuevo en unos segundos.
+                      details:
+                        reintentar_en_segundos: 5
                       request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
           headers:
             X-Request-ID:
@@ -4667,9 +5119,10 @@ paths:
             X-Request-ID:
               $ref: '#/components/headers/XRequestId'
         '503':
-          description: 'Códigos: LLM_NO_DISPONIBLE'
+          description: 'Códigos: LLM_NO_DISPONIBLE, SERVICIO_SATURADO'
           x-error-codes:
           - LLM_NO_DISPONIBLE
+          - SERVICIO_SATURADO
           content:
             application/json:
               schema:
@@ -4682,6 +5135,14 @@ paths:
                       message: El asistente no está disponible en este momento. Intenta de nuevo en unos
                         minutos.
                       details: {}
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+                SERVICIO_SATURADO:
+                  value:
+                    error:
+                      code: SERVICIO_SATURADO
+                      message: El servicio está saturado en este momento. Intenta de nuevo en unos segundos.
+                      details:
+                        reintentar_en_segundos: 5
                       request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
           headers:
             X-Request-ID:
@@ -4772,6 +5233,26 @@ paths:
                       code: ERROR_INTERNO
                       message: Ocurrió un error inesperado. Intenta de nuevo más tarde.
                       details: {}
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '503':
+          description: 'Códigos: SERVICIO_SATURADO'
+          x-error-codes:
+          - SERVICIO_SATURADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                SERVICIO_SATURADO:
+                  value:
+                    error:
+                      code: SERVICIO_SATURADO
+                      message: El servicio está saturado en este momento. Intenta de nuevo en unos segundos.
+                      details:
+                        reintentar_en_segundos: 5
                       request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
           headers:
             X-Request-ID:
@@ -4924,6 +5405,26 @@ paths:
                       code: ERROR_INTERNO
                       message: Ocurrió un error inesperado. Intenta de nuevo más tarde.
                       details: {}
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '503':
+          description: 'Códigos: SERVICIO_SATURADO'
+          x-error-codes:
+          - SERVICIO_SATURADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                SERVICIO_SATURADO:
+                  value:
+                    error:
+                      code: SERVICIO_SATURADO
+                      message: El servicio está saturado en este momento. Intenta de nuevo en unos segundos.
+                      details:
+                        reintentar_en_segundos: 5
                       request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
           headers:
             X-Request-ID:
@@ -5109,6 +5610,26 @@ paths:
           headers:
             X-Request-ID:
               $ref: '#/components/headers/XRequestId'
+        '503':
+          description: 'Códigos: SERVICIO_SATURADO'
+          x-error-codes:
+          - SERVICIO_SATURADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                SERVICIO_SATURADO:
+                  value:
+                    error:
+                      code: SERVICIO_SATURADO
+                      message: El servicio está saturado en este momento. Intenta de nuevo en unos segundos.
+                      details:
+                        reintentar_en_segundos: 5
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
       x-priority: P1
   /api/v1/internal/audit-events:
     get:
@@ -5245,6 +5766,26 @@ paths:
           headers:
             X-Request-ID:
               $ref: '#/components/headers/XRequestId'
+        '503':
+          description: 'Códigos: SERVICIO_SATURADO'
+          x-error-codes:
+          - SERVICIO_SATURADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                SERVICIO_SATURADO:
+                  value:
+                    error:
+                      code: SERVICIO_SATURADO
+                      message: El servicio está saturado en este momento. Intenta de nuevo en unos segundos.
+                      details:
+                        reintentar_en_segundos: 5
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
       x-priority: P1
   /api/v1/internal/dangerous-goods:
     get:
@@ -5376,6 +5917,26 @@ paths:
                       code: ERROR_INTERNO
                       message: Ocurrió un error inesperado. Intenta de nuevo más tarde.
                       details: {}
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '503':
+          description: 'Códigos: SERVICIO_SATURADO'
+          x-error-codes:
+          - SERVICIO_SATURADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                SERVICIO_SATURADO:
+                  value:
+                    error:
+                      code: SERVICIO_SATURADO
+                      message: El servicio está saturado en este momento. Intenta de nuevo en unos segundos.
+                      details:
+                        reintentar_en_segundos: 5
                       request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
           headers:
             X-Request-ID:
@@ -5552,6 +6113,26 @@ paths:
           headers:
             X-Request-ID:
               $ref: '#/components/headers/XRequestId'
+        '503':
+          description: 'Códigos: SERVICIO_SATURADO'
+          x-error-codes:
+          - SERVICIO_SATURADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                SERVICIO_SATURADO:
+                  value:
+                    error:
+                      code: SERVICIO_SATURADO
+                      message: El servicio está saturado en este momento. Intenta de nuevo en unos segundos.
+                      details:
+                        reintentar_en_segundos: 5
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
       x-priority: P1
   /health:
     get:
@@ -5641,12 +6222,22 @@ paths:
             X-Request-ID:
               $ref: '#/components/headers/XRequestId'
         '503':
-          description: Alguna dependencia no está lista
+          description: 'Códigos: SERVICIO_SATURADO'
+          x-error-codes:
+          - SERVICIO_SATURADO
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ReadinessResponse'
+                $ref: '#/components/schemas/ErrorEnvelope'
               examples:
+                SERVICIO_SATURADO:
+                  value:
+                    error:
+                      code: SERVICIO_SATURADO
+                      message: El servicio está saturado en este momento. Intenta de nuevo en unos segundos.
+                      details:
+                        reintentar_en_segundos: 5
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
                 ready.sin-ollama:
                   summary: 'S17 · Ollama caído: no listo'
                   value:
@@ -5827,19 +6418,19 @@ components:
           contentMediaType: application/octet-stream
           title: File
           description: PDF o JPG.
+        session_id:
+          type: string
+          format: uuid
+          title: Session Id
+          description: Conversación del mismo usuario (2.0.0).
         declared_doc_code:
           anyOf:
           - $ref: '#/components/schemas/DocumentoCodigo'
           - type: 'null'
-        session_id:
-          anyOf:
-          - type: string
-            format: uuid
-          - type: 'null'
-          title: Session Id
       type: object
       required:
       - file
+      - session_id
       title: Body_uploadAttachment
     CalculoFlete:
       properties:
@@ -6806,6 +7397,7 @@ components:
       - TARIFA_NO_DISPONIBLE
       - ARCHIVO_INVALIDO
       - CUERPO_DEMASIADO_GRANDE
+      - SERVICIO_SATURADO
       title: ErrorCode
     EscalationAction:
       type: string
@@ -7956,6 +8548,15 @@ components:
       - APROBADA
       - RECHAZADA
       title: ReviewDecision
+    ReviewStatus:
+      type: string
+      enum:
+      - NO_REQUERIDA
+      - PENDIENTE
+      - APROBADA
+      - RECHAZADA
+      title: ReviewStatus
+      description: '2.0.0 (CR-010, BIZ-01): specialised review of a shipment.'
     Role:
       type: string
       enum:
@@ -8066,6 +8667,12 @@ components:
             $ref: '#/components/schemas/ItemError'
           type: array
           title: Errores
+        estado_revision:
+          anyOf:
+          - $ref: '#/components/schemas/ReviewStatus'
+          - type: 'null'
+          description: '2.0.0: solo si status=CREATED. `PENDIENTE` = mercancía peligrosa a la espera de
+            un REVIEWER; el envío no avanza hasta que se apruebe.'
       additionalProperties: false
       type: object
       required:
@@ -8076,6 +8683,7 @@ components:
       - flete_total_cop
       - formula_version
       - errores
+      - estado_revision
       title: ShipmentBatchItemResult
     ShipmentBatchItemsPage:
       properties:
@@ -9575,15 +10183,20 @@ components:
           message: '#/components/schemas/WsMessageEvent'
           handoff_status: '#/components/schemas/WsHandoffStatusEvent'
   securitySchemes:
+    ClientId:
+      type: apiKey
+      description: UUID estable del navegador (el mismo `client_id` de `POST /chat/messages`).
+      in: header
+      name: X-Client-Id
+    StaffToken:
+      type: http
+      description: 'Token personal de un usuario interno: `Authorization: Bearer <tlxs_…>`.'
+      scheme: bearer
     AdminToken:
       type: apiKey
       description: Token de administración definido en `ADMIN_TOKEN` (entorno).
       in: header
       name: X-Admin-Token
-    StaffToken:
-      type: http
-      description: 'Token personal de un usuario interno: `Authorization: Bearer <tlxs_…>`.'
-      scheme: bearer
     ApiKey:
       type: http
       description: 'API key de un cliente empresarial: `Authorization: Bearer <api_key>`.'

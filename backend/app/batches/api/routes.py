@@ -112,7 +112,7 @@ async def create_shipment_batch(
     context = principal.client_context()
     status, batch_id = 500, None
     try:
-        box.batch_limiter.check(f"batches:{context.client_id}")
+        await box.batch_limiter.check(f"batches:{context.client_id}")
         raw = await _read_body(request, box.settings.batch_max_body_bytes)
         try:
             envelope = _Envelope.model_validate(json.loads(raw))

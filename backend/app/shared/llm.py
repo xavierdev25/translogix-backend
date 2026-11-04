@@ -20,19 +20,43 @@ logger = logging.getLogger("app.llm")
 _THINK = re.compile(r"<think>.*?</think>", re.DOTALL)
 
 
+CONNECT_RETRY_DELAY_SECONDS = 0.25
+
+
 class _OllamaClient:
-    def __init__(self, base_url: str, timeout_seconds: float) -> None:
-        self._client = httpx.AsyncClient(base_url=base_url.rstrip("/"), timeout=timeout_seconds)
+    """2.0.0 (LLM-01): exactly one retry, only when the connection could not be opened
+    (``ConnectError``: Ollama restarting, socket refused). Never on a timeout or an HTTP error:
+    that request may still be running in Ollama, and repeating it would double the load. The
+    caller already holds its admission slot, so the retry adds no concurrent request."""
+
+    def __init__(
+        self,
+        base_url: str,
+        timeout_seconds: float,
+        *,
+        transport: httpx.AsyncBaseTransport | None = None,
+    ) -> None:
+        self._client = httpx.AsyncClient(
+            base_url=base_url.rstrip("/"), timeout=timeout_seconds, transport=transport
+        )
 
     async def post(self, path: str, body: dict[str, Any]) -> dict[str, Any]:
-        try:
-            response = await self._client.post(path, json=body)
-            response.raise_for_status()
-            data: dict[str, Any] = response.json()
-        except (httpx.HTTPError, ValueError) as error:
-            logger.warning("ollama %s failed: %s", path, type(error).__name__)
-            raise ContractError(ErrorCode.LLM_NO_DISPONIBLE) from error
-        return data
+        for attempt in (1, 2):
+            try:
+                response = await self._client.post(path, json=body)
+                response.raise_for_status()
+                data: dict[str, Any] = response.json()
+            except httpx.ConnectError as error:
+                if attempt == 1:
+                    await asyncio.sleep(CONNECT_RETRY_DELAY_SECONDS)
+                    continue
+                logger.warning("ollama %s failed after retry: %s", path, type(error).__name__)
+                raise ContractError(ErrorCode.LLM_NO_DISPONIBLE) from error
+            except (httpx.HTTPError, ValueError) as error:
+                logger.warning("ollama %s failed: %s", path, type(error).__name__)
+                raise ContractError(ErrorCode.LLM_NO_DISPONIBLE) from error
+            return data
+        raise AssertionError("unreachable")  # pragma: no cover
 
     async def ping(self) -> bool:
         try:
@@ -86,8 +110,9 @@ class OllamaChat:
         *,
         max_inflight: int = 4,
         max_queue: int = 8,
+        transport: httpx.AsyncBaseTransport | None = None,
     ) -> None:
-        self._http = _OllamaClient(base_url, timeout_seconds)
+        self._http = _OllamaClient(base_url, timeout_seconds, transport=transport)
         self._admission = Admission(max_inflight, max_queue)
         self.model = model
 
@@ -127,8 +152,16 @@ class OllamaChat:
 class OllamaEmbedding:
     """``EmbeddingPort``. Refuses vectors whose size differs from ``EMBED_DIM``."""
 
-    def __init__(self, base_url: str, model: str, dimension: int, timeout_seconds: float) -> None:
-        self._http = _OllamaClient(base_url, timeout_seconds)
+    def __init__(
+        self,
+        base_url: str,
+        model: str,
+        dimension: int,
+        timeout_seconds: float,
+        *,
+        transport: httpx.AsyncBaseTransport | None = None,
+    ) -> None:
+        self._http = _OllamaClient(base_url, timeout_seconds, transport=transport)
         self.model = model
         self.dimension = dimension
 

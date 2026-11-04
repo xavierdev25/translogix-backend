@@ -298,6 +298,10 @@ class AttachmentService:
                 details={"max_bytes": self._max},
             )
         if data.startswith(_PDF):
+            # 2.0.0 (SEC-06): a PDF must also end like one (``%%EOF`` near the end); a header
+            # glued to anything else is rejected.
+            if b"%%EOF" not in data[-1024:]:
+                raise ContractError(ErrorCode.VALIDACION, "El PDF está incompleto o dañado.")
             mime, kind, extension = "application/pdf", "DOCUMENT", "pdf"
         elif data.startswith(_JPEG):
             mime, kind, extension = "image/jpeg", "IMAGE", "jpg"

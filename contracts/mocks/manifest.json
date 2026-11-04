@@ -1,5 +1,5 @@
 {
-  "contract_version": "1.7.0",
+  "contract_version": "2.0.0",
   "match_semantics": {
     "path": "valores exactos de parámetros de ruta",
     "body": "subconjunto exacto del cuerpo JSON de la petición",
@@ -101,6 +101,11 @@
           "status": 500,
           "code": "ERROR_INTERNO",
           "example": "examples/error.error-interno.json"
+        },
+        {
+          "status": 503,
+          "code": "SERVICIO_SATURADO",
+          "example": "examples/error.servicio-saturado.json"
         }
       ]
     },
@@ -214,6 +219,11 @@
           "status": 500,
           "code": "ERROR_INTERNO",
           "example": "examples/error.error-interno.json"
+        },
+        {
+          "status": 503,
+          "code": "SERVICIO_SATURADO",
+          "example": "examples/error.servicio-saturado.json"
         }
       ]
     },
@@ -272,6 +282,11 @@
           "status": 503,
           "code": "NO_CONFIGURADO",
           "example": "examples/error.no-configurado.json"
+        },
+        {
+          "status": 503,
+          "code": "SERVICIO_SATURADO",
+          "example": "examples/error.servicio-saturado.json"
         }
       ]
     },
@@ -340,6 +355,11 @@
           "status": 500,
           "code": "ERROR_INTERNO",
           "example": "examples/error.error-interno.json"
+        },
+        {
+          "status": 503,
+          "code": "SERVICIO_SATURADO",
+          "example": "examples/error.servicio-saturado.json"
         }
       ]
     },
@@ -359,6 +379,11 @@
       ],
       "errors": [
         {
+          "status": 401,
+          "code": "NO_AUTENTICADO",
+          "example": "examples/error.no-autenticado.json"
+        },
+        {
           "status": 404,
           "code": "NO_ENCONTRADO",
           "example": "examples/error.no-encontrado.json"
@@ -374,9 +399,19 @@
           "example": "examples/error.validacion.json"
         },
         {
+          "status": 429,
+          "code": "LIMITE_DE_TASA",
+          "example": "examples/error.limite-de-tasa.json"
+        },
+        {
           "status": 500,
           "code": "ERROR_INTERNO",
           "example": "examples/error.error-interno.json"
+        },
+        {
+          "status": 503,
+          "code": "SERVICIO_SATURADO",
+          "example": "examples/error.servicio-saturado.json"
         }
       ]
     },
@@ -595,6 +630,11 @@
           "status": 500,
           "code": "ERROR_INTERNO",
           "example": "examples/error.error-interno.json"
+        },
+        {
+          "status": 503,
+          "code": "SERVICIO_SATURADO",
+          "example": "examples/error.servicio-saturado.json"
         }
       ]
     },
@@ -614,6 +654,16 @@
       ],
       "errors": [
         {
+          "status": 401,
+          "code": "NO_AUTENTICADO",
+          "example": "examples/error.no-autenticado.json"
+        },
+        {
+          "status": 403,
+          "code": "NO_AUTORIZADO",
+          "example": "examples/error.no-autorizado.json"
+        },
+        {
           "status": 404,
           "code": "NO_ENCONTRADO",
           "example": "examples/error.no-encontrado.json"
@@ -627,6 +677,11 @@
           "status": 500,
           "code": "ERROR_INTERNO",
           "example": "examples/error.error-interno.json"
+        },
+        {
+          "status": 503,
+          "code": "SERVICIO_SATURADO",
+          "example": "examples/error.servicio-saturado.json"
         }
       ]
     },
@@ -659,6 +714,11 @@
           "status": 500,
           "code": "ERROR_INTERNO",
           "example": "examples/error.error-interno.json"
+        },
+        {
+          "status": 503,
+          "code": "SERVICIO_SATURADO",
+          "example": "examples/error.servicio-saturado.json"
         }
       ]
     },
@@ -702,6 +762,11 @@
           "status": 500,
           "code": "ERROR_INTERNO",
           "example": "examples/error.error-interno.json"
+        },
+        {
+          "status": 503,
+          "code": "SERVICIO_SATURADO",
+          "example": "examples/error.servicio-saturado.json"
         }
       ]
     },
@@ -756,6 +821,11 @@
           "status": 500,
           "code": "ERROR_INTERNO",
           "example": "examples/error.error-interno.json"
+        },
+        {
+          "status": 503,
+          "code": "SERVICIO_SATURADO",
+          "example": "examples/error.servicio-saturado.json"
         }
       ]
     },
@@ -799,6 +869,11 @@
           "status": 503,
           "code": "NO_CONFIGURADO",
           "example": "examples/error.no-configurado.json"
+        },
+        {
+          "status": 503,
+          "code": "SERVICIO_SATURADO",
+          "example": "examples/error.servicio-saturado.json"
         }
       ]
     },
@@ -837,6 +912,11 @@
           "status": 500,
           "code": "ERROR_INTERNO",
           "example": "examples/error.error-interno.json"
+        },
+        {
+          "status": 503,
+          "code": "SERVICIO_SATURADO",
+          "example": "examples/error.servicio-saturado.json"
         }
       ]
     },
@@ -879,6 +959,11 @@
           "status": 500,
           "code": "ERROR_INTERNO",
           "example": "examples/error.error-interno.json"
+        },
+        {
+          "status": 503,
+          "code": "SERVICIO_SATURADO",
+          "example": "examples/error.servicio-saturado.json"
         }
       ]
     },
@@ -932,6 +1017,11 @@
           "status": 500,
           "code": "ERROR_INTERNO",
           "example": "examples/error.error-interno.json"
+        },
+        {
+          "status": 503,
+          "code": "SERVICIO_SATURADO",
+          "example": "examples/error.servicio-saturado.json"
         }
       ]
     },
@@ -969,6 +1059,11 @@
           "status": 500,
           "code": "ERROR_INTERNO",
           "example": "examples/error.error-interno.json"
+        },
+        {
+          "status": 503,
+          "code": "SERVICIO_SATURADO",
+          "example": "examples/error.servicio-saturado.json"
         }
       ]
     },
@@ -1027,6 +1122,11 @@
           "status": 500,
           "code": "ERROR_INTERNO",
           "example": "examples/error.error-interno.json"
+        },
+        {
+          "status": 503,
+          "code": "SERVICIO_SATURADO",
+          "example": "examples/error.servicio-saturado.json"
         }
       ]
     },
@@ -1069,6 +1169,11 @@
           "status": 500,
           "code": "ERROR_INTERNO",
           "example": "examples/error.error-interno.json"
+        },
+        {
+          "status": 503,
+          "code": "SERVICIO_SATURADO",
+          "example": "examples/error.servicio-saturado.json"
         }
       ]
     },
@@ -1111,6 +1216,11 @@
           "status": 500,
           "code": "ERROR_INTERNO",
           "example": "examples/error.error-interno.json"
+        },
+        {
+          "status": 503,
+          "code": "SERVICIO_SATURADO",
+          "example": "examples/error.servicio-saturado.json"
         }
       ]
     },
@@ -1138,6 +1248,11 @@
           "status": 500,
           "code": "ERROR_INTERNO",
           "example": "examples/error.error-interno.json"
+        },
+        {
+          "status": 503,
+          "code": "SERVICIO_SATURADO",
+          "example": "examples/error.servicio-saturado.json"
         }
       ]
     },
@@ -1191,6 +1306,11 @@
           "status": 503,
           "code": "LLM_NO_DISPONIBLE",
           "example": "examples/error.llm-no-disponible.json"
+        },
+        {
+          "status": 503,
+          "code": "SERVICIO_SATURADO",
+          "example": "examples/error.servicio-saturado.json"
         }
       ]
     },
@@ -1223,6 +1343,11 @@
           "status": 500,
           "code": "ERROR_INTERNO",
           "example": "examples/error.error-interno.json"
+        },
+        {
+          "status": 503,
+          "code": "SERVICIO_SATURADO",
+          "example": "examples/error.servicio-saturado.json"
         }
       ]
     },
@@ -1271,6 +1396,11 @@
           "status": 500,
           "code": "ERROR_INTERNO",
           "example": "examples/error.error-interno.json"
+        },
+        {
+          "status": 503,
+          "code": "SERVICIO_SATURADO",
+          "example": "examples/error.servicio-saturado.json"
         }
       ]
     },
@@ -1324,6 +1454,11 @@
           "status": 500,
           "code": "ERROR_INTERNO",
           "example": "examples/error.error-interno.json"
+        },
+        {
+          "status": 503,
+          "code": "SERVICIO_SATURADO",
+          "example": "examples/error.servicio-saturado.json"
         }
       ]
     },
@@ -1361,6 +1496,11 @@
           "status": 500,
           "code": "ERROR_INTERNO",
           "example": "examples/error.error-interno.json"
+        },
+        {
+          "status": 503,
+          "code": "SERVICIO_SATURADO",
+          "example": "examples/error.servicio-saturado.json"
         }
       ]
     },
@@ -1398,6 +1538,11 @@
           "status": 500,
           "code": "ERROR_INTERNO",
           "example": "examples/error.error-interno.json"
+        },
+        {
+          "status": 503,
+          "code": "SERVICIO_SATURADO",
+          "example": "examples/error.servicio-saturado.json"
         }
       ]
     },
@@ -1451,6 +1596,11 @@
           "status": 500,
           "code": "ERROR_INTERNO",
           "example": "examples/error.error-interno.json"
+        },
+        {
+          "status": 503,
+          "code": "SERVICIO_SATURADO",
+          "example": "examples/error.servicio-saturado.json"
         }
       ]
     },
@@ -1502,6 +1652,11 @@
           "status": 500,
           "code": "ERROR_INTERNO",
           "example": "examples/error.error-interno.json"
+        },
+        {
+          "status": 503,
+          "code": "SERVICIO_SATURADO",
+          "example": "examples/error.servicio-saturado.json"
         }
       ]
     }

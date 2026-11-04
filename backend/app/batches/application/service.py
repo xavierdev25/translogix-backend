@@ -35,6 +35,7 @@ from app.contracts.shipment_batches import (
     BatchItemStatus,
     BatchStatus,
     ItemError,
+    ReviewStatus,
     ShipmentBatchItemResult,
     ShipmentBatchItemsPage,
     ShipmentBatchResponse,
@@ -203,9 +204,7 @@ class BatchService:
     # --- reading -----------------------------------------------------------------------
 
     @staticmethod
-    async def _owned(
-        repo: BatchRepository, owner: UUID | None, batch_id: UUID
-    ) -> ShipmentBatchRow:
+    async def _owned(repo: BatchRepository, owner: UUID | None, batch_id: UUID) -> ShipmentBatchRow:
         row = await (repo.get(batch_id, owner) if owner is not None else repo.get_any(batch_id))
         if row is None:
             raise ContractError(ErrorCode.NO_ENCONTRADO, details={"recurso": "shipment_batch"})
@@ -238,7 +237,7 @@ def _summary(row: ShipmentBatchRow, counts: dict[BatchItemStatus, int]) -> Shipm
 
 
 def _result(row: ResultRow) -> ShipmentBatchItemResult:
-    item, numero_guia, flete, formula = row
+    item, numero_guia, flete, formula, review = row
     return ShipmentBatchItemResult(
         linea=item.line_number,
         referencia_cliente=item.referencia_cliente,
@@ -247,4 +246,5 @@ def _result(row: ResultRow) -> ShipmentBatchItemResult:
         flete_total_cop=flete,
         formula_version=formula,
         errores=[ItemError.model_validate(e) for e in item.errors_json],
+        estado_revision=ReviewStatus(review) if review else None,
     )

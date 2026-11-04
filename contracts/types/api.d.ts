@@ -95,7 +95,7 @@ export interface paths {
         put?: never;
         /**
          * Sube un adjunto (PDF o JPG) y devuelve su attachment_id
-         * @description Tipo validado por contenido; límite de tamaño configurable; el nombre de archivo del cliente no se conserva y el contenido no se registra en logs.
+         * @description 2.0.0: exige `X-Client-Id` y el `session_id` de una conversación de web chat de ese mismo usuario; si no, 404 (sin oráculo). Tipo validado por contenido (PDF completo o JPG); límite de tamaño y de frecuencia por usuario. El nombre de archivo del cliente no se conserva y el contenido no se registra en logs.
          */
         post: operations["uploadAttachment"];
         delete?: never;
@@ -131,7 +131,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Historial de una sesión */
+        /**
+         * Historial de una sesión
+         * @description 2.0.0 (SEC-01): el dueño con `X-Client-Id`; un ADMIN (cualquier sesión) o un REVIEWER (sesiones con un caso en su bandeja) con su token. Sin credencial, 401. Una sesión ajena o inexistente, 404 (sin oráculo).
+         */
         get: operations["getSessionHistory"];
         put?: never;
         post?: never;
@@ -607,9 +610,13 @@ export interface components {
              * @description PDF o JPG.
              */
             file: string;
+            /**
+             * Session Id
+             * Format: uuid
+             * @description Conversación del mismo usuario (2.0.0).
+             */
+            session_id: string;
             declared_doc_code?: components["schemas"]["DocumentoCodigo"] | null;
-            /** Session Id */
-            session_id?: string | null;
         };
         /** CalculoFlete */
         CalculoFlete: {
@@ -1145,7 +1152,7 @@ export interface components {
          * ErrorCode
          * @enum {string}
          */
-        ErrorCode: "VALIDACION" | "GUIA_FORMATO_INVALIDO" | "GUIA_NO_ENCONTRADA" | "RUTA_SIN_TARIFA" | "CIUDAD_NO_RECONOCIDA" | "SERVICIO_NO_DISPONIBLE" | "EXCEDE_LIMITE_COBERTURA" | "LLM_NO_DISPONIBLE" | "RAG_SIN_EVIDENCIA" | "FIRMA_INVALIDA" | "LIMITE_DE_TASA" | "NO_ENCONTRADO" | "ERROR_INTERNO" | "NO_CONFIGURADO" | "NO_AUTORIZADO" | "NO_AUTENTICADO" | "IDEMPOTENCIA_CONFLICTO" | "LOTE_DEMASIADO_GRANDE" | "REFERENCIA_DUPLICADA" | "CIUDAD_NO_CUBIERTA" | "TARIFA_NO_DISPONIBLE" | "ARCHIVO_INVALIDO" | "CUERPO_DEMASIADO_GRANDE";
+        ErrorCode: "VALIDACION" | "GUIA_FORMATO_INVALIDO" | "GUIA_NO_ENCONTRADA" | "RUTA_SIN_TARIFA" | "CIUDAD_NO_RECONOCIDA" | "SERVICIO_NO_DISPONIBLE" | "EXCEDE_LIMITE_COBERTURA" | "LLM_NO_DISPONIBLE" | "RAG_SIN_EVIDENCIA" | "FIRMA_INVALIDA" | "LIMITE_DE_TASA" | "NO_ENCONTRADO" | "ERROR_INTERNO" | "NO_CONFIGURADO" | "NO_AUTORIZADO" | "NO_AUTENTICADO" | "IDEMPOTENCIA_CONFLICTO" | "LOTE_DEMASIADO_GRANDE" | "REFERENCIA_DUPLICADA" | "CIUDAD_NO_CUBIERTA" | "TARIFA_NO_DISPONIBLE" | "ARCHIVO_INVALIDO" | "CUERPO_DEMASIADO_GRANDE" | "SERVICIO_SATURADO";
         /**
          * EscalationAction
          * @enum {string}
@@ -1799,6 +1806,12 @@ export interface components {
          */
         ReviewDecision: "APROBADA" | "RECHAZADA";
         /**
+         * ReviewStatus
+         * @description 2.0.0 (CR-010, BIZ-01): specialised review of a shipment.
+         * @enum {string}
+         */
+        ReviewStatus: "NO_REQUERIDA" | "PENDIENTE" | "APROBADA" | "RECHAZADA";
+        /**
          * Role
          * @enum {string}
          */
@@ -1867,6 +1880,8 @@ export interface components {
             formula_version: string | null;
             /** Errores */
             errores: components["schemas"]["ItemError"][];
+            /** @description 2.0.0: solo si status=CREATED. `PENDIENTE` = mercancía peligrosa a la espera de un REVIEWER; el envío no avanza hasta que se apruebe. */
+            estado_revision: components["schemas"]["ReviewStatus"] | null;
         };
         /** ShipmentBatchItemsPage */
         ShipmentBatchItemsPage: {
@@ -2837,6 +2852,16 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
+            /** @description Códigos: SERVICIO_SATURADO */
+            503: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
         };
     };
     createQuote: {
@@ -2887,6 +2912,16 @@ export interface operations {
             };
             /** @description Códigos: ERROR_INTERNO */
             500: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: SERVICIO_SATURADO */
+            503: {
                 headers: {
                     "X-Request-ID": components["headers"]["XRequestId"];
                     [name: string]: unknown;
@@ -2953,7 +2988,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
-            /** @description Códigos: NO_CONFIGURADO */
+            /** @description Códigos: NO_CONFIGURADO, SERVICIO_SATURADO */
             503: {
                 headers: {
                     "X-Request-ID": components["headers"]["XRequestId"];
@@ -3031,6 +3066,16 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
+            /** @description Códigos: SERVICIO_SATURADO */
+            503: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
         };
     };
     uploadAttachment: {
@@ -3057,6 +3102,16 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AttachmentUploadResponse"];
+                };
+            };
+            /** @description Códigos: NO_AUTENTICADO */
+            401: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
             /** @description Códigos: NO_ENCONTRADO */
@@ -3089,8 +3144,28 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
+            /** @description Códigos: LIMITE_DE_TASA */
+            429: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
             /** @description Códigos: ERROR_INTERNO */
             500: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: SERVICIO_SATURADO */
+            503: {
                 headers: {
                     "X-Request-ID": components["headers"]["XRequestId"];
                     [name: string]: unknown;
@@ -3177,6 +3252,16 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
+            /** @description Códigos: SERVICIO_SATURADO */
+            503: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
         };
     };
     getSessionHistory: {
@@ -3203,6 +3288,26 @@ export interface operations {
                     "application/json": components["schemas"]["SessionHistory"];
                 };
             };
+            /** @description Códigos: NO_AUTENTICADO */
+            401: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: NO_AUTORIZADO */
+            403: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
             /** @description Códigos: NO_ENCONTRADO */
             404: {
                 headers: {
@@ -3225,6 +3330,16 @@ export interface operations {
             };
             /** @description Códigos: ERROR_INTERNO */
             500: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: SERVICIO_SATURADO */
+            503: {
                 headers: {
                     "X-Request-ID": components["headers"]["XRequestId"];
                     [name: string]: unknown;
@@ -3283,6 +3398,16 @@ export interface operations {
             };
             /** @description Códigos: ERROR_INTERNO */
             500: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: SERVICIO_SATURADO */
+            503: {
                 headers: {
                     "X-Request-ID": components["headers"]["XRequestId"];
                     [name: string]: unknown;
@@ -3360,6 +3485,16 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
+            /** @description Códigos: SERVICIO_SATURADO */
+            503: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
         };
     };
     simulateWhatsApp: {
@@ -3410,6 +3545,16 @@ export interface operations {
             };
             /** @description Códigos: ERROR_INTERNO */
             500: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: SERVICIO_SATURADO */
+            503: {
                 headers: {
                     "X-Request-ID": components["headers"]["XRequestId"];
                     [name: string]: unknown;
@@ -3476,7 +3621,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
-            /** @description Códigos: NO_CONFIGURADO */
+            /** @description Códigos: NO_CONFIGURADO, SERVICIO_SATURADO */
             503: {
                 headers: {
                     "X-Request-ID": components["headers"]["XRequestId"];
@@ -3536,6 +3681,16 @@ export interface operations {
             };
             /** @description Códigos: ERROR_INTERNO */
             500: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: SERVICIO_SATURADO */
+            503: {
                 headers: {
                     "X-Request-ID": components["headers"]["XRequestId"];
                     [name: string]: unknown;
@@ -3612,6 +3767,16 @@ export interface operations {
             };
             /** @description Códigos: ERROR_INTERNO */
             500: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: SERVICIO_SATURADO */
+            503: {
                 headers: {
                     "X-Request-ID": components["headers"]["XRequestId"];
                     [name: string]: unknown;
@@ -3710,6 +3875,16 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
+            /** @description Códigos: SERVICIO_SATURADO */
+            503: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
         };
     };
     listHandoffs: {
@@ -3768,6 +3943,16 @@ export interface operations {
             };
             /** @description Códigos: ERROR_INTERNO */
             500: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: SERVICIO_SATURADO */
+            503: {
                 headers: {
                     "X-Request-ID": components["headers"]["XRequestId"];
                     [name: string]: unknown;
@@ -3895,6 +4080,16 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
+            /** @description Códigos: SERVICIO_SATURADO */
+            503: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
         };
     };
     getShipmentBatch: {
@@ -3963,6 +4158,16 @@ export interface operations {
             };
             /** @description Códigos: ERROR_INTERNO */
             500: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: SERVICIO_SATURADO */
+            503: {
                 headers: {
                     "X-Request-ID": components["headers"]["XRequestId"];
                     [name: string]: unknown;
@@ -4051,6 +4256,16 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
+            /** @description Códigos: SERVICIO_SATURADO */
+            503: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
         };
     };
     getChannelMetrics: {
@@ -4090,6 +4305,16 @@ export interface operations {
             };
             /** @description Códigos: ERROR_INTERNO */
             500: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: SERVICIO_SATURADO */
+            503: {
                 headers: {
                     "X-Request-ID": components["headers"]["XRequestId"];
                     [name: string]: unknown;
@@ -4176,7 +4401,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
-            /** @description Códigos: LLM_NO_DISPONIBLE */
+            /** @description Códigos: LLM_NO_DISPONIBLE, SERVICIO_SATURADO */
             503: {
                 headers: {
                     "X-Request-ID": components["headers"]["XRequestId"];
@@ -4232,6 +4457,16 @@ export interface operations {
             };
             /** @description Códigos: ERROR_INTERNO */
             500: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: SERVICIO_SATURADO */
+            503: {
                 headers: {
                     "X-Request-ID": components["headers"]["XRequestId"];
                     [name: string]: unknown;
@@ -4310,6 +4545,16 @@ export interface operations {
             };
             /** @description Códigos: ERROR_INTERNO */
             500: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: SERVICIO_SATURADO */
+            503: {
                 headers: {
                     "X-Request-ID": components["headers"]["XRequestId"];
                     [name: string]: unknown;
@@ -4408,6 +4653,16 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
+            /** @description Códigos: SERVICIO_SATURADO */
+            503: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
         };
     };
     listAuditEvents: {
@@ -4475,6 +4730,16 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
+            /** @description Códigos: SERVICIO_SATURADO */
+            503: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
         };
     };
     listDangerousGoods: {
@@ -4534,6 +4799,16 @@ export interface operations {
             };
             /** @description Códigos: ERROR_INTERNO */
             500: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: SERVICIO_SATURADO */
+            503: {
                 headers: {
                     "X-Request-ID": components["headers"]["XRequestId"];
                     [name: string]: unknown;
@@ -4632,6 +4907,16 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
+            /** @description Códigos: SERVICIO_SATURADO */
+            503: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
         };
     };
     getHealth: {
@@ -4700,14 +4985,14 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
-            /** @description Alguna dependencia no está lista */
+            /** @description Códigos: SERVICIO_SATURADO */
             503: {
                 headers: {
                     "X-Request-ID": components["headers"]["XRequestId"];
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ReadinessResponse"];
+                    "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
         };

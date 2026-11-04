@@ -9,7 +9,7 @@ from uuid import UUID
 
 import pytest
 from fastapi import FastAPI
-from sqlalchemy import text
+from sqlalchemy import select, text
 
 from app.batches.application.service import BatchService
 from app.clients.application.services import ClientAdminService
@@ -19,6 +19,7 @@ from app.contracts.normalizers import NUMERO_GUIA_PATTERN
 from app.contracts.shipment_batches import ApiScope
 from app.shipments.domain.models import GUIDE_MAX, GUIDE_MIN
 from app.shipments.infrastructure import repositories as shipment_repos
+from app.shipments.infrastructure.tables import ShipmentRecipientRow
 from tests.db import AppFactory, http, scalar
 from tests.shipments.support import auth, envio, lote, new_client
 
@@ -442,13 +443,20 @@ async def test_personal_data_never_leaves_the_recipients_table(
         for table in ("shipment_batches", "shipment_batch_items", "shipments", "api_audit_events"):
             rows = (await session.execute(text(f"SELECT * FROM {table}"))).all()  # noqa: S608
             exposed.append((table, json.dumps([list(r) for r in rows], default=str)))
-        recipients = (
-            await session.execute(text("SELECT nombre, telefono FROM shipment_recipients"))
+        # 2.0.0 (PII-01): even the recipients table only holds ciphertext at rest...
+        stored = (
+            await session.execute(
+                text("SELECT nombre, telefono, direccion FROM shipment_recipients")
+            )
         ).all()
+        exposed.append(("shipment_recipients", json.dumps([list(r) for r in stored])))
+        # ...while the application still reads the plain values through the ORM.
+        recipients = (await session.execute(select(ShipmentRecipientRow))).scalars().all()
     for where, content in exposed:
         for value in PII:
             assert value not in content, (where, value)
-    assert [tuple(r) for r in recipients] == [(PII[0], PII[1])]
+    assert all(str(value).startswith("enc:v1:") for row in stored for value in row)
+    assert [(r.nombre, r.telefono) for r in recipients] == [(PII[0], PII[1])]
 
 
 # --- HTTP contract --------------------------------------------------------------------------

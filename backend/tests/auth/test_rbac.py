@@ -16,7 +16,7 @@ from fastapi import FastAPI
 from fastapi.routing import APIRoute
 from sqlalchemy import text
 
-from app.auth.dependencies import RBAC_ROLES_ATTRIBUTE
+from app.auth.dependencies import RBAC_ROLES_ATTRIBUTE, SESSION_OWNER_ATTRIBUTE
 from app.contracts.staff import Role
 from app.staff.application.services import StaffAdminService
 from tests.db import http, scalar
@@ -107,9 +107,7 @@ PUBLIC = {
     ("POST", "/api/v1/cotizar"),
     ("POST", "/api/v1/cotizaciones"),
     ("POST", "/api/v1/pqrs/crear-ticket"),
-    ("POST", "/api/v1/attachments"),
     ("POST", "/api/v1/chat/messages"),
-    ("GET", "/api/v1/chat/sessions/{session_id}/history"),
     ("GET", "/api/v1/channels/whatsapp/webhook"),
     ("POST", "/api/v1/channels/whatsapp/webhook"),
     ("POST", "/api/v1/channels/whatsapp/simulate"),
@@ -455,14 +453,17 @@ async def test_sensitive_actions_and_denials_are_audited_without_credentials(
         assert leaked == 0
 
 
-def rbac_roles(route: APIRoute) -> set[Role]:
-    found: set[Role] = set()
+def is_protected(route: APIRoute) -> bool:
+    """``require(...)`` (roles) or, 2.0.0, a web-chat session-owner check (X-Client-Id)."""
     pending = list(route.dependant.dependencies)
     while pending:
         dependency = pending.pop()
-        found |= set(getattr(dependency.call, RBAC_ROLES_ATTRIBUTE, ()))
+        if getattr(dependency.call, RBAC_ROLES_ATTRIBUTE, None) or getattr(
+            dependency.call, SESSION_OWNER_ATTRIBUTE, False
+        ):
+            return True
         pending.extend(dependency.dependencies)
-    return found
+    return False
 
 
 def api_routes(routes: Iterable[Any]) -> Iterator[APIRoute]:
@@ -480,9 +481,9 @@ def test_every_route_is_protected_or_explicitly_public(app: FastAPI) -> None:
     unprotected = {
         (method, route.path)
         for route in routes
-        if not rbac_roles(route)
+        if not is_protected(route)
         for method in route.methods or ()
     }
 
-    assert len(routes) == 28  # 13 protected + 15 public: a new route must land in one set
+    assert len(routes) == 28  # 15 protected + 13 public: a new route must land in one set
     assert unprotected == PUBLIC

@@ -27,7 +27,7 @@ from app.db.repositories import (
     MessageRepository,
 )
 from app.modules.conversation.orchestrator import DialogueOrchestrator
-from app.shared.http import SlidingWindowRateLimiter
+from app.shared.ratelimit import RateLimiter
 
 HISTORY_FOR_HANDOFF = 10
 
@@ -51,7 +51,7 @@ class ConversationService:
         clock: Clock,
         salt: str,
         ttl_minutes: dict[ChannelType, int],
-        limiter: SlidingWindowRateLimiter,
+        limiter: RateLimiter,
     ) -> None:
         self._session = session
         self._orchestrator = orchestrator(session)
@@ -71,7 +71,7 @@ class ConversationService:
         if existing is not None:  # idempotent resend: same reply, nothing reprocessed
             return existing
         user_hash = hash_user(self._salt, msg.channel, msg.external_user_id)
-        self._limiter.check(f"{msg.channel.value}:{user_hash}")
+        await self._limiter.check(f"{msg.channel.value}:{user_hash}")
         now = self._clock.now()
         state = await self._resolve(msg, user_hash)
         await self._conversations.save(state)  # the session row must exist before its messages

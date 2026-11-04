@@ -195,6 +195,24 @@ class HandoffRepository:
             row.assigned_staff_user_id = assignee
         await self._session.flush()
 
+    async def visible_for_session(self, session_id: UUID, reviewer: UUID | None) -> bool:
+        """A REVIEWER may read a conversation that has a case in their inbox: PENDING, or
+        assigned to them (2.0.0, SEC-01)."""
+        if reviewer is None:
+            return False
+        found = await self._session.scalar(
+            select(HandoffRow.handoff_id)
+            .where(
+                HandoffRow.session_id == session_id,
+                or_(
+                    HandoffRow.status == HandoffStatus.PENDING.value,
+                    HandoffRow.assigned_staff_user_id == reviewer,
+                ),
+            )
+            .limit(1)
+        )
+        return found is not None
+
     async def list_by_status(
         self, status: HandoffStatus | None, *, reviewer: UUID | None = None
     ) -> list[HandoffSummary]:
@@ -304,6 +322,20 @@ class AttachmentRepository:
             )
         )
         await self._session.flush()
+
+    async def owned_by(self, attachment_ids: Sequence[str], user_hash: str) -> set[str]:
+        """Ids among ``attachment_ids`` uploaded into a conversation of ``user_hash`` (SEC-06)."""
+        if not attachment_ids:
+            return set()
+        rows = await self._session.scalars(
+            select(AttachmentRow.attachment_id)
+            .join(ConversationRow, ConversationRow.session_id == AttachmentRow.session_id)
+            .where(
+                AttachmentRow.attachment_id.in_(attachment_ids),
+                ConversationRow.external_user_id_hash == user_hash,
+            )
+        )
+        return set(rows)
 
     async def existing(self, attachment_ids: Sequence[str]) -> set[str]:
         if not attachment_ids:

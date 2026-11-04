@@ -110,7 +110,11 @@ Respuesta de `GET /api/v1/auth/me`:
 | Reindexar el RAG | `POST /admin/rag/reindex` | ✔ | ✘ | ✘ |
 
 **Siguen públicos, sin login:** chat, rastreo, cotización (`/cotizar` y `/cotizaciones`), PQRS,
-adjuntos, métricas, `/health` y `/ready`. Los flujos actuales de la demo no cambian.
+métricas, `/health` y `/ready`. Los flujos actuales de la demo no cambian.
+
+**Desde 2.0.0** (ver [`FRONTEND_CAMBIOS_2_0_0.md`](FRONTEND_CAMBIOS_2_0_0.md)), el historial del chat y
+los adjuntos exigen `X-Client-Id`; los adjuntos, además, `session_id`. ADMIN lee cualquier historial y
+REVIEWER, el de los casos de su bandeja.
 
 ## 5. Detalle de los endpoints nuevos o cambiados
 
@@ -245,7 +249,7 @@ Todos los errores usan el mismo sobre:
 | Asignaciones | No existe la gestión de PQRS asignadas a un revisor |
 | Consultas de ADMIN | No hay consulta global de cotizaciones ni de PQRS |
 | Respuesta al cliente | El asesor todavía no puede responderle por el chat; llega con CR-007 |
-| Endpoints públicos | El historial del chat y los adjuntos siguen públicos (decisiones pendientes) |
+| Endpoints públicos | En 1.7.0, el historial del chat y los adjuntos siguen públicos. **Se cierran en 2.0.0** |
 
 ## 9. Lo que necesitamos de ustedes
 

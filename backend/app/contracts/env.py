@@ -37,6 +37,8 @@ class EnvVar(StrEnum):
     BATCH_LEASE_SECONDS = "BATCH_LEASE_SECONDS"
     # Added in 1.5.0 (CR-003): which tariff profiles this deployment may use.
     TARIFF_ENVIRONMENT = "TARIFF_ENVIRONMENT"
+    # Added in 2.0.0 (CR-010): authenticated encryption of personal data (PII-01).
+    PII_ENCRYPTION_KEYS = "PII_ENCRYPTION_KEYS"
 
 
 SECRET_ENV_VARS = frozenset(
@@ -46,5 +48,6 @@ SECRET_ENV_VARS = frozenset(
         EnvVar.WHATSAPP_APP_SECRET,
         EnvVar.ADMIN_TOKEN,
         EnvVar.PII_HASH_SALT,
+        EnvVar.PII_ENCRYPTION_KEYS,
     }
 )

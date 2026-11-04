@@ -10,6 +10,7 @@ from app.contracts.common import ContractError, ErrorCode
 from app.main import build_container
 from app.shared.config import Settings
 from app.shared.llm import Admission
+from tests.conftest import TEST_PII_KEY
 
 
 async def hold(admission: Admission, entered: asyncio.Event, release: asyncio.Event) -> None:
@@ -59,6 +60,7 @@ async def test_rag_retrieval_does_not_draw_from_the_pool_its_chat_turn_holds() -
         ollama_base_url=HttpUrl("http://127.0.0.1:9"),  # never called: only wired
         ollama_chat_model="m",
         ollama_embed_model="e",
+        pii_encryption_keys=SecretStr(TEST_PII_KEY),
     )
     box = build_container(settings)
     try:

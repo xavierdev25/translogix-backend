@@ -17,7 +17,8 @@
       "numero_guia": "TLX-200001-CO",
       "flete_total_cop": 21000,
       "formula_version": "provisional-v1",
-      "errores": []
+      "errores": [],
+      "estado_revision": "NO_REQUERIDA"
     },
     {
       "linea": 2,
@@ -31,7 +32,8 @@
           "code": "TARIFA_NO_DISPONIBLE",
           "field": "destino"
         }
-      ]
+      ],
+      "estado_revision": null
     },
     {
       "linea": 3,
@@ -45,7 +47,8 @@
           "code": "REFERENCIA_DUPLICADA",
           "field": "referencia_cliente"
         }
-      ]
+      ],
+      "estado_revision": null
     }
   ]
 }
