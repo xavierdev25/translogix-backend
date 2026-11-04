@@ -6,7 +6,7 @@ import pytest
 
 from app.clients.domain.models import KEY_PATTERN, key_prefix_of, new_api_key
 from app.contracts.common import ContractError, ErrorCode
-from app.contracts.staff import StaffRole
+from app.contracts.staff import Role
 from app.staff.api.dependencies import staff_authenticated
 from app.staff.application.services import require_role
 from app.staff.domain.models import (
@@ -19,7 +19,7 @@ from app.staff.domain.models import (
 )
 
 
-def context(*roles: StaffRole) -> StaffContext:
+def context(*roles: Role) -> StaffContext:
     return StaffContext(staff_user_id=uuid4(), token_id=uuid4(), roles=frozenset(roles))
 
 
@@ -51,16 +51,16 @@ def test_emails_are_normalised_and_validated() -> None:
 
 
 def test_one_allowed_role_is_enough() -> None:
-    require_role(context(StaffRole.ASESOR), StaffRole.ASESOR, StaffRole.SUPERVISOR)
+    require_role(context(Role.REVIEWER), Role.REVIEWER, Role.ADMIN)
 
 
 def test_missing_role_is_forbidden_and_names_the_required_roles() -> None:
     with pytest.raises(ContractError) as error:
-        require_role(context(StaffRole.ASESOR), StaffRole.OPERADOR_LOGISTICO)
+        require_role(context(Role.REVIEWER), Role.ADMIN)
 
     assert error.value.code is ErrorCode.NO_AUTORIZADO
     assert error.value.http_status == 403
-    assert error.value.details == {"roles_requeridos": ["OPERADOR_LOGISTICO"]}
+    assert error.value.details == {"roles_requeridos": ["ADMIN"]}
 
 
 def test_an_internal_route_must_declare_its_roles() -> None:

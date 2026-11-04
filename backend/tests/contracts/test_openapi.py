@@ -38,6 +38,13 @@ EXPECTED_SURFACE = {
     ("get", "/api/v1/shipment-batches/{batch_id}/items"),
     ("get", "/health"),
     ("get", "/ready"),
+    # 1.7.0: RBAC (CR-009)
+    ("get", "/api/v1/auth/me"),
+    ("post", "/api/v1/internal/staff-users"),
+    ("patch", "/api/v1/internal/staff-users/{user_id}/roles"),
+    ("get", "/api/v1/internal/audit-events"),
+    ("get", "/api/v1/internal/dangerous-goods"),
+    ("post", "/api/v1/internal/shipments/{shipment_id}/dangerous-goods-review"),
 }
 
 
@@ -117,18 +124,40 @@ def test_internal_pii_model_is_not_published() -> None:
     assert "firma_digital_url" not in text
 
 
-def test_protected_operations_declare_the_admin_token() -> None:
+def schemes(operation: dict[str, Any]) -> set[str]:
+    return {name for requirement in operation.get("security", []) for name in requirement}
+
+
+# 1.7.0 (CR-009): which credential families each protected operation accepts.
+STAFF_OR_ADMIN_TOKEN = {"AdminToken", "StaffToken"}  # X-Admin-Token = ADMIN (compatibility)
+EXPECTED_SECURITY = {
+    "reindexRag": STAFF_OR_ADMIN_TOKEN,
+    "getHandoff": STAFF_OR_ADMIN_TOKEN,
+    "listHandoffs": STAFF_OR_ADMIN_TOKEN,
+    "updateHandoffStatus": STAFF_OR_ADMIN_TOKEN,
+    "createStaffUser": STAFF_OR_ADMIN_TOKEN,
+    "updateStaffUserRoles": STAFF_OR_ADMIN_TOKEN,
+    "listAuditEvents": STAFF_OR_ADMIN_TOKEN,
+    "listDangerousGoods": STAFF_OR_ADMIN_TOKEN,
+    "reviewDangerousGoods": {"StaffToken"},
+    "getCurrentPrincipal": {"ApiKey", "StaffToken", "AdminToken"},
+    "createShipmentBatch": {"ApiKey"},
+    "getShipmentBatch": {"ApiKey", "StaffToken", "AdminToken"},
+    "listShipmentBatchItems": {"ApiKey", "StaffToken", "AdminToken"},
+}
+
+
+def test_protected_operations_declare_their_credentials() -> None:
     by_id = {op["operationId"]: op for _, _, op in operations(build_openapi())}
 
-    for operation_id in ("reindexRag", "getHandoff", "listHandoffs", "updateHandoffStatus"):
-        assert by_id[operation_id]["security"] == [{"AdminToken": []}]
+    assert {op_id: schemes(by_id[op_id]) for op_id in EXPECTED_SECURITY} == EXPECTED_SECURITY
 
 
-def test_bulk_shipment_operations_declare_the_client_api_key() -> None:
-    by_id = {op["operationId"]: op for _, _, op in operations(build_openapi())}
+def test_every_other_operation_is_public_and_says_so_by_omission() -> None:
+    """Deny by default is enforced on the app (tests/auth); here: nothing else asks for one."""
+    secured = {op["operationId"] for _, _, op in operations(build_openapi()) if schemes(op)}
 
-    for operation_id in ("createShipmentBatch", "getShipmentBatch", "listShipmentBatchItems"):
-        assert by_id[operation_id]["security"] == [{"ApiKey": []}]
+    assert secured == set(EXPECTED_SECURITY)
 
 
 def test_env_example_lists_exactly_the_canonical_names_without_secrets() -> None:

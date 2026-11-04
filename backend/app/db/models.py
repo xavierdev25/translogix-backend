@@ -69,6 +69,9 @@ class HandoffRow(Base):
     payload_json: Mapped[dict[str, Any]] = mapped_column(Json)
     status: Mapped[str] = mapped_column(String(16), index=True)
     created_at: Mapped[datetime]
+    # 1.7.0 (CR-009): the REVIEWER who took the case; null while PENDING or if an
+    # ADMIN assigned it with the shared token.
+    assigned_staff_user_id: Mapped[UUID | None] = mapped_column(index=True)
 
 
 class QuoteRow(Base):

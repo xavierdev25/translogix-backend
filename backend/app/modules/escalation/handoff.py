@@ -112,11 +112,37 @@ class HandoffService:
     async def get(self, handoff_id: UUID) -> HandoffPayload | None:
         return await self._repo.get(handoff_id)
 
-    async def list_by_status(self, status: HandoffStatus | None = None) -> Sequence[HandoffSummary]:
-        return await self._repo.list_by_status(status)
+    async def list_by_status(
+        self, status: HandoffStatus | None = None, *, reviewer: UUID | None = None
+    ) -> Sequence[HandoffSummary]:
+        return await self._repo.list_by_status(status, reviewer=reviewer)
 
-    async def update_status(self, handoff_id: UUID, status: HandoffStatus) -> HandoffPayload | None:
-        current = await self._repo.get(handoff_id)
+    async def get_visible(self, handoff_id: UUID, reviewer: UUID | None) -> HandoffPayload | None:
+        """``reviewer`` None: ADMIN, sees everything. A REVIEWER sees the PENDING queue and the
+        cases assigned to them; any other case is reported as missing (no oracle)."""
+        found = await self._repo.get_with_assignee(handoff_id)
+        if found is None:
+            return None
+        payload, assignee = found
+        if (
+            reviewer is not None
+            and payload.status is not HandoffStatus.PENDING
+            and assignee != reviewer
+        ):
+            return None
+        return payload
+
+    async def update_status(
+        self,
+        handoff_id: UUID,
+        status: HandoffStatus,
+        *,
+        actor: UUID | None = None,
+        reviewer: UUID | None = None,
+    ) -> HandoffPayload | None:
+        """``actor``: staff user acting, recorded as assignee when the case leaves PENDING.
+        ``reviewer``: same visibility rule as ``get_visible``."""
+        current = await self.get_visible(handoff_id, reviewer)
         if current is None:
             return None
         if status not in _TRANSITIONS[current.status]:
@@ -125,5 +151,6 @@ class HandoffService:
                 f"Transición no permitida: {current.status.value} → {status.value}.",
             )
         updated = current.model_copy(update={"status": status})
-        await self._repo.update(updated)
+        taking = current.status is HandoffStatus.PENDING
+        await self._repo.update(updated, assignee=actor if taking else None)
         return updated

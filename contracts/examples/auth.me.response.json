@@ -1,0 +1,7 @@
+{
+  "roles": ["REVIEWER"],
+  "metodo": "STAFF_TOKEN",
+  "staff_user_id": "3f6c2a9e-8b1d-4c7e-9a2f-5d4b3c2a1e0f",
+  "client_id": null,
+  "scopes": []
+}

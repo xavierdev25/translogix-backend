@@ -380,8 +380,9 @@ Códigos de error nuevos que comparten:
   `asesor-backend-faltantes.md`. La reconciliación con el backend está en
   [`REVISION_SOLICITUD_ASESOR.md`](REVISION_SOLICITUD_ASESOR.md).
 - **Fecha:** 2026-11-04
-- **Versión destino:** contrato **1.7.0** (re-asignada: 1.6.0 la tomó CR-008, que no tiene migración) y
-  migración **0005** (`down_revision="0004"`), en dos entregas
+- **Versión destino:** contrato **1.8.0** y migración **0006** (`down_revision="0005"`), en dos entregas.
+  Re-asignada dos veces: 1.6.0 la tomó CR-008 y 1.7.0/0005, CR-009 (RBAC). Los roles del CRM pasan a ser
+  ADMIN y REVIEWER.
   (P0a y P0b). P1 va en otro CR.
 - **Qué cambia:**
 
@@ -511,6 +512,28 @@ Códigos de error nuevos que comparten:
   - R1: el chat prometía una respuesta del asesor que no existe.
 - **Compatibilidad:** aditivo (MINOR). Un cliente que no conozca el código nuevo recibe el sobre de error
   de siempre con HTTP 413. Sin migración.
-- **Versión:** contrato **1.6.0**. CR-007 pasa a 1.7.0.
+- **Versión:** contrato **1.6.0**. CR-007 pasa a 1.7.0 (después a 1.8.0, por CR-009).
+- **Estado:** IMPLEMENTADA
+
+### CR-009 — RBAC mínimo: ADMIN, CLIENT, REVIEWER
+
+- **Solicitante:** equipo (implementación prioritaria de RBAC), 2026-11-04.
+- **Qué cambia:**
+  - `Role` sustituye a los roles de personal 1.4.0;
+  - 6 operaciones nuevas (`/auth/me` y `/internal/*`);
+  - `StaffToken` como alternativa en `/handoffs*`, reindex y lectura de lotes;
+  - migración 0005 (roles a REVIEWER, asignado del *handoff* y `shipment_reviews`).
+- **Por qué:**
+  - separar autenticación y autorización;
+  - aislar clientes;
+  - que REVIEWER no tenga acciones de ADMIN;
+  - que CLIENT no apruebe mercancía peligrosa.
+
+  Ver [`RBAC.md`](RBAC.md).
+- **Compatibilidad:** aditivo en la forma. `X-Admin-Token` sigue siendo ADMIN. Cambios de
+  comportamiento:
+  - sin credencial → 401 (antes 403) en `/handoffs*` y reindex;
+  - token de personal en `POST /shipment-batches` → 403 (antes 401).
+- **Versión:** contrato **1.7.0**, migración **0005**.
 - **Estado:** IMPLEMENTADA
 

@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.contracts.common import ContractError, ErrorCode
 from app.contracts.ports import Clock
-from app.contracts.staff import StaffRole
+from app.contracts.staff import STAFF_ROLES, Role
 from app.staff.domain.models import (
     TOKEN_MAX_DAYS,
     StaffContext,
@@ -24,10 +24,16 @@ from app.staff.domain.models import (
 from app.staff.infrastructure.repositories import StaffTokenRepository, StaffUserRepository
 
 
-def _roles(roles: Iterable[StaffRole]) -> frozenset[StaffRole]:
+def _roles(roles: Iterable[Role]) -> frozenset[Role]:
     wanted = frozenset(roles)
     if not wanted:
         raise ContractError(ErrorCode.VALIDACION, "Un usuario interno necesita al menos un rol.")
+    if not wanted <= STAFF_ROLES:  # CLIENT only ever comes from an API key
+        raise ContractError(
+            ErrorCode.VALIDACION,
+            "Un usuario interno solo puede tener los roles ADMIN o REVIEWER.",
+            details={"roles_permitidos": sorted(r.value for r in STAFF_ROLES)},
+        )
     return wanted
 
 
@@ -39,7 +45,7 @@ class StaffAdminService:
         self._tokens = StaffTokenRepository(session)
         self._clock = clock
 
-    async def create_user(self, email: str, nombre: str, roles: Iterable[StaffRole]) -> StaffUser:
+    async def create_user(self, email: str, nombre: str, roles: Iterable[Role]) -> StaffUser:
         try:
             normalized = normalize_email(email)
         except ValueError:
@@ -59,7 +65,7 @@ class StaffAdminService:
         await self._users.add(user)
         return user
 
-    async def set_roles(self, user_id: UUID, roles: Iterable[StaffRole]) -> bool:
+    async def set_roles(self, user_id: UUID, roles: Iterable[Role]) -> bool:
         return await self._users.update(user_id, self._clock.now(), roles=_roles(roles))
 
     async def set_status(self, user_id: UUID, estado: StaffStatus) -> bool:
@@ -136,7 +142,7 @@ class StaffAuthenticator:
         return StaffContext(staff_user_id=user.id, token_id=record.id, roles=user.roles)
 
 
-def require_role(context: StaffContext, *allowed: StaffRole) -> None:
+def require_role(context: StaffContext, *allowed: Role) -> None:
     """At least one of ``allowed``. Finer rules (own followups only…) live in each use case."""
     if not context.roles & set(allowed):
         raise ContractError(

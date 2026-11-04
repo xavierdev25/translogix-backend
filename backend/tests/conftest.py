@@ -40,6 +40,7 @@ NEW_TABLES = (
     "staff_tokens",
     "staff_users",
     "tariff_quotations",  # profiles and rules keep the migration seed (see tests/tariffs)
+    "shipment_reviews",  # 1.7.0 (CR-009)
 )
 
 

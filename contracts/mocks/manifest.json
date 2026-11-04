@@ -1,5 +1,5 @@
 {
-  "contract_version": "1.6.0",
+  "contract_version": "1.7.0",
   "match_semantics": {
     "path": "valores exactos de parámetros de ruta",
     "body": "subconjunto exacto del cuerpo JSON de la petición",
@@ -856,6 +856,11 @@
       ],
       "errors": [
         {
+          "status": 401,
+          "code": "NO_AUTENTICADO",
+          "example": "examples/error.no-autenticado.json"
+        },
+        {
           "status": 403,
           "code": "NO_AUTORIZADO",
           "example": "examples/error.no-autorizado.json"
@@ -899,6 +904,11 @@
       ],
       "errors": [
         {
+          "status": 401,
+          "code": "NO_AUTENTICADO",
+          "example": "examples/error.no-autenticado.json"
+        },
+        {
           "status": 403,
           "code": "NO_AUTORIZADO",
           "example": "examples/error.no-autorizado.json"
@@ -940,6 +950,11 @@
         }
       ],
       "errors": [
+        {
+          "status": 401,
+          "code": "NO_AUTENTICADO",
+          "example": "examples/error.no-autenticado.json"
+        },
         {
           "status": 403,
           "code": "NO_AUTORIZADO",
@@ -1148,6 +1163,11 @@
       ],
       "errors": [
         {
+          "status": 401,
+          "code": "NO_AUTENTICADO",
+          "example": "examples/error.no-autenticado.json"
+        },
+        {
           "status": 403,
           "code": "NO_AUTORIZADO",
           "example": "examples/error.no-autorizado.json"
@@ -1171,6 +1191,266 @@
           "status": 503,
           "code": "LLM_NO_DISPONIBLE",
           "example": "examples/error.llm-no-disponible.json"
+        }
+      ]
+    },
+    {
+      "operationId": "getCurrentPrincipal",
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "requests": [],
+      "responses": [
+        {
+          "status": 200,
+          "example": "examples/auth.me.response.json",
+          "scenario": null,
+          "match": null,
+          "pendiente_de_servicio_real": null
+        }
+      ],
+      "errors": [
+        {
+          "status": 401,
+          "code": "NO_AUTENTICADO",
+          "example": "examples/error.no-autenticado.json"
+        },
+        {
+          "status": 403,
+          "code": "NO_AUTORIZADO",
+          "example": "examples/error.no-autorizado.json"
+        },
+        {
+          "status": 500,
+          "code": "ERROR_INTERNO",
+          "example": "examples/error.error-interno.json"
+        }
+      ]
+    },
+    {
+      "operationId": "createStaffUser",
+      "method": "POST",
+      "path": "/api/v1/internal/staff-users",
+      "requests": [
+        {
+          "example": "examples/staff-users.create.request.json",
+          "scenario": null,
+          "pendiente_de_servicio_real": null
+        }
+      ],
+      "responses": [
+        {
+          "status": 201,
+          "example": "examples/staff-users.response.json",
+          "scenario": null,
+          "match": null,
+          "pendiente_de_servicio_real": "id y fechas: los genera el servicio real"
+        }
+      ],
+      "errors": [
+        {
+          "status": 401,
+          "code": "NO_AUTENTICADO",
+          "example": "examples/error.no-autenticado.json"
+        },
+        {
+          "status": 403,
+          "code": "NO_AUTORIZADO",
+          "example": "examples/error.no-autorizado.json"
+        },
+        {
+          "status": 413,
+          "code": "CUERPO_DEMASIADO_GRANDE",
+          "example": "examples/error.cuerpo-demasiado-grande.json"
+        },
+        {
+          "status": 422,
+          "code": "VALIDACION",
+          "example": "examples/error.validacion.json"
+        },
+        {
+          "status": 500,
+          "code": "ERROR_INTERNO",
+          "example": "examples/error.error-interno.json"
+        }
+      ]
+    },
+    {
+      "operationId": "updateStaffUserRoles",
+      "method": "PATCH",
+      "path": "/api/v1/internal/staff-users/{user_id}/roles",
+      "requests": [
+        {
+          "example": "examples/staff-users.roles.request.json",
+          "scenario": null,
+          "pendiente_de_servicio_real": null
+        }
+      ],
+      "responses": [
+        {
+          "status": 200,
+          "example": "examples/staff-users.response.json",
+          "scenario": null,
+          "match": null,
+          "pendiente_de_servicio_real": "id y fechas: los genera el servicio real"
+        }
+      ],
+      "errors": [
+        {
+          "status": 401,
+          "code": "NO_AUTENTICADO",
+          "example": "examples/error.no-autenticado.json"
+        },
+        {
+          "status": 403,
+          "code": "NO_AUTORIZADO",
+          "example": "examples/error.no-autorizado.json"
+        },
+        {
+          "status": 404,
+          "code": "NO_ENCONTRADO",
+          "example": "examples/error.no-encontrado.json"
+        },
+        {
+          "status": 413,
+          "code": "CUERPO_DEMASIADO_GRANDE",
+          "example": "examples/error.cuerpo-demasiado-grande.json"
+        },
+        {
+          "status": 422,
+          "code": "VALIDACION",
+          "example": "examples/error.validacion.json"
+        },
+        {
+          "status": 500,
+          "code": "ERROR_INTERNO",
+          "example": "examples/error.error-interno.json"
+        }
+      ]
+    },
+    {
+      "operationId": "listAuditEvents",
+      "method": "GET",
+      "path": "/api/v1/internal/audit-events",
+      "requests": [],
+      "responses": [
+        {
+          "status": 200,
+          "example": "examples/audit-events.response.json",
+          "scenario": null,
+          "match": null,
+          "pendiente_de_servicio_real": "ids y fechas: los genera el servicio real"
+        }
+      ],
+      "errors": [
+        {
+          "status": 401,
+          "code": "NO_AUTENTICADO",
+          "example": "examples/error.no-autenticado.json"
+        },
+        {
+          "status": 403,
+          "code": "NO_AUTORIZADO",
+          "example": "examples/error.no-autorizado.json"
+        },
+        {
+          "status": 422,
+          "code": "VALIDACION",
+          "example": "examples/error.validacion.json"
+        },
+        {
+          "status": 500,
+          "code": "ERROR_INTERNO",
+          "example": "examples/error.error-interno.json"
+        }
+      ]
+    },
+    {
+      "operationId": "listDangerousGoods",
+      "method": "GET",
+      "path": "/api/v1/internal/dangerous-goods",
+      "requests": [],
+      "responses": [
+        {
+          "status": 200,
+          "example": "examples/dangerous-goods.list.json",
+          "scenario": null,
+          "match": null,
+          "pendiente_de_servicio_real": "ids, guía y fechas: los genera el servicio real"
+        }
+      ],
+      "errors": [
+        {
+          "status": 401,
+          "code": "NO_AUTENTICADO",
+          "example": "examples/error.no-autenticado.json"
+        },
+        {
+          "status": 403,
+          "code": "NO_AUTORIZADO",
+          "example": "examples/error.no-autorizado.json"
+        },
+        {
+          "status": 422,
+          "code": "VALIDACION",
+          "example": "examples/error.validacion.json"
+        },
+        {
+          "status": 500,
+          "code": "ERROR_INTERNO",
+          "example": "examples/error.error-interno.json"
+        }
+      ]
+    },
+    {
+      "operationId": "reviewDangerousGoods",
+      "method": "POST",
+      "path": "/api/v1/internal/shipments/{shipment_id}/dangerous-goods-review",
+      "requests": [
+        {
+          "example": "examples/dangerous-goods.review.request.json",
+          "scenario": null,
+          "pendiente_de_servicio_real": null
+        }
+      ],
+      "responses": [
+        {
+          "status": 201,
+          "example": "examples/dangerous-goods.review.response.json",
+          "scenario": null,
+          "match": null,
+          "pendiente_de_servicio_real": "ids y fecha: los genera el servicio real"
+        }
+      ],
+      "errors": [
+        {
+          "status": 401,
+          "code": "NO_AUTENTICADO",
+          "example": "examples/error.no-autenticado.json"
+        },
+        {
+          "status": 403,
+          "code": "NO_AUTORIZADO",
+          "example": "examples/error.no-autorizado.json"
+        },
+        {
+          "status": 404,
+          "code": "NO_ENCONTRADO",
+          "example": "examples/error.no-encontrado.json"
+        },
+        {
+          "status": 413,
+          "code": "CUERPO_DEMASIADO_GRANDE",
+          "example": "examples/error.cuerpo-demasiado-grande.json"
+        },
+        {
+          "status": 422,
+          "code": "VALIDACION",
+          "example": "examples/error.validacion.json"
+        },
+        {
+          "status": 500,
+          "code": "ERROR_INTERNO",
+          "example": "examples/error.error-interno.json"
         }
       ]
     },

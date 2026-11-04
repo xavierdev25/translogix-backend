@@ -9,6 +9,7 @@ from app.shipments.domain.models import ShipmentDraft, ShipmentStatus, format_gu
 from app.shipments.infrastructure.tables import (
     GUIDE_SEQUENCE,
     ShipmentRecipientRow,
+    ShipmentReviewRow,
     ShipmentRow,
 )
 
@@ -89,3 +90,42 @@ class ShipmentRepository:
         )
         await self._session.flush()
         return shipment_id
+
+
+class ShipmentReviewRepository:
+    """Dangerous-goods reviews (CR-009). Reads never touch ``shipment_recipients`` (PII)."""
+
+    def __init__(self, session: AsyncSession) -> None:
+        self._session = session
+
+    async def dangerous(
+        self, *, reviewed: bool | None, limit: int
+    ) -> list[tuple[ShipmentRow, ShipmentReviewRow | None]]:
+        query = (
+            select(ShipmentRow, ShipmentReviewRow)
+            .outerjoin(ShipmentReviewRow, ShipmentReviewRow.shipment_id == ShipmentRow.id)
+            .where(ShipmentRow.mercancia_peligrosa.is_(True))
+            .order_by(ShipmentRow.created_at.desc())
+            .limit(limit)
+        )
+        if reviewed is True:
+            query = query.where(ShipmentReviewRow.id.is_not(None))
+        elif reviewed is False:
+            query = query.where(ShipmentReviewRow.id.is_(None))
+        return [
+            (shipment, review) for shipment, review in (await self._session.execute(query)).all()
+        ]
+
+    async def shipment(self, shipment_id: UUID) -> ShipmentRow | None:
+        row: ShipmentRow | None = await self._session.get(ShipmentRow, shipment_id)
+        return row
+
+    async def review_of(self, shipment_id: UUID) -> ShipmentReviewRow | None:
+        row: ShipmentReviewRow | None = await self._session.scalar(
+            select(ShipmentReviewRow).where(ShipmentReviewRow.shipment_id == shipment_id)
+        )
+        return row
+
+    async def add(self, review: ShipmentReviewRow) -> None:
+        self._session.add(review)
+        await self._session.flush()

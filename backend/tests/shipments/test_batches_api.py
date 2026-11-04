@@ -69,10 +69,14 @@ async def test_missing_invalid_revoked_and_unauthorised_credentials(app: FastAPI
         assert response.status_code == 403
         assert response.json()["error"]["code"] == "NO_AUTORIZADO"
     assert await scalar(app, "SELECT count(*) FROM shipment_batches") == 0
+    # 1.7.0 (CR-009): 401 is audited as auth.failed and 403 as access.denied.
     failures = await scalar(
         app, "SELECT count(*) FROM api_audit_events WHERE action = 'auth.failed'"
     )
-    assert failures == 6
+    denied = await scalar(
+        app, "SELECT count(*) FROM api_audit_events WHERE action = 'access.denied'"
+    )
+    assert (failures, denied) == (4, 2)
 
 
 async def test_clients_cannot_see_each_others_batches(app: FastAPI) -> None:
@@ -457,7 +461,7 @@ def test_real_openapi_matches_the_contract_for_bulk_shipments(app: FastAPI) -> N
         for method, operation in contract["paths"][path].items():
             mine = real["paths"][path][method]
             assert mine["operationId"] == operation["operationId"]
-            assert mine["security"] == [{"ApiKey": []}]
+            assert mine["security"] == operation["security"]
             assert sorted(p["name"] for p in mine.get("parameters", [])) == sorted(
                 p["name"] for p in operation.get("parameters", [])
             )

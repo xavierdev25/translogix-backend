@@ -7,7 +7,7 @@ document from the same Pydantic models the services import, so
 implements these routes with the same paths, operation ids and models.
 """
 
-from typing import Annotated, Any, NoReturn
+from typing import Annotated, Any, Literal, NoReturn
 from uuid import UUID
 
 from fastapi import APIRouter, Body, FastAPI, File, Form, Header, Path, Query, Security, UploadFile
@@ -16,6 +16,16 @@ from fastapi.security import APIKeyHeader, HTTPAuthorizationCredentials, HTTPBea
 from pydantic import AwareDatetime
 
 from app.contracts.attachments import AttachmentUploadResponse
+from app.contracts.auth import (
+    AuditEventPage,
+    DangerousGoodsList,
+    DangerousGoodsReview,
+    DangerousGoodsReviewRequest,
+    StaffRolesUpdateRequest,
+    StaffUserCreateRequest,
+    StaffUserResponse,
+    WhoAmI,
+)
 from app.contracts.channels_http import (
     PbxSimulateRequest,
     PbxTurnRequest,
@@ -108,6 +118,9 @@ staff_token = HTTPBearer(
     auto_error=False,
 )
 StaffTokenDep = Annotated[HTTPAuthorizationCredentials | None, Security(staff_token)]
+
+# 1.7.0 (CR-009): 401 without a valid credential, 403 when its role is not allowed.
+_RBAC_ERRORS = (ErrorCode.NO_AUTENTICADO, ErrorCode.NO_AUTORIZADO)
 
 tracking = APIRouter(tags=["tracking"])
 quotation = APIRouter(tags=["cotización"])
@@ -296,27 +309,35 @@ async def simulate_pbx(body: PbxSimulateRequest) -> PbxTurnResponse:
 @handoffs.get(
     "/{handoff_id}",
     summary="Detalle y payload de un handoff",
-    description="Contiene historial de la conversación: requiere token (DEC-C13).",
-    **_route(
-        "getHandoff", priority="P0", errors=(ErrorCode.NO_AUTORIZADO, ErrorCode.NO_ENCONTRADO)
+    description=(
+        "Contiene historial de la conversación (DEC-C13). Roles: ADMIN (todos) y REVIEWER "
+        "(la cola PENDING y sus casos asignados; otro caso responde 404). `X-Admin-Token` "
+        "sigue valiendo como ADMIN (CR-009)."
     ),
+    **_route("getHandoff", priority="P0", errors=(*_RBAC_ERRORS, ErrorCode.NO_ENCONTRADO)),
 )
-async def get_handoff(handoff_id: UUID, token: AdminTokenDep) -> HandoffPayload:
+async def get_handoff(
+    handoff_id: UUID, token: AdminTokenDep, staff: StaffTokenDep
+) -> HandoffPayload:
     _spec_only()
 
 
 @handoffs.patch(
     "/{handoff_id}",
     summary="Asigna o cierra un handoff (bandeja de asesor)",
-    description="PENDING → ASSIGNED → CLOSED; emite `handoff_status` por WebSocket.",
+    description=(
+        "PENDING → ASSIGNED → CLOSED; emite `handoff_status` por WebSocket. Roles: ADMIN y "
+        "REVIEWER. Al salir de PENDING el caso queda asignado a quien actúa; un REVIEWER solo "
+        "cierra sus propios casos (CR-009)."
+    ),
     **_route(
         "updateHandoffStatus",
         priority="P1",
-        errors=(ErrorCode.NO_AUTORIZADO, ErrorCode.NO_ENCONTRADO),
+        errors=(*_RBAC_ERRORS, ErrorCode.NO_ENCONTRADO),
     ),
 )
 async def update_handoff_status(
-    handoff_id: UUID, body: HandoffStatusUpdate, token: AdminTokenDep
+    handoff_id: UUID, body: HandoffStatusUpdate, token: AdminTokenDep, staff: StaffTokenDep
 ) -> HandoffPayload:
     _spec_only()
 
@@ -324,10 +345,13 @@ async def update_handoff_status(
 @handoffs.get(
     "",
     summary="Bandeja mínima de asesor",
-    **_route("listHandoffs", priority="P1", errors=(ErrorCode.NO_AUTORIZADO,)),
+    description="ADMIN ve todos los casos; REVIEWER, la cola PENDING y los suyos (CR-009).",
+    **_route("listHandoffs", priority="P1", errors=_RBAC_ERRORS),
 )
 async def list_handoffs(
-    token: AdminTokenDep, status: Annotated[HandoffStatus | None, Query()] = None
+    token: AdminTokenDep,
+    staff: StaffTokenDep,
+    status: Annotated[HandoffStatus | None, Query()] = None,
 ) -> HandoffListResponse:
     _spec_only()
 
@@ -373,19 +397,27 @@ async def create_shipment_batch(
 @shipment_batches.get(
     "/{batch_id}",
     summary="Estado y contadores de un lote (solo el cliente propietario)",
-    description="Scope `batches:read`. Un lote de otro cliente responde 404.",
+    description=(
+        "CLIENT con scope `batches:read`: un lote de otro cliente responde 404. ADMIN (token "
+        "personal o `X-Admin-Token`) lee cualquier lote (CR-009)."
+    ),
     **_route(
         "getShipmentBatch", priority="P0", errors=(*_BATCH_AUTH_ERRORS, ErrorCode.NO_ENCONTRADO)
     ),
 )
-async def get_shipment_batch(batch_id: UUID, credentials: ApiKeyDep) -> ShipmentBatchSummary:
+async def get_shipment_batch(
+    batch_id: UUID, credentials: ApiKeyDep, staff: StaffTokenDep, token: AdminTokenDep
+) -> ShipmentBatchSummary:
     _spec_only()
 
 
 @shipment_batches.get(
     "/{batch_id}/items",
     summary="Resultados por ítem de un lote, paginados por línea",
-    description="Scope `batches:read`. Orden estable por `linea`; `cursor` es opaco.",
+    description=(
+        "CLIENT con scope `batches:read` (solo sus lotes) o ADMIN. Orden estable por `linea`; "
+        "`cursor` es opaco."
+    ),
     **_route(
         "listShipmentBatchItems",
         priority="P0",
@@ -395,6 +427,8 @@ async def get_shipment_batch(batch_id: UUID, credentials: ApiKeyDep) -> Shipment
 async def list_shipment_batch_items(
     batch_id: UUID,
     credentials: ApiKeyDep,
+    staff: StaffTokenDep,
+    token: AdminTokenDep,
     status: Annotated[BatchItemStatus | None, Query()] = None,
     cursor: Annotated[str | None, Query(max_length=64)] = None,
     limit: Annotated[int, Query(ge=1, le=ITEMS_PAGE_MAX)] = 50,
@@ -420,12 +454,111 @@ async def get_channel_metrics(
     **_route(
         "reindexRag",
         priority="P0",
-        errors=(ErrorCode.NO_AUTORIZADO, ErrorCode.LLM_NO_DISPONIBLE),
+        errors=(*_RBAC_ERRORS, ErrorCode.LLM_NO_DISPONIBLE),
     ),
 )
 async def reindex_rag(
-    token: AdminTokenDep, body: Annotated[ReindexRequest | None, Body()] = None
+    token: AdminTokenDep,
+    staff: StaffTokenDep,
+    body: Annotated[ReindexRequest | None, Body()] = None,
 ) -> ReindexResponse:
+    _spec_only()
+
+
+# --- 1.7.0 (CR-009): RBAC ------------------------------------------------------------
+
+rbac = APIRouter()
+
+
+@rbac.get(
+    "/auth/me",
+    tags=["autenticación"],
+    summary="Quién es el llamante y con qué roles",
+    description="Cualquier credencial válida: API key (CLIENT), token personal o `X-Admin-Token`.",
+    **_route("getCurrentPrincipal", priority="P0", errors=_RBAC_ERRORS),
+)
+async def get_current_principal(
+    credentials: ApiKeyDep, staff: StaffTokenDep, token: AdminTokenDep
+) -> WhoAmI:
+    _spec_only()
+
+
+@rbac.post(
+    "/internal/staff-users",
+    status_code=201,
+    tags=["administración"],
+    summary="Crea un usuario interno (ADMIN)",
+    description="Roles permitidos: ADMIN y REVIEWER. El token personal se emite por CLI.",
+    **_route("createStaffUser", priority="P1", errors=_RBAC_ERRORS),
+)
+async def create_staff_user(
+    body: StaffUserCreateRequest, staff: StaffTokenDep, token: AdminTokenDep
+) -> StaffUserResponse:
+    _spec_only()
+
+
+@rbac.patch(
+    "/internal/staff-users/{user_id}/roles",
+    tags=["administración"],
+    summary="Cambia los roles de un usuario interno (ADMIN, nunca los propios)",
+    description="Cambiar los propios roles responde 403 (`details.motivo = propio_rol`).",
+    **_route(
+        "updateStaffUserRoles", priority="P1", errors=(*_RBAC_ERRORS, ErrorCode.NO_ENCONTRADO)
+    ),
+)
+async def update_staff_user_roles(
+    user_id: UUID, body: StaffRolesUpdateRequest, staff: StaffTokenDep, token: AdminTokenDep
+) -> StaffUserResponse:
+    _spec_only()
+
+
+@rbac.get(
+    "/internal/audit-events",
+    tags=["administración"],
+    summary="Últimos eventos de auditoría de la API (ADMIN)",
+    **_route("listAuditEvents", priority="P1", errors=_RBAC_ERRORS),
+)
+async def list_audit_events(
+    staff: StaffTokenDep,
+    token: AdminTokenDep,
+    limit: Annotated[int, Query(ge=1, le=200)] = 50,
+    action: Annotated[str | None, Query(max_length=32)] = None,
+) -> AuditEventPage:
+    _spec_only()
+
+
+@rbac.get(
+    "/internal/dangerous-goods",
+    tags=["revisión"],
+    summary="Envíos declarados como mercancía peligrosa y su revisión (ADMIN, REVIEWER)",
+    description="Sin datos del destinatario.",
+    **_route("listDangerousGoods", priority="P1", errors=_RBAC_ERRORS),
+)
+async def list_dangerous_goods(
+    staff: StaffTokenDep,
+    token: AdminTokenDep,
+    estado: Annotated[Literal["PENDIENTE", "REVISADO"] | None, Query()] = None,
+    limit: Annotated[int, Query(ge=1, le=200)] = 50,
+) -> DangerousGoodsList:
+    _spec_only()
+
+
+@rbac.post(
+    "/internal/shipments/{shipment_id}/dangerous-goods-review",
+    status_code=201,
+    tags=["revisión"],
+    summary="Decisión del revisor sobre una mercancía peligrosa (REVIEWER)",
+    description=(
+        "Una decisión por envío. Registra la decisión y las observaciones; todavía no bloquea "
+        "el envío (regla pendiente: Q1 / CR-006)."
+    ),
+    **_route(
+        "reviewDangerousGoods", priority="P1", errors=(*_RBAC_ERRORS, ErrorCode.NO_ENCONTRADO)
+    ),
+)
+async def review_dangerous_goods(
+    shipment_id: UUID, body: DangerousGoodsReviewRequest, staff: StaffTokenDep
+) -> DangerousGoodsReview:
     _spec_only()
 
 
@@ -453,7 +586,7 @@ def build_contract_app() -> FastAPI:
     app = FastAPI(title=TITLE, version=CONTRACT_VERSION, description=DESCRIPTION)
     api = APIRouter(prefix=API_PREFIX)
     routers = (tracking, quotation, pqrs, attachments, chat, whatsapp, pbx, handoffs)
-    for router in (*routers, shipment_batches, ops):
+    for router in (*routers, shipment_batches, ops, rbac):
         api.include_router(router)
     app.include_router(api)
     app.include_router(root)

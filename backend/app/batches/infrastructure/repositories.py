@@ -77,6 +77,11 @@ class BatchRepository:
         )
         return row
 
+    async def get_any(self, batch_id: UUID) -> ShipmentBatchRow | None:
+        """Not scoped: only for an ADMIN's global read (CR-009). Clients always use ``get``."""
+        row: ShipmentBatchRow | None = await self._session.get(ShipmentBatchRow, batch_id)
+        return row
+
     async def get_by_reference(
         self, client_id: UUID, referencia_lote: str
     ) -> ShipmentBatchRow | None:

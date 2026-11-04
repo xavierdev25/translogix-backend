@@ -16,6 +16,16 @@ from typing import Any, Literal
 from pydantic import BaseModel
 
 from app.contracts.attachments import AttachmentUploadResponse
+from app.contracts.auth import (
+    AuditEventPage,
+    DangerousGoodsList,
+    DangerousGoodsReview,
+    DangerousGoodsReviewRequest,
+    StaffRolesUpdateRequest,
+    StaffUserCreateRequest,
+    StaffUserResponse,
+    WhoAmI,
+)
 from app.contracts.channels_http import (
     PbxSimulateRequest,
     PbxTurnRequest,
@@ -158,6 +168,56 @@ EXAMPLES: tuple[Example, ...] = (
     ),
     # --- quotation ------------------------------------------------------
     Example("cotizar.request", "Bogotá → Medellín", CotizacionRequest, (req("createQuote", "S7"),)),
+    # 1.7.0 (CR-009): RBAC
+    Example(
+        "auth.me.response", "Token personal de un REVIEWER", WhoAmI, (res("getCurrentPrincipal"),)
+    ),
+    Example(
+        "staff-users.create.request",
+        "Alta de una revisora",
+        StaffUserCreateRequest,
+        (req("createStaffUser"),),
+    ),
+    Example(
+        "staff-users.roles.request",
+        "Roles ADMIN y REVIEWER",
+        StaffRolesUpdateRequest,
+        (req("updateStaffUserRoles"),),
+    ),
+    Example(
+        "staff-users.response",
+        "Usuario interno",
+        StaffUserResponse,
+        (res("createStaffUser", 201), res("updateStaffUserRoles")),
+        pending="id y fechas: los genera el servicio real",
+    ),
+    Example(
+        "audit-events.response",
+        "Acceso denegado a un REVIEWER",
+        AuditEventPage,
+        (res("listAuditEvents"),),
+        pending="ids y fechas: los genera el servicio real",
+    ),
+    Example(
+        "dangerous-goods.list",
+        "Un envío pendiente de revisión",
+        DangerousGoodsList,
+        (res("listDangerousGoods"),),
+        pending="ids, guía y fechas: los genera el servicio real",
+    ),
+    Example(
+        "dangerous-goods.review.request",
+        "Aprobación con observaciones",
+        DangerousGoodsReviewRequest,
+        (req("reviewDangerousGoods"),),
+    ),
+    Example(
+        "dangerous-goods.review.response",
+        "Decisión registrada",
+        DangerousGoodsReview,
+        (res("reviewDangerousGoods", 201),),
+        pending="ids y fecha: los genera el servicio real",
+    ),
     Example(
         "cotizaciones.request",
         "Bogotá → Barranquilla, 6,2 kg (perfil de pruebas)",

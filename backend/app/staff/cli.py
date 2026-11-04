@@ -17,14 +17,14 @@ import sys
 from uuid import UUID
 
 from app.contracts.common import ContractError
-from app.contracts.staff import StaffRole
+from app.contracts.staff import STAFF_ROLES, Role
 from app.db.session import create_engine, create_session_factory
 from app.shared.clock import build_clock
 from app.shared.config import get_settings
 from app.staff.application.services import StaffAdminService
 from app.staff.domain.models import TOKEN_MAX_DAYS, StaffStatus
 
-ROLES = [r.value for r in StaffRole]
+ROLES = sorted(r.value for r in STAFF_ROLES)
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -58,7 +58,7 @@ async def _run(args: argparse.Namespace) -> int:
             admin = StaffAdminService(session, build_clock(settings.clock_override))
             if args.command == "create-user":
                 user = await admin.create_user(
-                    args.email, args.nombre, [StaffRole(r) for r in args.role]
+                    args.email, args.nombre, [Role(r) for r in args.role]
                 )
                 roles = ",".join(sorted(r.value for r in user.roles))
                 print(f"user_id={user.id} email={user.email} roles={roles}")
@@ -75,7 +75,7 @@ async def _run(args: argparse.Namespace) -> int:
                     return 1
                 print("revocado")
             elif args.command == "set-roles":
-                if not await admin.set_roles(args.user_id, [StaffRole(r) for r in args.role]):
+                if not await admin.set_roles(args.user_id, [Role(r) for r in args.role]):
                     print("Usuario no encontrado.", file=sys.stderr)
                     return 1
                 print(f"roles={','.join(sorted(args.role))}")

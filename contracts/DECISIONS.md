@@ -154,3 +154,15 @@ una decisión de negocio; los valores salen de mediciones de esa auditoría.
 | DEC-AUD3 | La recuperación del RAG usa **su propio pool** de conexiones. Corre dentro de un turno de chat que ya tiene una conexión, y con un solo pool una ráfaga de turnos se bloqueaba a sí misma hasta el *timeout* del pool (500). | REL-01: 10 de 24 peticiones RAG simultáneas daban 500. | CONFIRMADA |
 | DEC-AUD4 | Un turno bloquea la fila de su conversación (`SELECT … FOR UPDATE`) hasta el commit: dos turnos de la misma conversación se ejecutan uno tras otro. Se mantiene la atomicidad del turno (P08). | CON-01: dos mensajes simultáneos perdían un dato de la cotización. | CONFIRMADA |
 | DEC-AUD5 | Mientras no exista un canal asesor→cliente (CR-007), el texto de espera dice "Tu caso ya quedó registrado y está en la cola de asesores de TransLogix." Antes prometía "Te responderá en este mismo chat". | R1. | PROVISIONAL (lo sustituye CR-007) |
+
+## 9. RBAC mínimo (1.7.0, CR-009)
+
+| Id | Decisión | Fuente | Estado |
+|----|----------|--------|--------|
+| DEC-RBAC1 | Tres roles exactos (`Role`). CLIENT sale solo de una API key; ADMIN y REVIEWER, de un token personal. El rol nunca se lee de la petición | Solicitud RBAC del 2026-11-04 | CONFIRMADA |
+| DEC-RBAC2 | Los roles 1.4.0 pasan **todos** a REVIEWER (mínimo privilegio). ADMIN se concede explícitamente | Esta implementación; no había usuarios en la base de desarrollo | PROVISIONAL |
+| DEC-RBAC3 | `X-Admin-Token` cuenta como ADMIN para no romper la bandeja del front. No sirve para decidir sobre mercancía peligrosa (no identifica a una persona) | Compatibilidad | PROVISIONAL (migrar el front a tokens personales) |
+| DEC-RBAC4 | REVIEWER ve la cola PENDING y sus casos. Al tomar un caso se le asigna; solo el asignado lo cierra. ADMIN ve todo | "No puede acceder indiscriminadamente…" | CONFIRMADA |
+| DEC-RBAC5 | Solo REVIEWER decide sobre mercancía peligrosa (separación de funciones). La decisión se registra pero **no bloquea** el envío hasta resolver Q1 / CR-006 | Matriz y Q1 pendiente | PROVISIONAL |
+| DEC-RBAC6 | 401 sin credencial o con una inválida; 403 con credencial válida sin el rol. Ambos se auditan (`auth.failed` y `access.denied`) en `api_audit_events` | Requisitos de seguridad | CONFIRMADA |
+

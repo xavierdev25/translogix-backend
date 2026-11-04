@@ -11,6 +11,22 @@ partir de la Puerta A** (contrato congelado):
 Antes de la Puerta A las versiones pueden incluir ajustes no aditivos (nadie consume todavía).
 Los demás agentes proponen cambios en [`docs/contract-change-requests.md`](../docs/contract-change-requests.md).
 
+## 1.7.0 — 2026-11-04 · RBAC mínimo: ADMIN, CLIENT, REVIEWER (CR-009)
+
+Cambio **aditivo** (MINOR) en la forma: se añaden 6 operaciones y alternativas de credencial en 6
+operaciones existentes. **Dos cambios de comportamiento:**
+- sin credencial, `/handoffs*` y `/admin/rag/reindex` responden **401** (antes 403);
+- un token de personal en `POST /shipment-batches` responde **403** (antes 401).
+
+Detalle en [`docs/RBAC.md`](../docs/RBAC.md) y decisiones en [`DECISIONS.md`](DECISIONS.md) §9.
+
+| Cambio | Motivo |
+|---|---|
+| `Role` (`ADMIN`, `CLIENT`, `REVIEWER`) reemplaza a los roles de personal 1.4.0 (migración 0005: todos pasan a REVIEWER) | RBAC con tres roles exactos |
+| `GET /auth/me`, `POST /internal/staff-users`, `PATCH /internal/staff-users/{id}/roles`, `GET /internal/audit-events`, `GET /internal/dangerous-goods` y `POST /internal/shipments/{id}/dangerous-goods-review` | Matriz de autorización |
+| `/handoffs*` y reindex aceptan `StaffToken` además de `AdminToken`; los GET de lotes aceptan `StaffToken`/`AdminToken` (ADMIN, lectura global) | Roles ADMIN y REVIEWER; compatibilidad con `X-Admin-Token` |
+| 8 ejemplos nuevos (`auth.me`, `staff-users.*`, `audit-events`, `dangerous-goods.*`) | *Mocks* y validación |
+
 ## 1.6.0 — 2026-11-04 · endurecimiento tras la auditoría integral (CR-008)
 
 Cambio **aditivo** (MINOR). Implementa [CR-008](../docs/contract-change-requests.md). Ningún campo ni

@@ -34,13 +34,16 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 
 from app.audit.application.service import ApiAuditService
+from app.audit.domain.models import AuditAction
+from app.auth import routes as auth_routes
+from app.auth.dependencies import audit, require
+from app.auth.principal import Principal
 from app.batches.api import routes as batch_routes
 from app.batches.application.service import BatchService
 from app.contracts.api_spec import (
     API_PREFIX,
     DESCRIPTION,
     TITLE,
-    AdminTokenDep,
     build_contract_app,
 )
 from app.contracts.attachments import AttachmentUploadResponse
@@ -96,6 +99,7 @@ from app.contracts.reply import (
     QuickRepliesBlock,
 )
 from app.contracts.shipment_batches import ShipmentBatchRequest
+from app.contracts.staff import Role
 from app.contracts.tariffs import TipoPerfil
 from app.contracts.tracking import TrackingResponse
 from app.db.repositories import (
@@ -131,7 +135,6 @@ from app.shared.http import (
     SlidingWindowRateLimiter,
     register_error_handlers,
     request_id_of,
-    require_admin,
 )
 from app.shared.llm import OllamaChat, OllamaEmbedding
 from app.shared.logging import configure_logging
@@ -325,8 +328,14 @@ async def db_session(box: Box) -> AsyncIterator[AsyncSession]:
 Db = Annotated[AsyncSession, Depends(db_session)]
 
 
-def admin(box: Container, token: str | None) -> None:
-    require_admin(box.settings.admin_token.get_secret_value(), token)
+# 1.7.0 (CR-009): RBAC. X-Admin-Token is still accepted as ADMIN (compatibility).
+AdminOnly = Annotated[Principal, Depends(require(Role.ADMIN))]
+AdminOrReviewer = Annotated[Principal, Depends(require(Role.ADMIN, Role.REVIEWER))]
+
+
+def reviewer_scope(principal: Principal) -> UUID | None:
+    """None for an ADMIN (sees every case); the REVIEWER's own id otherwise."""
+    return None if principal.has(Role.ADMIN) else principal.staff_user_id
 
 
 # --- routers (paths and operation ids from the contract) -------------------------
@@ -699,9 +708,19 @@ async def simulate_pbx(body: PbxSimulateRequest, request: Request, box: Box) -> 
 
 
 @api.get("/handoffs/{handoff_id}", tags=["handoff"], operation_id="getHandoff")
-async def get_handoff(handoff_id: UUID, token: AdminTokenDep, box: Box, db: Db) -> HandoffPayload:
-    admin(box, token)
-    payload = await box.handoffs(db).get(handoff_id)
+async def get_handoff(
+    handoff_id: UUID, principal: AdminOrReviewer, request: Request, box: Box, db: Db
+) -> HandoffPayload:
+    payload = await box.handoffs(db).get_visible(handoff_id, reviewer_scope(principal))
+    status = 200 if payload is not None else 404
+    await audit(
+        request,
+        principal,
+        AuditAction.HANDOFF_READ,
+        status,
+        resource_type="handoff",
+        resource_id=handoff_id,
+    )
     if payload is None:
         raise ContractError(ErrorCode.NO_ENCONTRADO, details={"recurso": "handoff"})
     return payload
@@ -709,22 +728,49 @@ async def get_handoff(handoff_id: UUID, token: AdminTokenDep, box: Box, db: Db) 
 
 @api.patch("/handoffs/{handoff_id}", tags=["handoff"], operation_id="updateHandoffStatus")
 async def update_handoff_status(
-    handoff_id: UUID, body: HandoffStatusUpdate, token: AdminTokenDep, box: Box, db: Db
+    handoff_id: UUID,
+    body: HandoffStatusUpdate,
+    principal: AdminOrReviewer,
+    request: Request,
+    box: Box,
+    db: Db,
 ) -> HandoffPayload:
-    admin(box, token)
-    updated = await box.handoffs(db).update_status(handoff_id, body.status)
-    if updated is None:
-        raise ContractError(ErrorCode.NO_ENCONTRADO, details={"recurso": "handoff"})
-    await db.commit()
-    return updated
+    status = 500
+    try:
+        updated = await box.handoffs(db).update_status(
+            handoff_id,
+            body.status,
+            actor=principal.staff_user_id,
+            reviewer=reviewer_scope(principal),
+        )
+        if updated is None:
+            raise ContractError(ErrorCode.NO_ENCONTRADO, details={"recurso": "handoff"})
+        await db.commit()
+        status = 200
+        return updated
+    except ContractError as error:
+        status = error.http_status
+        raise
+    finally:
+        await audit(
+            request,
+            principal,
+            AuditAction.HANDOFF_UPDATE,
+            status,
+            resource_type="handoff",
+            resource_id=handoff_id,
+        )
 
 
 @api.get("/handoffs", tags=["handoff"], operation_id="listHandoffs")
 async def list_handoffs(
-    token: AdminTokenDep, box: Box, db: Db, status: Annotated[HandoffStatus | None, Query()] = None
+    principal: AdminOrReviewer,
+    box: Box,
+    db: Db,
+    status: Annotated[HandoffStatus | None, Query()] = None,
 ) -> HandoffListResponse:
-    admin(box, token)
-    return HandoffListResponse(items=list(await box.handoffs(db).list_by_status(status)))
+    items = await box.handoffs(db).list_by_status(status, reviewer=reviewer_scope(principal))
+    return HandoffListResponse(items=list(items))
 
 
 # --- operation ----------------------------------------------------------------------
@@ -751,16 +797,19 @@ async def get_channel_metrics(
 
 @api.post("/admin/rag/reindex", tags=["operación"], operation_id="reindexRag")
 async def reindex_rag(
-    token: AdminTokenDep, box: Box, body: Annotated[ReindexRequest | None, Body()] = None
+    principal: AdminOnly,
+    request: Request,
+    box: Box,
+    body: Annotated[ReindexRequest | None, Body()] = None,
 ) -> ReindexResponse:
-    admin(box, token)
     if box.ingestion is None or box.rag is None:
         raise ContractError(ErrorCode.NO_CONFIGURADO, details={"variable": "OLLAMA_BASE_URL"})
-    request = body or ReindexRequest()
+    wanted = body or ReindexRequest()
     report = await box.ingestion.reindex(
-        now=box.clock.now(), doc_codes=request.doc_codes, force=request.force
+        now=box.clock.now(), doc_codes=wanted.doc_codes, force=wanted.force
     )
     box.rag.invalidate()
+    await audit(request, principal, AuditAction.RAG_REINDEX, 200, resource_type="rag")
     return ReindexResponse(
         documentos=report.documentos,
         chunks=report.chunks,
@@ -865,6 +914,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     register_error_handlers(app)
     app.include_router(api)
     app.include_router(batch_routes.router)
+    app.include_router(auth_routes.router)
     app.include_router(tariff_routes.router)
     app.include_router(root)
     _publish_raw_body_schemas(app)

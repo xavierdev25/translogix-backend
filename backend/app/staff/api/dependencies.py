@@ -11,13 +11,13 @@ from fastapi import Request
 from app.audit.domain.models import ApiAuditEvent, AuditAction
 from app.contracts.api_spec import StaffTokenDep
 from app.contracts.common import ContractError
-from app.contracts.staff import StaffRole
+from app.contracts.staff import Role
 from app.shared.http import request_id_of
 from app.staff.application.services import StaffAuthenticator, require_role
 from app.staff.domain.models import StaffContext
 
 
-def staff_authenticated(*allowed: StaffRole) -> Callable[..., Awaitable[StaffContext]]:
+def staff_authenticated(*allowed: Role) -> Callable[..., Awaitable[StaffContext]]:
     if not allowed:
         raise ValueError("an internal route must name the roles it accepts")
 

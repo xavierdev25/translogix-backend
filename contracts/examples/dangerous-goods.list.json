@@ -1,0 +1,11 @@
+{
+  "items": [
+    {
+      "shipment_id": "7d1a2b3c-4e5f-4a6b-8c7d-9e0f1a2b3c4d",
+      "numero_guia": "TLX-200014-CO",
+      "codigo_trayecto": "TLX-BOG-MED-001",
+      "created_at": "2026-11-04T08:30:00-05:00",
+      "revision": null
+    }
+  ]
+}

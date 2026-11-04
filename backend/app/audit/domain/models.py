@@ -15,6 +15,16 @@ class AuditAction(StrEnum):
     BATCH_CREATE = "batch.create"
     BATCH_READ = "batch.read"
     BATCH_ITEMS_READ = "batch.items.read"
+    # 1.7.0 (CR-009): RBAC
+    ACCESS_DENIED = "access.denied"
+    STAFF_CREATE = "staff.create"
+    STAFF_ROLES_UPDATE = "staff.roles.update"
+    HANDOFF_READ = "handoff.read"
+    HANDOFF_UPDATE = "handoff.update"
+    RAG_REINDEX = "rag.reindex"
+    AUDIT_READ = "audit.read"
+    DANGEROUS_GOODS_READ = "dangerous_goods.read"
+    DANGEROUS_GOODS_REVIEW = "dangerous_goods.review"
 
 
 @dataclass(frozen=True)

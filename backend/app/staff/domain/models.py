@@ -1,4 +1,4 @@
-"""Internal users (advisors, supervisors, operators, reviewers) and their personal tokens.
+"""Internal users (roles ADMIN and REVIEWER, CR-009) and their personal tokens.
 
 A staff token is ``tlxs_<prefix>_<secret>`` (``app.shared.tokens``), always has an
 expiry and belongs to exactly one person, so every change can name who made it.
@@ -10,7 +10,7 @@ from datetime import datetime
 from enum import StrEnum
 from uuid import UUID
 
-from app.contracts.staff import StaffRole
+from app.contracts.staff import Role
 from app.shared.tokens import hash_token, new_token, prefix_of, token_pattern
 
 TOKEN_KIND = "tlxs"  # noqa: S105 - credential family prefix, not a secret
@@ -29,7 +29,7 @@ class StaffUser:
     id: UUID
     email: str
     nombre: str
-    roles: frozenset[StaffRole]
+    roles: frozenset[Role]
     estado: StaffStatus
     created_at: datetime
     updated_at: datetime
@@ -52,7 +52,7 @@ class StaffContext:
 
     staff_user_id: UUID
     token_id: UUID
-    roles: frozenset[StaffRole]
+    roles: frozenset[Role]
 
 
 def normalize_email(raw: str) -> str:

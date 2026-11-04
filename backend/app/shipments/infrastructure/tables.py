@@ -68,3 +68,16 @@ class ShipmentRecipientRow(Base):
     direccion: Mapped[str] = mapped_column(String(200))
     created_at: Mapped[datetime]
     updated_at: Mapped[datetime]
+
+
+class ShipmentReviewRow(Base):
+    """Specialised review of a dangerous-goods shipment (CR-009). One decision per shipment."""
+
+    __tablename__ = "shipment_reviews"
+
+    id: Mapped[UUID] = mapped_column(primary_key=True)
+    shipment_id: Mapped[UUID] = mapped_column(ForeignKey("shipments.id"), unique=True)
+    decision: Mapped[str] = mapped_column(String(16))
+    observaciones: Mapped[str] = mapped_column(String(2000))
+    reviewer_staff_user_id: Mapped[UUID] = mapped_column(ForeignKey("staff_users.id"))
+    created_at: Mapped[datetime]

@@ -103,16 +103,17 @@ class BatchService:
         await self._process(context, batch_id, parsed)
         return await self._response(context, batch_id), 201 if created else 200
 
-    async def summary(self, context: ClientContext, batch_id: UUID) -> ShipmentBatchSummary:
+    async def summary(self, owner: UUID | None, batch_id: UUID) -> ShipmentBatchSummary:
+        """``owner``: the CLIENT's id; None only for an ADMIN (global read, CR-009)."""
         async with self._sessions() as session:
             repo = BatchRepository(session)
-            row = await self._owned(repo, context, batch_id)
+            row = await self._owned(repo, owner, batch_id)
             counts = await repo.counts(batch_id)
         return _summary(row, counts)
 
     async def items(
         self,
-        context: ClientContext,
+        owner: UUID | None,
         batch_id: UUID,
         *,
         status: BatchItemStatus | None,
@@ -136,7 +137,7 @@ class BatchService:
             ) from None
         async with self._sessions() as session:
             repo = BatchRepository(session)
-            await self._owned(repo, context, batch_id)
+            await self._owned(repo, owner, batch_id)
             rows = await repo.results(batch_id, after_line=after, status=status, limit=limit + 1)
         page = [_result(row) for row in rows[:limit]]
         next_cursor = encode_cursor(page[-1].linea) if len(rows) > limit else None
@@ -203,9 +204,9 @@ class BatchService:
 
     @staticmethod
     async def _owned(
-        repo: BatchRepository, context: ClientContext, batch_id: UUID
+        repo: BatchRepository, owner: UUID | None, batch_id: UUID
     ) -> ShipmentBatchRow:
-        row = await repo.get(batch_id, context.client_id)
+        row = await (repo.get(batch_id, owner) if owner is not None else repo.get_any(batch_id))
         if row is None:
             raise ContractError(ErrorCode.NO_ENCONTRADO, details={"recurso": "shipment_batch"})
         return row
@@ -213,7 +214,7 @@ class BatchService:
     async def _response(self, context: ClientContext, batch_id: UUID) -> ShipmentBatchResponse:
         async with self._sessions() as session:
             repo = BatchRepository(session)
-            row = await self._owned(repo, context, batch_id)
+            row = await self._owned(repo, context.client_id, batch_id)
             counts = await repo.counts(batch_id)
             rows = await repo.results(batch_id)
         return ShipmentBatchResponse(

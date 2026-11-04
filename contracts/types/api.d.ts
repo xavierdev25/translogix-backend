@@ -228,7 +228,7 @@ export interface paths {
         };
         /**
          * Detalle y payload de un handoff
-         * @description Contiene historial de la conversación: requiere token (DEC-C13).
+         * @description Contiene historial de la conversación (DEC-C13). Roles: ADMIN (todos) y REVIEWER (la cola PENDING y sus casos asignados; otro caso responde 404). `X-Admin-Token` sigue valiendo como ADMIN (CR-009).
          */
         get: operations["getHandoff"];
         put?: never;
@@ -238,7 +238,7 @@ export interface paths {
         head?: never;
         /**
          * Asigna o cierra un handoff (bandeja de asesor)
-         * @description PENDING → ASSIGNED → CLOSED; emite `handoff_status` por WebSocket.
+         * @description PENDING → ASSIGNED → CLOSED; emite `handoff_status` por WebSocket. Roles: ADMIN y REVIEWER. Al salir de PENDING el caso queda asignado a quien actúa; un REVIEWER solo cierra sus propios casos (CR-009).
          */
         patch: operations["updateHandoffStatus"];
         trace?: never;
@@ -250,7 +250,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Bandeja mínima de asesor */
+        /**
+         * Bandeja mínima de asesor
+         * @description ADMIN ve todos los casos; REVIEWER, la cola PENDING y los suyos (CR-009).
+         */
         get: operations["listHandoffs"];
         put?: never;
         post?: never;
@@ -289,7 +292,7 @@ export interface paths {
         };
         /**
          * Estado y contadores de un lote (solo el cliente propietario)
-         * @description Scope `batches:read`. Un lote de otro cliente responde 404.
+         * @description CLIENT con scope `batches:read`: un lote de otro cliente responde 404. ADMIN (token personal o `X-Admin-Token`) lee cualquier lote (CR-009).
          */
         get: operations["getShipmentBatch"];
         put?: never;
@@ -309,7 +312,7 @@ export interface paths {
         };
         /**
          * Resultados por ítem de un lote, paginados por línea
-         * @description Scope `batches:read`. Orden estable por `linea`; `cursor` es opaco.
+         * @description CLIENT con scope `batches:read` (solo sus lotes) o ADMIN. Orden estable por `linea`; `cursor` es opaco.
          */
         get: operations["listShipmentBatchItems"];
         put?: never;
@@ -348,6 +351,123 @@ export interface paths {
         put?: never;
         /** Reindexación del corpus RAG */
         post: operations["reindexRag"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Quién es el llamante y con qué roles
+         * @description Cualquier credencial válida: API key (CLIENT), token personal o `X-Admin-Token`.
+         */
+        get: operations["getCurrentPrincipal"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/internal/staff-users": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Crea un usuario interno (ADMIN)
+         * @description Roles permitidos: ADMIN y REVIEWER. El token personal se emite por CLI.
+         */
+        post: operations["createStaffUser"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/internal/staff-users/{user_id}/roles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Cambia los roles de un usuario interno (ADMIN, nunca los propios)
+         * @description Cambiar los propios roles responde 403 (`details.motivo = propio_rol`).
+         */
+        patch: operations["updateStaffUserRoles"];
+        trace?: never;
+    };
+    "/api/v1/internal/audit-events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Últimos eventos de auditoría de la API (ADMIN) */
+        get: operations["listAuditEvents"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/internal/dangerous-goods": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Envíos declarados como mercancía peligrosa y su revisión (ADMIN, REVIEWER)
+         * @description Sin datos del destinatario.
+         */
+        get: operations["listDangerousGoods"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/internal/shipments/{shipment_id}/dangerous-goods-review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Decisión del revisor sobre una mercancía peligrosa (REVIEWER)
+         * @description Una decisión por envío. Registra la decisión y las observaciones; todavía no bloquea el envío (regla pendiente: Q1 / CR-006).
+         */
+        post: operations["reviewDangerousGoods"];
         delete?: never;
         options?: never;
         head?: never;
@@ -393,6 +513,11 @@ export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
         /**
+         * ApiScope
+         * @enum {string}
+         */
+        ApiScope: "shipments:create" | "shipments:read" | "batches:create" | "batches:read";
+        /**
          * AttachmentRef
          * @description Attachment already stored by the platform, referenced by id.
          */
@@ -425,6 +550,46 @@ export interface components {
             /** Sha256 */
             sha256: string;
         };
+        /**
+         * AuditEventItem
+         * @description Row of ``api_audit_events``. Identifiers only: no PII, no credential.
+         */
+        AuditEventItem: {
+            /**
+             * Id
+             * Format: uuid4
+             */
+            id: string;
+            /** Action */
+            action: string;
+            /** Http Status */
+            http_status: number;
+            /** Request Id */
+            request_id: string;
+            /** Client Id */
+            client_id: string | null;
+            /** Staff User Id */
+            staff_user_id: string | null;
+            /** Resource Type */
+            resource_type: string | null;
+            /** Resource Id */
+            resource_id: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
+        /** AuditEventPage */
+        AuditEventPage: {
+            /** Items */
+            items: components["schemas"]["AuditEventItem"][];
+        };
+        /**
+         * AuthMethod
+         * @enum {string}
+         */
+        AuthMethod: "API_KEY" | "STAFF_TOKEN" | "ADMIN_TOKEN";
         /**
          * BatchItemStatus
          * @enum {string}
@@ -800,6 +965,63 @@ export interface components {
              * @default provisional-v1
              */
             formula_version: string;
+        };
+        /**
+         * DangerousGoodsItem
+         * @description A shipment declared as dangerous goods, without recipient data.
+         */
+        DangerousGoodsItem: {
+            /**
+             * Shipment Id
+             * Format: uuid4
+             */
+            shipment_id: string;
+            /**
+             * Numero Guia
+             * @example TLX-984021-CO
+             */
+            numero_guia: string;
+            /** Codigo Trayecto */
+            codigo_trayecto: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** @description null: pendiente de revisión especializada. */
+            revision: components["schemas"]["DangerousGoodsReview"] | null;
+        };
+        /** DangerousGoodsList */
+        DangerousGoodsList: {
+            /** Items */
+            items: components["schemas"]["DangerousGoodsItem"][];
+        };
+        /** DangerousGoodsReview */
+        DangerousGoodsReview: {
+            /**
+             * Shipment Id
+             * Format: uuid4
+             */
+            shipment_id: string;
+            decision: components["schemas"]["ReviewDecision"];
+            /** Observaciones */
+            observaciones: string;
+            /**
+             * Reviewer Staff User Id
+             * Format: uuid4
+             */
+            reviewer_staff_user_id: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
+        /** DangerousGoodsReviewRequest */
+        DangerousGoodsReviewRequest: {
+            decision: components["schemas"]["ReviewDecision"];
+            /** Observaciones */
+            observaciones: string;
         };
         /**
          * DeliveryMode
@@ -1571,6 +1793,16 @@ export interface components {
             /** Checklist */
             checklist: components["schemas"]["ChecklistItemDetallado"][];
         };
+        /**
+         * ReviewDecision
+         * @enum {string}
+         */
+        ReviewDecision: "APROBADA" | "RECHAZADA";
+        /**
+         * Role
+         * @enum {string}
+         */
+        Role: "ADMIN" | "CLIENT" | "REVIEWER";
         /** RutaCotizada */
         RutaCotizada: {
             /** Codigo Trayecto */
@@ -1719,6 +1951,52 @@ export interface components {
             started_at: string | null;
             /** Completed At */
             completed_at: string | null;
+        };
+        /** StaffRolesUpdateRequest */
+        StaffRolesUpdateRequest: {
+            /**
+             * Roles
+             * @description Solo ADMIN o REVIEWER.
+             */
+            roles: components["schemas"]["Role"][];
+        };
+        /** StaffUserCreateRequest */
+        StaffUserCreateRequest: {
+            /** Email */
+            email: string;
+            /** Nombre */
+            nombre: string;
+            /**
+             * Roles
+             * @description Solo ADMIN o REVIEWER.
+             */
+            roles: components["schemas"]["Role"][];
+        };
+        /** StaffUserResponse */
+        StaffUserResponse: {
+            /**
+             * Id
+             * Format: uuid4
+             */
+            id: string;
+            /** Email */
+            email: string;
+            /** Nombre */
+            nombre: string;
+            /** Roles */
+            roles: components["schemas"]["Role"][];
+            /** Estado */
+            estado: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
         };
         /** TarifaAplicada */
         TarifaAplicada: {
@@ -2046,6 +2324,21 @@ export interface components {
             entry: components["schemas"]["WaEntry"][];
         } & {
             [key: string]: unknown;
+        };
+        /**
+         * WhoAmI
+         * @description ``GET /api/v1/auth/me``: who the credential belongs to.
+         */
+        WhoAmI: {
+            /** Roles */
+            roles: components["schemas"]["Role"][];
+            metodo: components["schemas"]["AuthMethod"];
+            /** Staff User Id */
+            staff_user_id: string | null;
+            /** Client Id */
+            client_id: string | null;
+            /** Scopes */
+            scopes: components["schemas"]["ApiScope"][];
         };
         /** ErrorBody */
         ErrorBody: {
@@ -3277,6 +3570,16 @@ export interface operations {
                     "application/json": components["schemas"]["HandoffPayload"];
                 };
             };
+            /** @description Códigos: NO_AUTENTICADO */
+            401: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
             /** @description Códigos: NO_AUTORIZADO */
             403: {
                 headers: {
@@ -3345,6 +3648,16 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HandoffPayload"];
+                };
+            };
+            /** @description Códigos: NO_AUTENTICADO */
+            401: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
             /** @description Códigos: NO_AUTORIZADO */
@@ -3421,6 +3734,16 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HandoffListResponse"];
+                };
+            };
+            /** @description Códigos: NO_AUTENTICADO */
+            401: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
             /** @description Códigos: NO_AUTORIZADO */
@@ -3803,6 +4126,16 @@ export interface operations {
                     "application/json": components["schemas"]["ReindexResponse"];
                 };
             };
+            /** @description Códigos: NO_AUTENTICADO */
+            401: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
             /** @description Códigos: NO_AUTORIZADO */
             403: {
                 headers: {
@@ -3845,6 +4178,452 @@ export interface operations {
             };
             /** @description Códigos: LLM_NO_DISPONIBLE */
             503: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    getCurrentPrincipal: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Identificador de correlación; se genera si falta. */
+                "X-Request-ID"?: components["parameters"]["XRequestId"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WhoAmI"];
+                };
+            };
+            /** @description Códigos: NO_AUTENTICADO */
+            401: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: NO_AUTORIZADO */
+            403: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: ERROR_INTERNO */
+            500: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    createStaffUser: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Identificador de correlación; se genera si falta. */
+                "X-Request-ID"?: components["parameters"]["XRequestId"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StaffUserCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StaffUserResponse"];
+                };
+            };
+            /** @description Códigos: NO_AUTENTICADO */
+            401: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: NO_AUTORIZADO */
+            403: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: CUERPO_DEMASIADO_GRANDE */
+            413: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: VALIDACION */
+            422: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: ERROR_INTERNO */
+            500: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    updateStaffUserRoles: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Identificador de correlación; se genera si falta. */
+                "X-Request-ID"?: components["parameters"]["XRequestId"];
+            };
+            path: {
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StaffRolesUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StaffUserResponse"];
+                };
+            };
+            /** @description Códigos: NO_AUTENTICADO */
+            401: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: NO_AUTORIZADO */
+            403: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: NO_ENCONTRADO */
+            404: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: CUERPO_DEMASIADO_GRANDE */
+            413: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: VALIDACION */
+            422: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: ERROR_INTERNO */
+            500: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    listAuditEvents: {
+        parameters: {
+            query?: {
+                limit?: number;
+                action?: string | null;
+            };
+            header?: {
+                /** @description Identificador de correlación; se genera si falta. */
+                "X-Request-ID"?: components["parameters"]["XRequestId"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuditEventPage"];
+                };
+            };
+            /** @description Códigos: NO_AUTENTICADO */
+            401: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: NO_AUTORIZADO */
+            403: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: VALIDACION */
+            422: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: ERROR_INTERNO */
+            500: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    listDangerousGoods: {
+        parameters: {
+            query?: {
+                estado?: ("PENDIENTE" | "REVISADO") | null;
+                limit?: number;
+            };
+            header?: {
+                /** @description Identificador de correlación; se genera si falta. */
+                "X-Request-ID"?: components["parameters"]["XRequestId"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DangerousGoodsList"];
+                };
+            };
+            /** @description Códigos: NO_AUTENTICADO */
+            401: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: NO_AUTORIZADO */
+            403: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: VALIDACION */
+            422: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: ERROR_INTERNO */
+            500: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    reviewDangerousGoods: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Identificador de correlación; se genera si falta. */
+                "X-Request-ID"?: components["parameters"]["XRequestId"];
+            };
+            path: {
+                shipment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DangerousGoodsReviewRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DangerousGoodsReview"];
+                };
+            };
+            /** @description Códigos: NO_AUTENTICADO */
+            401: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: NO_AUTORIZADO */
+            403: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: NO_ENCONTRADO */
+            404: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: CUERPO_DEMASIADO_GRANDE */
+            413: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: VALIDACION */
+            422: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: ERROR_INTERNO */
+            500: {
                 headers: {
                     "X-Request-ID": components["headers"]["XRequestId"];
                     [name: string]: unknown;

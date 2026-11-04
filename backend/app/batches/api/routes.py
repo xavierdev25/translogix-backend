@@ -13,9 +13,9 @@ from fastapi import APIRouter, Depends, Header, Query, Request, Response
 from fastapi.exceptions import RequestValidationError
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
-from app.audit.domain.models import ApiAuditEvent, AuditAction
-from app.clients.api.dependencies import authenticated
-from app.clients.domain.models import ClientContext
+from app.audit.domain.models import AuditAction
+from app.auth.dependencies import audit, require
+from app.auth.principal import Principal
 from app.contracts.api_spec import API_PREFIX
 from app.contracts.common import ContractError, ErrorCode
 from app.contracts.shipment_batches import (
@@ -28,12 +28,19 @@ from app.contracts.shipment_batches import (
     ShipmentBatchResponse,
     ShipmentBatchSummary,
 )
-from app.shared.http import request_id_of
+from app.contracts.staff import Role
 
 router = APIRouter(prefix=f"{API_PREFIX}/shipment-batches", tags=["envíos masivos"])
 
-CanCreate = Annotated[ClientContext, Depends(authenticated(ApiScope.BATCHES_CREATE))]
-CanRead = Annotated[ClientContext, Depends(authenticated(ApiScope.BATCHES_READ))]
+CanCreate = Annotated[Principal, Depends(require(Role.CLIENT, scope=ApiScope.BATCHES_CREATE))]
+# 1.7.0 (CR-009): an ADMIN reads any batch; a CLIENT only its own (the repository filters).
+CanRead = Annotated[
+    Principal, Depends(require(Role.CLIENT, Role.ADMIN, scope=ApiScope.BATCHES_READ))
+]
+
+
+def _owner(principal: Principal) -> UUID | None:
+    return principal.client_id if principal.has(Role.CLIENT) else None
 
 
 class _Envelope(BaseModel):
@@ -64,23 +71,13 @@ async def _read_body(request: Request, max_bytes: int) -> bytes:
 
 async def _audited(
     request: Request,
-    context: ClientContext,
+    principal: Principal,
     action: AuditAction,
     resource_id: UUID | None,
     status: int,
 ) -> None:
-    box = request.app.state.container
-    await box.audit.record(
-        ApiAuditEvent(
-            action=action,
-            http_status=status,
-            request_id=request_id_of(request),
-            created_at=box.clock.now(),
-            client_id=context.client_id,
-            api_key_id=context.api_key_id,
-            resource_type="shipment_batch",
-            resource_id=str(resource_id) if resource_id else None,
-        )
+    await audit(
+        request, principal, action, status, resource_type="shipment_batch", resource_id=resource_id
     )
 
 
@@ -106,12 +103,13 @@ async def _audited(
 async def create_shipment_batch(
     request: Request,
     response: Response,
-    context: CanCreate,
+    principal: CanCreate,
     idempotency_key: Annotated[
         str | None, Header(alias=IDEMPOTENCY_KEY_HEADER, max_length=64)
     ] = None,
 ) -> ShipmentBatchResponse:
     box = request.app.state.container
+    context = principal.client_context()
     status, batch_id = 500, None
     try:
         box.batch_limiter.check(f"batches:{context.client_id}")
@@ -156,30 +154,30 @@ async def create_shipment_batch(
         status = 422
         raise
     finally:
-        await _audited(request, context, AuditAction.BATCH_CREATE, batch_id, status)
+        await _audited(request, principal, AuditAction.BATCH_CREATE, batch_id, status)
 
 
 @router.get("/{batch_id}", operation_id="getShipmentBatch")
 async def get_shipment_batch(
-    batch_id: UUID, request: Request, context: CanRead
+    batch_id: UUID, request: Request, principal: CanRead
 ) -> ShipmentBatchSummary:
     status = 500
     try:
-        summary = await request.app.state.container.batches.summary(context, batch_id)
+        summary = await request.app.state.container.batches.summary(_owner(principal), batch_id)
         status = 200
         return cast(ShipmentBatchSummary, summary)
     except ContractError as error:
         status = error.http_status
         raise
     finally:
-        await _audited(request, context, AuditAction.BATCH_READ, batch_id, status)
+        await _audited(request, principal, AuditAction.BATCH_READ, batch_id, status)
 
 
 @router.get("/{batch_id}/items", operation_id="listShipmentBatchItems")
 async def list_shipment_batch_items(
     batch_id: UUID,
     request: Request,
-    context: CanRead,
+    principal: CanRead,
     status: Annotated[BatchItemStatus | None, Query()] = None,
     cursor: Annotated[str | None, Query(max_length=64)] = None,
     limit: Annotated[int, Query(ge=1, le=ITEMS_PAGE_MAX)] = 50,
@@ -187,7 +185,7 @@ async def list_shipment_batch_items(
     http_status = 500
     try:
         page = await request.app.state.container.batches.items(
-            context, batch_id, status=status, cursor=cursor, limit=limit
+            _owner(principal), batch_id, status=status, cursor=cursor, limit=limit
         )
         http_status = 200
         return cast(ShipmentBatchItemsPage, page)
@@ -195,4 +193,4 @@ async def list_shipment_batch_items(
         http_status = error.http_status
         raise
     finally:
-        await _audited(request, context, AuditAction.BATCH_ITEMS_READ, batch_id, http_status)
+        await _audited(request, principal, AuditAction.BATCH_ITEMS_READ, batch_id, http_status)

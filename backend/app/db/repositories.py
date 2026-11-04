@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import Any
 from uuid import UUID, uuid4
 
-from sqlalchemy import func, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -178,16 +178,37 @@ class HandoffRepository:
         row = await self._session.get(HandoffRow, handoff_id)
         return HandoffPayload.model_validate(row.payload_json) if row else None
 
-    async def update(self, payload: HandoffPayload) -> None:
+    async def get_with_assignee(
+        self, handoff_id: UUID
+    ) -> tuple[HandoffPayload, UUID | None] | None:
+        row = await self._session.get(HandoffRow, handoff_id)
+        if row is None:
+            return None
+        return HandoffPayload.model_validate(row.payload_json), row.assigned_staff_user_id
+
+    async def update(self, payload: HandoffPayload, *, assignee: UUID | None = None) -> None:
+        """``assignee`` is only written when given: closing keeps who took the case."""
         row = await self._session.get_one(HandoffRow, payload.handoff_id)
         row.payload_json = payload.model_dump(mode="json")
         row.status = payload.status.value
+        if assignee is not None:
+            row.assigned_staff_user_id = assignee
         await self._session.flush()
 
-    async def list_by_status(self, status: HandoffStatus | None) -> list[HandoffSummary]:
+    async def list_by_status(
+        self, status: HandoffStatus | None, *, reviewer: UUID | None = None
+    ) -> list[HandoffSummary]:
+        """``reviewer`` set: only the PENDING queue and the cases assigned to that REVIEWER."""
         query = select(HandoffRow).order_by(HandoffRow.created_at.desc())
         if status is not None:
             query = query.where(HandoffRow.status == status.value)
+        if reviewer is not None:
+            query = query.where(
+                or_(
+                    HandoffRow.status == HandoffStatus.PENDING.value,
+                    HandoffRow.assigned_staff_user_id == reviewer,
+                )
+            )
         payloads = [
             HandoffPayload.model_validate(r.payload_json)
             for r in await self._session.scalars(query)

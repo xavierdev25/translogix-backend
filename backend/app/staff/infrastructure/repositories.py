@@ -5,7 +5,7 @@ from uuid import UUID
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.contracts.staff import StaffRole
+from app.contracts.staff import Role
 from app.staff.domain.models import StaffStatus, StaffTokenRecord, StaffUser
 from app.staff.infrastructure.tables import StaffTokenRow, StaffUserRow
 
@@ -15,7 +15,7 @@ def _user(row: StaffUserRow) -> StaffUser:
         id=row.id,
         email=row.email,
         nombre=row.nombre,
-        roles=frozenset(StaffRole(r) for r in row.roles),
+        roles=frozenset(Role(r) for r in row.roles),
         estado=StaffStatus(row.estado),
         created_at=row.created_at,
         updated_at=row.updated_at,
@@ -34,7 +34,7 @@ def _token(row: StaffTokenRow) -> StaffTokenRecord:
     )
 
 
-def _roles(roles: Iterable[StaffRole]) -> list[str]:
+def _roles(roles: Iterable[Role]) -> list[str]:
     return sorted(r.value for r in roles)
 
 
@@ -69,7 +69,7 @@ class StaffUserRepository:
         user_id: UUID,
         at: datetime,
         *,
-        roles: Iterable[StaffRole] | None = None,
+        roles: Iterable[Role] | None = None,
         estado: StaffStatus | None = None,
     ) -> bool:
         values: dict[str, object] = {"updated_at": at}
