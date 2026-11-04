@@ -44,6 +44,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/cotizaciones": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Cotización con perfil tarifario versionado (fórmula excedente-v1)
+         * @description 1.5.0 (CR-003). Peso facturable = máx(real, volumétrico); flete = base + excedente x precio/kg; IVA según el perfil. Persiste un snapshot inmutable. Con un perfil TEST_ONLY, `precio_comercial` es false. `/cotizar` no cambia.
+         */
+        post: operations["createProfileQuotation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/pqrs/crear-ticket": {
         parameters: {
             query?: never;
@@ -600,6 +620,13 @@ export interface components {
             /** Items */
             items: components["schemas"]["CitationItem"][];
         };
+        /** CiudadRef */
+        CiudadRef: {
+            /** Codigo Dane */
+            codigo_dane: string;
+            /** Municipio */
+            municipio: string;
+        };
         /**
          * ColaDestino
          * @enum {string}
@@ -638,6 +665,78 @@ export interface components {
          * @enum {string}
          */
         ConversationStatus: "ACTIVE" | "AWAITING_USER" | "IDLE" | "ESCALATED" | "CLOSED";
+        /** CotizacionPerfilRequest */
+        CotizacionPerfilRequest: {
+            /**
+             * Origen
+             * @description Se registra; no cambia el precio (DEC-TAR5).
+             */
+            origen: string;
+            /**
+             * Destino
+             * @example Barranquilla
+             */
+            destino: string;
+            /** Peso Real Kg */
+            peso_real_kg: number | string;
+            /** Alto Cm */
+            alto_cm: number | string;
+            /** Ancho Cm */
+            ancho_cm: number | string;
+            /** Largo Cm */
+            largo_cm: number | string;
+        };
+        /** CotizacionPerfilResponse */
+        CotizacionPerfilResponse: {
+            /**
+             * Cotizacion Id
+             * Format: uuid4
+             */
+            cotizacion_id: string;
+            /**
+             * Formula Version
+             * @example excedente-v1
+             */
+            formula_version: string;
+            /**
+             * Precio Comercial
+             * @description Siempre false con un perfil TEST_ONLY.
+             */
+            precio_comercial: boolean;
+            origen: components["schemas"]["CiudadRef"];
+            destino: components["schemas"]["CiudadRef"];
+            /** Peso Real Kg */
+            peso_real_kg: number;
+            /** Peso Volumetrico Kg */
+            peso_volumetrico_kg: number;
+            /** Peso Facturable Kg */
+            peso_facturable_kg: number;
+            /** Peso Excedente Kg */
+            peso_excedente_kg: number;
+            tarifa: components["schemas"]["TarifaPerfilAplicada"];
+            /**
+             * Flete Cop
+             * @description Pesos colombianos (COP), entero.
+             */
+            flete_cop: number;
+            /**
+             * Iva Cop
+             * @description Pesos colombianos (COP), entero.
+             */
+            iva_cop: number;
+            /**
+             * Total Cop
+             * @description Pesos colombianos (COP), entero.
+             */
+            total_cop: number;
+            /** Advertencias */
+            advertencias: string[];
+            /**
+             * Calculado En
+             * Format: date-time
+             */
+            calculado_en: string;
+        };
         /** CotizacionRequest */
         CotizacionRequest: {
             /**
@@ -1634,6 +1733,38 @@ export interface components {
              */
             cop_por_kg: number;
         };
+        /**
+         * TarifaPerfilAplicada
+         * @description Copy of the rule used: the quote never depends on the profile changing later.
+         */
+        TarifaPerfilAplicada: {
+            /**
+             * Perfil Id
+             * Format: uuid4
+             */
+            perfil_id: string;
+            /** Perfil Nombre */
+            perfil_nombre: string;
+            /** Perfil Version */
+            perfil_version: number;
+            tipo_perfil: components["schemas"]["TipoPerfil"];
+            /**
+             * Base Cop
+             * @description Pesos colombianos (COP), entero.
+             */
+            base_cop: number;
+            /** Peso Incluido Kg */
+            peso_incluido_kg: number;
+            /**
+             * Precio Kg Excedente Cop
+             * @description Pesos colombianos (COP), entero.
+             */
+            precio_kg_excedente_cop: number;
+            /** Divisor Volumetrico */
+            divisor_volumetrico: number;
+            /** Iva Pct */
+            iva_pct: number;
+        };
         /** TextBlock */
         TextBlock: {
             /**
@@ -1649,6 +1780,11 @@ export interface components {
          * @enum {string}
          */
         TipoNovedad: "AVERIA_APARENTE" | "AVERIA_NO_APARENTE" | "PERDIDA_TOTAL" | "SAQUEO" | "OTRO";
+        /**
+         * TipoPerfil
+         * @enum {string}
+         */
+        TipoPerfil: "TEST_ONLY" | "COMMERCIAL";
         /** TrackingCardBlock */
         TrackingCardBlock: {
             /**
@@ -2448,6 +2584,64 @@ export interface operations {
             };
             /** @description Códigos: ERROR_INTERNO */
             500: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    createProfileQuotation: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Identificador de correlación; se genera si falta. */
+                "X-Request-ID"?: components["parameters"]["XRequestId"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CotizacionPerfilRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CotizacionPerfilResponse"];
+                };
+            };
+            /** @description Códigos: VALIDACION, CIUDAD_NO_RECONOCIDA, CIUDAD_NO_CUBIERTA, TARIFA_NO_DISPONIBLE */
+            422: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: ERROR_INTERNO */
+            500: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: NO_CONFIGURADO */
+            503: {
                 headers: {
                     "X-Request-ID": components["headers"]["XRequestId"];
                     [name: string]: unknown;

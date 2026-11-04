@@ -96,6 +96,7 @@ from app.contracts.reply import (
     QuickRepliesBlock,
 )
 from app.contracts.shipment_batches import ShipmentBatchRequest
+from app.contracts.tariffs import TipoPerfil
 from app.contracts.tracking import TrackingResponse
 from app.db.repositories import (
     AttachmentRepository,
@@ -134,6 +135,8 @@ from app.shared.http import (
 from app.shared.llm import OllamaChat, OllamaEmbedding
 from app.shared.logging import configure_logging
 from app.shipments.application.service import ShipmentService, tariff_version
+from app.tariffs.api import routes as tariff_routes
+from app.tariffs.application.service import TariffQuotationService
 
 CONFIG_DIR = REPO_ROOT / "data" / "config"
 
@@ -161,6 +164,7 @@ class Container:
     shipments: ShipmentService
     batches: BatchService
     batch_limiter: SlidingWindowRateLimiter
+    tariff_quotes: TariffQuotationService
 
     def pqrs(self, session: AsyncSession) -> PqrsService:
         return PqrsService(
@@ -280,6 +284,9 @@ def build_container(settings: Settings) -> Container:
             sessions, shipments, clock, lease_seconds=settings.batch_lease_seconds
         ),
         batch_limiter=SlidingWindowRateLimiter(settings.batch_rate_limit_per_minute),
+        tariff_quotes=TariffQuotationService(
+            sessions, tariffs, clock, environment=TipoPerfil(settings.tariff_environment)
+        ),
     )
 
 
@@ -815,12 +822,22 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         CORSMiddleware,
         allow_origins=settings.cors_allow_origins,
         allow_methods=["GET", "POST", "PATCH"],
-        allow_headers=["Content-Type", "X-Request-ID", "X-Admin-Token", "X-Client-Id"],
+        # Authorization carries the B2B API key and the staff token (1.3.0/1.4.0).
+        allow_headers=[
+            "Content-Type",
+            "Authorization",
+            "Idempotency-Key",
+            "X-Request-ID",
+            "X-Admin-Token",
+            "X-Client-Id",
+        ],
+        expose_headers=["X-Request-ID"],
     )
     app.add_middleware(RequestIdMiddleware)
     register_error_handlers(app)
     app.include_router(api)
     app.include_router(batch_routes.router)
+    app.include_router(tariff_routes.router)
     app.include_router(root)
     _publish_raw_body_schemas(app)
     return app

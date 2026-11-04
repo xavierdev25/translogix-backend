@@ -1,22 +1,20 @@
 """Enterprise clients and their API keys (B2B integrations).
 
-An API key has the form ``tlx_<prefix>_<secret>``: the prefix is a public
-identifier used to find the key, the secret never leaves the response that
-created it. Only a SHA-256 of the full key is stored; keys are random with
-256 bits of entropy, so a slow password hash is not needed.
+An API key has the form ``tlx_<prefix>_<secret>`` (see ``app.shared.tokens``): the
+prefix is a public identifier used to find the key, the secret never leaves the
+response that created it, and only its SHA-256 is stored.
 """
 
-import hashlib
 import re
-import secrets
 from dataclasses import dataclass
 from datetime import datetime
 from enum import StrEnum
 from uuid import UUID
 
 from app.contracts.shipment_batches import ApiScope
+from app.shared.tokens import hash_token, new_token, prefix_of, token_pattern
 
-KEY_PATTERN = re.compile(r"^tlx_([0-9a-f]{12})_([A-Za-z0-9_-]{43})$")
+KEY_PATTERN = token_pattern("tlx")
 _NIT_PATTERN = re.compile(r"^\d{6,12}(-\d)?$")
 
 
@@ -66,14 +64,12 @@ def normalize_nit(raw: str) -> str:
 
 def new_api_key() -> tuple[str, str]:
     """(prefix, full key). The full key is shown once and never stored."""
-    prefix = secrets.token_hex(6)
-    return prefix, f"tlx_{prefix}_{secrets.token_urlsafe(32)}"
+    return new_token("tlx")
 
 
 def key_prefix_of(full_key: str) -> str | None:
-    match = KEY_PATTERN.match(full_key)
-    return match.group(1) if match else None
+    return prefix_of(full_key, KEY_PATTERN)
 
 
 def hash_api_key(full_key: str) -> str:
-    return hashlib.sha256(full_key.encode()).hexdigest()
+    return hash_token(full_key)

@@ -25,5 +25,6 @@ class ApiAuditEvent:
     created_at: datetime
     client_id: UUID | None = None
     api_key_id: UUID | None = None
+    staff_user_id: UUID | None = None  # 1.4.0: internal actor (CR-002)
     resource_type: str | None = None
     resource_id: str | None = None

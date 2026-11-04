@@ -66,6 +66,8 @@ class Settings(BaseSettings):
     batch_max_body_bytes: int = Field(default=2 * 1024 * 1024, gt=0)
     batch_rate_limit_per_minute: int = Field(default=10, ge=0)  # 0 = sin límite
     batch_lease_seconds: int = Field(default=60, gt=0)
+    # Tariff profiles (contract 1.5.0): only profiles of this type are used.
+    tariff_environment: Literal["TEST_ONLY", "COMMERCIAL"] = "TEST_ONLY"
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
     clock_override: AwareDatetime | None = None
 

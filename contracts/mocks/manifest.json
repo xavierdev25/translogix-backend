@@ -1,5 +1,5 @@
 {
-  "contract_version": "1.3.0",
+  "contract_version": "1.5.0",
   "match_semantics": {
     "path": "valores exactos de parámetros de ruta",
     "body": "subconjunto exacto del cuerpo JSON de la petición",
@@ -209,6 +209,59 @@
           "status": 500,
           "code": "ERROR_INTERNO",
           "example": "examples/error.error-interno.json"
+        }
+      ]
+    },
+    {
+      "operationId": "createProfileQuotation",
+      "method": "POST",
+      "path": "/api/v1/cotizaciones",
+      "requests": [
+        {
+          "example": "examples/cotizaciones.request.json",
+          "scenario": null,
+          "pendiente_de_servicio_real": null
+        }
+      ],
+      "responses": [
+        {
+          "status": 201,
+          "example": "examples/cotizaciones.response.json",
+          "scenario": null,
+          "match": null,
+          "pendiente_de_servicio_real": "cotizacion_id y calculado_en: los genera el servicio real"
+        }
+      ],
+      "errors": [
+        {
+          "status": 422,
+          "code": "VALIDACION",
+          "example": "examples/error.validacion.json"
+        },
+        {
+          "status": 422,
+          "code": "CIUDAD_NO_RECONOCIDA",
+          "example": "examples/error.ciudad-no-reconocida.json"
+        },
+        {
+          "status": 422,
+          "code": "CIUDAD_NO_CUBIERTA",
+          "example": "examples/error.ciudad-no-cubierta.json"
+        },
+        {
+          "status": 422,
+          "code": "TARIFA_NO_DISPONIBLE",
+          "example": "examples/error.tarifa-no-disponible.json"
+        },
+        {
+          "status": 500,
+          "code": "ERROR_INTERNO",
+          "example": "examples/error.error-interno.json"
+        },
+        {
+          "status": 503,
+          "code": "NO_CONFIGURADO",
+          "example": "examples/error.no-configurado.json"
         }
       ]
     },

@@ -52,6 +52,7 @@ from app.contracts.shipment_batches import (
     ShipmentBatchResponse,
     ShipmentBatchSummary,
 )
+from app.contracts.tariffs import CotizacionPerfilRequest, CotizacionPerfilResponse
 from app.contracts.tracking import TrackingResponse
 from app.contracts.ws import WsHandoffStatusEvent
 
@@ -157,6 +158,19 @@ EXAMPLES: tuple[Example, ...] = (
     ),
     # --- quotation ------------------------------------------------------
     Example("cotizar.request", "Bogotá → Medellín", CotizacionRequest, (req("createQuote", "S7"),)),
+    Example(
+        "cotizaciones.request",
+        "Bogotá → Barranquilla, 6,2 kg (perfil de pruebas)",
+        CotizacionPerfilRequest,
+        (req("createProfileQuotation"),),
+    ),
+    Example(
+        "cotizaciones.response",
+        "Flete 31.500 + IVA 19 % = 37.485 (TEST_ONLY, excedente-v1)",
+        CotizacionPerfilResponse,
+        (res("createProfileQuotation", 201),),
+        pending="cotizacion_id y calculado_en: los genera el servicio real",
+    ),
     Example(
         "cotizar.response",
         "Bogotá → Medellín: total 190.975",

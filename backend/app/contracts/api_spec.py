@@ -47,6 +47,7 @@ from app.contracts.shipment_batches import (
     ShipmentBatchResponse,
     ShipmentBatchSummary,
 )
+from app.contracts.tariffs import CotizacionPerfilRequest, CotizacionPerfilResponse
 from app.contracts.tracking import TrackingResponse
 
 API_PREFIX = "/api/v1"
@@ -100,6 +101,14 @@ api_key = HTTPBearer(
 )
 ApiKeyDep = Annotated[HTTPAuthorizationCredentials | None, Security(api_key)]
 
+# 1.4.0 (CR-002): personal token of internal staff, for the routes under /api/v1/internal/.
+staff_token = HTTPBearer(
+    scheme_name="StaffToken",
+    description="Token personal de un usuario interno: `Authorization: Bearer <tlxs_…>`.",
+    auto_error=False,
+)
+StaffTokenDep = Annotated[HTTPAuthorizationCredentials | None, Security(staff_token)]
+
 tracking = APIRouter(tags=["tracking"])
 quotation = APIRouter(tags=["cotización"])
 pqrs = APIRouter(tags=["pqrs"])
@@ -142,6 +151,30 @@ async def get_tracking(guia: Annotated[str, Path(max_length=64)]) -> TrackingRes
     ),
 )
 async def create_quote(body: CotizacionRequest) -> CotizacionResponse:
+    _spec_only()
+
+
+@quotation.post(
+    "/cotizaciones",
+    status_code=201,
+    summary="Cotización con perfil tarifario versionado (fórmula excedente-v1)",
+    description=(
+        "1.5.0 (CR-003). Peso facturable = máx(real, volumétrico); flete = base + excedente x "
+        "precio/kg; IVA según el perfil. Persiste un snapshot inmutable. Con un perfil "
+        "TEST_ONLY, `precio_comercial` es false. `/cotizar` no cambia."
+    ),
+    **_route(
+        "createProfileQuotation",
+        priority="P1",
+        errors=(
+            ErrorCode.CIUDAD_NO_RECONOCIDA,
+            ErrorCode.CIUDAD_NO_CUBIERTA,
+            ErrorCode.TARIFA_NO_DISPONIBLE,
+            ErrorCode.NO_CONFIGURADO,
+        ),
+    ),
+)
+async def create_profile_quotation(body: CotizacionPerfilRequest) -> CotizacionPerfilResponse:
     _spec_only()
 
 

@@ -11,6 +11,30 @@ partir de la Puerta A** (contrato congelado):
 Antes de la Puerta A las versiones pueden incluir ajustes no aditivos (nadie consume todavía).
 Los demás agentes proponen cambios en [`docs/contract-change-requests.md`](../docs/contract-change-requests.md).
 
+## 1.5.0 — 2026-11-04 · cotización por perfiles tarifarios (CR-003)
+
+Cambio **aditivo** (MINOR). Implementa [CR-003](../docs/contract-change-requests.md) con las decisiones
+de negocio D2–D5. `POST /cotizar` (`provisional-v1`) y el chat no cambian. Decisiones en
+[`DECISIONS.md`](DECISIONS.md) §7 (DEC-TAR1 a DEC-TAR7).
+
+| Cambio | Motivo |
+|--------|--------|
+| `POST /api/v1/cotizaciones` (P1, `createProfileQuotation`): fórmula `excedente-v1` con peso facturable e IVA del perfil; persiste un snapshot inmutable. | Spec 1.1 §6; CR-003. |
+| `tariffs.py`: `CotizacionPerfilRequest` (peso y medidas con 2 decimales), `CotizacionPerfilResponse` (valida su propia aritmética), `TarifaPerfilAplicada`, `CiudadRef` y `TipoPerfil` (`TEST_ONLY`/`COMMERCIAL`). | Spec 1.1 §6.3 y §6.5. |
+| `EnvVar.TARIFF_ENVIRONMENT` (`TEST_ONLY` por defecto). | Un perfil TEST_ONLY nunca confirma un precio comercial (spec 1.1 §5.1). |
+| 2 ejemplos (`cotizaciones.*`): Bogotá → Barranquilla, 6,2 kg: flete 31.500 + IVA 5.985 = 37.485. | Mocks y validación del YAML. |
+
+## 1.4.0 — 2026-11-04 · identidades internas (CR-002)
+
+Cambio **aditivo** (MINOR). Implementa [CR-002](../docs/contract-change-requests.md). Ninguna operación
+HTTP existente cambia y no se añade ningún endpoint: las rutas internas que usarán este esquema llegan
+con CR-004 y CR-005. Decisiones en [`DECISIONS.md`](DECISIONS.md) §6 (DEC-STF1 a DEC-STF5).
+
+| Cambio | Motivo |
+|--------|--------|
+| `staff.py`: `StaffRole` (`ASESOR`, `SUPERVISOR`, `OPERADOR_LOGISTICO` y `REVISOR_ESPECIALIZADO`). | CR-002: el asesor es una identidad interna autenticada (spec 1.1 §5.3). |
+| `api_spec.py`: esquema de seguridad `StaffToken` (`Authorization: Bearer tlxs_…`) y `StaffTokenDep`, separados de `ApiKey`. Aún no lo usa ninguna ruta publicada, así que el OpenAPI solo cambia de versión. | CR-002. |
+
 ## 1.3.0 — 2026-11-04 · envíos masivos B2B (P0)
 
 Cambio **aditivo** (MINOR): nada existente cambia de forma ni de comportamiento.

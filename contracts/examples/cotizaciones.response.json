@@ -1,0 +1,33 @@
+{
+  "cotizacion_id": "2d6f8a1c-3b5e-4c7d-9e0f-1a2b3c4d5e6f",
+  "formula_version": "excedente-v1",
+  "precio_comercial": false,
+  "origen": {
+    "codigo_dane": "11001",
+    "municipio": "Bogotá D.C."
+  },
+  "destino": {
+    "codigo_dane": "08001",
+    "municipio": "Barranquilla"
+  },
+  "peso_real_kg": 6.2,
+  "peso_volumetrico_kg": 6.0,
+  "peso_facturable_kg": 6.2,
+  "peso_excedente_kg": 0.7,
+  "tarifa": {
+    "perfil_id": "7c3b2a10-5d4e-4f6a-9b8c-0d1e2f3a4b5c",
+    "perfil_nombre": "matriz-pruebas",
+    "perfil_version": 1,
+    "tipo_perfil": "TEST_ONLY",
+    "base_cop": 28000,
+    "peso_incluido_kg": 5.5,
+    "precio_kg_excedente_cop": 5000,
+    "divisor_volumetrico": 4000,
+    "iva_pct": 19.0
+  },
+  "flete_cop": 31500,
+  "iva_cop": 5985,
+  "total_cop": 37485,
+  "advertencias": [],
+  "calculado_en": "2026-11-04T10:00:00-05:00"
+}

@@ -1,16 +1,17 @@
-"""PostgreSQL fixtures for the bulk-shipment tests.
+"""PostgreSQL fixtures shared by the integration tests (bulk shipments, staff identities).
 
 They run against ``TEST_DATABASE_URL`` (default: the local ``translogix_test``), migrate
-it to head once per session and empty the new tables before each test. The database
-name must end in ``_test``: these fixtures truncate tables.
+it to head once per session and empty the B2B and staff tables before each test. The
+database name must end in ``_test``: these fixtures truncate tables. Contract tests do
+not request them and never touch a database.
 """
 
 import os
 import socket
 import subprocess
 import sys
-from collections.abc import AsyncIterator, Callable
-from contextlib import AbstractAsyncContextManager, asynccontextmanager
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any
 
@@ -21,8 +22,9 @@ from sqlalchemy.engine import make_url
 
 from app.main import create_app
 from app.shared.config import Settings
+from tests.db import AppFactory
 
-BACKEND = Path(__file__).resolve().parents[2]
+BACKEND = Path(__file__).resolve().parents[1]
 TEST_DATABASE_URL = os.environ.get(
     "TEST_DATABASE_URL", "postgresql+asyncpg://postgres@localhost:54329/translogix_test"
 )
@@ -35,6 +37,9 @@ NEW_TABLES = (
     "client_api_keys",
     "enterprise_clients",
     "quotes",
+    "staff_tokens",
+    "staff_users",
+    "tariff_quotations",  # profiles and rules keep the migration seed (see tests/tariffs)
 )
 
 
@@ -55,9 +60,6 @@ def database_url() -> str:
         capture_output=True,
     )
     return TEST_DATABASE_URL
-
-
-AppFactory = Callable[..., AbstractAsyncContextManager[FastAPI]]
 
 
 @pytest.fixture

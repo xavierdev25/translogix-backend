@@ -18,6 +18,7 @@ OPENAPI_PATH = ROOT / "contracts" / "openapi.yaml"
 EXPECTED_SURFACE = {
     ("get", "/api/v1/tracking/{guia}"),
     ("post", "/api/v1/cotizar"),
+    ("post", "/api/v1/cotizaciones"),  # 1.5.0: tariff profiles (CR-003, P1)
     ("post", "/api/v1/pqrs/crear-ticket"),
     ("post", "/api/v1/attachments"),  # added by the P01 prompt (P1)
     ("post", "/api/v1/chat/messages"),

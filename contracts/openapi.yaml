@@ -22,7 +22,7 @@ info:
     * Todo error usa el sobre `ErrorEnvelope` con un `code` estable (`x-error-codes` por respuesta).
 
     '
-  version: 1.3.0
+  version: 1.5.0
 paths:
   /api/v1/tracking/{guia}:
     get:
@@ -578,6 +578,167 @@ paths:
             X-Request-ID:
               $ref: '#/components/headers/XRequestId'
       x-priority: P0
+      parameters:
+      - $ref: '#/components/parameters/XRequestId'
+  /api/v1/cotizaciones:
+    post:
+      tags:
+      - cotización
+      summary: Cotización con perfil tarifario versionado (fórmula excedente-v1)
+      description: 1.5.0 (CR-003). Peso facturable = máx(real, volumétrico); flete = base + excedente
+        x precio/kg; IVA según el perfil. Persiste un snapshot inmutable. Con un perfil TEST_ONLY, `precio_comercial`
+        es false. `/cotizar` no cambia.
+      operationId: createProfileQuotation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CotizacionPerfilRequest'
+            examples:
+              cotizaciones.request:
+                summary: Bogotá → Barranquilla, 6,2 kg (perfil de pruebas)
+                value:
+                  origen: Bogotá D.C.
+                  destino: Barranquilla
+                  peso_real_kg: 6.2
+                  alto_cm: 20
+                  ancho_cm: 30
+                  largo_cm: 40
+        required: true
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CotizacionPerfilResponse'
+              examples:
+                cotizaciones.response:
+                  summary: Flete 31.500 + IVA 19 % = 37.485 (TEST_ONLY, excedente-v1)
+                  value:
+                    cotizacion_id: 2d6f8a1c-3b5e-4c7d-9e0f-1a2b3c4d5e6f
+                    formula_version: excedente-v1
+                    precio_comercial: false
+                    origen:
+                      codigo_dane: '11001'
+                      municipio: Bogotá D.C.
+                    destino:
+                      codigo_dane: 08001
+                      municipio: Barranquilla
+                    peso_real_kg: 6.2
+                    peso_volumetrico_kg: 6.0
+                    peso_facturable_kg: 6.2
+                    peso_excedente_kg: 0.7
+                    tarifa:
+                      perfil_id: 7c3b2a10-5d4e-4f6a-9b8c-0d1e2f3a4b5c
+                      perfil_nombre: matriz-pruebas
+                      perfil_version: 1
+                      tipo_perfil: TEST_ONLY
+                      base_cop: 28000
+                      peso_incluido_kg: 5.5
+                      precio_kg_excedente_cop: 5000
+                      divisor_volumetrico: 4000
+                      iva_pct: 19.0
+                    flete_cop: 31500
+                    iva_cop: 5985
+                    total_cop: 37485
+                    advertencias: []
+                    calculado_en: '2026-11-04T10:00:00-05:00'
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '422':
+          description: 'Códigos: VALIDACION, CIUDAD_NO_RECONOCIDA, CIUDAD_NO_CUBIERTA, TARIFA_NO_DISPONIBLE'
+          x-error-codes:
+          - VALIDACION
+          - CIUDAD_NO_RECONOCIDA
+          - CIUDAD_NO_CUBIERTA
+          - TARIFA_NO_DISPONIBLE
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                VALIDACION:
+                  value:
+                    error:
+                      code: VALIDACION
+                      message: 'Revisa los datos enviados: hay campos inválidos o incompletos.'
+                      details:
+                        campos:
+                        - loc:
+                          - body
+                          - alto_cm
+                          msg: Input should be greater than 0
+                          type: greater_than
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+                CIUDAD_NO_RECONOCIDA:
+                  value:
+                    error:
+                      code: CIUDAD_NO_RECONOCIDA
+                      message: No reconozco esa ciudad en el directorio de cobertura disponible.
+                      details:
+                        ciudad: Ciudad Gótica
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+                CIUDAD_NO_CUBIERTA:
+                  value:
+                    error:
+                      code: CIUDAD_NO_CUBIERTA
+                      message: No tenemos cobertura operativa en esa ciudad.
+                      details:
+                        field: destino
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+                TARIFA_NO_DISPONIBLE:
+                  value:
+                    error:
+                      code: TARIFA_NO_DISPONIBLE
+                      message: No hay una tarifa disponible para esa ruta.
+                      details:
+                        field: destino
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '500':
+          description: 'Códigos: ERROR_INTERNO'
+          x-error-codes:
+          - ERROR_INTERNO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                ERROR_INTERNO:
+                  value:
+                    error:
+                      code: ERROR_INTERNO
+                      message: Ocurrió un error inesperado. Intenta de nuevo más tarde.
+                      details: {}
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '503':
+          description: 'Códigos: NO_CONFIGURADO'
+          x-error-codes:
+          - NO_CONFIGURADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                NO_CONFIGURADO:
+                  value:
+                    error:
+                      code: NO_CONFIGURADO
+                      message: Esta función no está configurada en este entorno.
+                      details:
+                        funcion: ASR
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+      x-priority: P1
       parameters:
       - $ref: '#/components/parameters/XRequestId'
   /api/v1/pqrs/crear-ticket:
@@ -4737,6 +4898,21 @@ components:
       - type
       - items
       title: CitationsBlock
+    CiudadRef:
+      properties:
+        codigo_dane:
+          type: string
+          pattern: ^\d{5}$
+          title: Codigo Dane
+        municipio:
+          type: string
+          title: Municipio
+      additionalProperties: false
+      type: object
+      required:
+      - codigo_dane
+      - municipio
+      title: CiudadRef
     ColaDestino:
       type: string
       enum:
@@ -4816,6 +4992,131 @@ components:
       - ESCALATED
       - CLOSED
       title: ConversationStatus
+    CotizacionPerfilRequest:
+      properties:
+        origen:
+          type: string
+          maxLength: 80
+          minLength: 1
+          title: Origen
+          description: Se registra; no cambia el precio (DEC-TAR5).
+        destino:
+          type: string
+          maxLength: 80
+          minLength: 1
+          title: Destino
+          examples:
+          - Barranquilla
+        peso_real_kg:
+          anyOf:
+          - type: number
+            exclusiveMinimum: 0.0
+          - type: string
+          title: Peso Real Kg
+        alto_cm:
+          anyOf:
+          - type: number
+            exclusiveMinimum: 0.0
+          - type: string
+          title: Alto Cm
+        ancho_cm:
+          anyOf:
+          - type: number
+            exclusiveMinimum: 0.0
+          - type: string
+          title: Ancho Cm
+        largo_cm:
+          anyOf:
+          - type: number
+            exclusiveMinimum: 0.0
+          - type: string
+          title: Largo Cm
+      additionalProperties: false
+      type: object
+      required:
+      - origen
+      - destino
+      - peso_real_kg
+      - alto_cm
+      - ancho_cm
+      - largo_cm
+      title: CotizacionPerfilRequest
+    CotizacionPerfilResponse:
+      properties:
+        cotizacion_id:
+          type: string
+          format: uuid4
+          title: Cotizacion Id
+        formula_version:
+          type: string
+          title: Formula Version
+          examples:
+          - excedente-v1
+        precio_comercial:
+          type: boolean
+          title: Precio Comercial
+          description: Siempre false con un perfil TEST_ONLY.
+        origen:
+          $ref: '#/components/schemas/CiudadRef'
+        destino:
+          $ref: '#/components/schemas/CiudadRef'
+        peso_real_kg:
+          type: number
+          title: Peso Real Kg
+        peso_volumetrico_kg:
+          type: number
+          title: Peso Volumetrico Kg
+        peso_facturable_kg:
+          type: number
+          title: Peso Facturable Kg
+        peso_excedente_kg:
+          type: number
+          title: Peso Excedente Kg
+        tarifa:
+          $ref: '#/components/schemas/TarifaPerfilAplicada'
+        flete_cop:
+          type: integer
+          minimum: 0.0
+          title: Flete Cop
+          description: Pesos colombianos (COP), entero.
+        iva_cop:
+          type: integer
+          minimum: 0.0
+          title: Iva Cop
+          description: Pesos colombianos (COP), entero.
+        total_cop:
+          type: integer
+          minimum: 0.0
+          title: Total Cop
+          description: Pesos colombianos (COP), entero.
+        advertencias:
+          items:
+            type: string
+          type: array
+          title: Advertencias
+        calculado_en:
+          type: string
+          format: date-time
+          title: Calculado En
+      additionalProperties: false
+      type: object
+      required:
+      - cotizacion_id
+      - formula_version
+      - precio_comercial
+      - origen
+      - destino
+      - peso_real_kg
+      - peso_volumetrico_kg
+      - peso_facturable_kg
+      - peso_excedente_kg
+      - tarifa
+      - flete_cop
+      - iva_cop
+      - total_cop
+      - advertencias
+      - calculado_en
+      title: CotizacionPerfilResponse
     CotizacionRequest:
       properties:
         origen:
@@ -6600,6 +6901,55 @@ components:
       - tipo
       - cop_por_kg
       title: TarifaAplicada
+    TarifaPerfilAplicada:
+      properties:
+        perfil_id:
+          type: string
+          format: uuid4
+          title: Perfil Id
+        perfil_nombre:
+          type: string
+          title: Perfil Nombre
+        perfil_version:
+          type: integer
+          minimum: 1.0
+          title: Perfil Version
+        tipo_perfil:
+          $ref: '#/components/schemas/TipoPerfil'
+        base_cop:
+          type: integer
+          minimum: 0.0
+          title: Base Cop
+          description: Pesos colombianos (COP), entero.
+        peso_incluido_kg:
+          type: number
+          title: Peso Incluido Kg
+        precio_kg_excedente_cop:
+          type: integer
+          minimum: 0.0
+          title: Precio Kg Excedente Cop
+          description: Pesos colombianos (COP), entero.
+        divisor_volumetrico:
+          type: integer
+          exclusiveMinimum: 0.0
+          title: Divisor Volumetrico
+        iva_pct:
+          type: number
+          title: Iva Pct
+      additionalProperties: false
+      type: object
+      required:
+      - perfil_id
+      - perfil_nombre
+      - perfil_version
+      - tipo_perfil
+      - base_cop
+      - peso_incluido_kg
+      - precio_kg_excedente_cop
+      - divisor_volumetrico
+      - iva_pct
+      title: TarifaPerfilAplicada
+      description: 'Copy of the rule used: the quote never depends on the profile changing later.'
     TextBlock:
       properties:
         type:
@@ -6626,6 +6976,12 @@ components:
       - SAQUEO
       - OTRO
       title: TipoNovedad
+    TipoPerfil:
+      type: string
+      enum:
+      - TEST_ONLY
+      - COMMERCIAL
+      title: TipoPerfil
     TrackingCardBlock:
       properties:
         type:

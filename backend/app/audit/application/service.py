@@ -23,6 +23,7 @@ class ApiAuditService:
                         id=uuid4(),
                         client_id=event.client_id,
                         api_key_id=event.api_key_id,
+                        staff_user_id=event.staff_user_id,
                         action=event.action.value,
                         resource_type=event.resource_type,
                         resource_id=event.resource_id,

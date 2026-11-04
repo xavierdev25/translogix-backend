@@ -28,7 +28,7 @@ from app.contracts.normalizers import NUMERO_GUIA_PATTERN
 from app.contracts.pii import find_pii
 from app.contracts.timezone import to_bogota
 
-CONTRACT_VERSION = "1.3.0"
+CONTRACT_VERSION = "1.5.0"
 REQUEST_ID_HEADER = "X-Request-ID"
 REQUEST_ID_PATTERN = r"^[A-Za-z0-9._-]{1,128}$"
 LOCALE = "es-CO"

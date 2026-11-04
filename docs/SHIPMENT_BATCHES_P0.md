@@ -23,7 +23,9 @@ qué hay, cómo se opera y qué falta. El contrato campo a campo está en `contr
 
 ```bash
 cd backend
-uv run alembic upgrade head          # crea las 7 tablas y la secuencia (migración 0002)
+uv run alembic upgrade head          # crea las tablas y la secuencia (0002) y lo posterior
+# Reinicia uvicorn: un servidor arrancado antes de este módulo no tiene las rutas y responde 404.
+uv run uvicorn app.main:app --host 127.0.0.1 --port 8000
 uv run python -m app.clients.cli create-client --nit 900123456-7 --razon-social "Cliente Demo"
 uv run python -m app.clients.cli create-key --client-id <client_id> \
   --scope batches:create --scope batches:read
@@ -34,7 +36,11 @@ uv run python -m app.clients.cli create-key --client-id <client_id> \
 - La migración 0002 se verificó así:
   - sobre una base limpia: upgrade, `alembic check`, downgrade y upgrade de nuevo;
   - sobre una copia de la base existente, con los datos idénticos antes y después.
-- La base de desarrollo `translogix` **no** se migró; hay que ejecutar el `upgrade` del primer comando.
+- Para comprobar que el servidor tiene el módulo, `curl -s localhost:8000/openapi.json` debe listar
+  `/api/v1/shipment-batches`.
+- Una ruta que existe, llamada sin API key, responde **401** `NO_AUTENTICADO`. Si
+  `POST /api/v1/shipment-batches` responde **404** `NO_ENCONTRADO`, el servidor corre código anterior
+  al módulo y hay que reiniciarlo.
 
 ## 3. Autenticación
 
@@ -49,6 +55,7 @@ siempre de la credencial, nunca del cuerpo. Un lote de otro cliente responde 404
 ## 4. Crear un lote
 
 ```bash
+# desde la raíz del repositorio (la ruta del ejemplo es relativa a ella)
 curl -s -X POST http://localhost:8000/api/v1/shipment-batches \
   -H "Authorization: Bearer $API_KEY" -H "Idempotency-Key: LOTE-CLIENTE-0001" \
   -H "Content-Type: application/json" -d @contracts/examples/shipment-batch.request.json
@@ -136,7 +143,7 @@ La auditoría (`api_audit_events`) es una tabla aparte, solo de inserción, sin 
 ## 8. Pruebas
 
 ```bash
-cd backend && uv run pytest -q     # 442 pruebas: 408 del contrato + 34 del módulo
+cd backend && uv run pytest -q tests/shipments     # 34 pruebas del módulo (la suite completa: uv run pytest)
 ```
 
 - **`tests/shipments/test_domain.py`** (17 pruebas, sin base de datos): keys, NIT, formato y rango de

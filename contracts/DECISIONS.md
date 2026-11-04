@@ -117,3 +117,27 @@ su §14 deja abierto se implementó con el valor más conservador y queda **PROV
 | DEC-SHP10 | Reanudación sin worker: lease `locked_until` (`BATCH_LEASE_SECONDS`) renovado en cada ítem. Una repetición idéntica con el lease vencido reanuda los ítems `PENDING`; con el lease vivo responde 202. El lote no guarda el contenido enviado (tiene PII), así que reanudar exige reenviar el mismo cuerpo. | Spec §6.5. | CONFIRMADA |
 | DEC-SHP11 | API key `tlx_<prefijo>_<secreto>`, mostrada una sola vez y guardada como SHA-256 (256 bits de entropía). Una key desconocida, malformada o revocada responde siempre 401, sin distinguir el caso; un cliente inactivo o una key sin el scope requerido, 403. El alta de clientes y keys se hace por CLI (`python -m app.clients.cli`), sin endpoints nuevos. | Spec §4.2, §5.4, §6.1. | CONFIRMADA |
 
+## 6. Identidades internas (1.4.0, CR-002)
+
+| Id | Decisión | Fuente | Estado |
+|----|----------|--------|--------|
+| DEC-STF1 | Token personal `tlxs_<prefijo>_<secreto>`, mostrado una sola vez y guardado como SHA-256, con vigencia **obligatoria** de 1 a 365 días (90 por defecto en el CLI) y `last_used_at`. Comparte formato y funciones con la API key B2B (`app.shared.tokens`), pero el prefijo de familia (`tlxs` frente a `tlx`) impide que una credencial sirva en la otra familia de rutas. | CR-002. | CONFIRMADA |
+| DEC-STF2 | Cualquier fallo del token (falta, malformado, desconocido, falsificado, revocado, vencido o de un usuario INACTIVE) responde siempre 401 `NO_AUTENTICADO`; un rol insuficiente, 403 `NO_AUTORIZADO` con `roles_requeridos`. A diferencia del B2B (cliente inactivo → 403, DEC-SHP11), aquí la respuesta no revela si una persona fue desactivada. | CR-002. | CONFIRMADA |
+| DEC-STF3 | Los roles se leen de la base en cada petición, no se copian al token: un cambio de rol o una desactivación aplican en la siguiente petición. Cada usuario tiene al menos un rol; el correo es único y se normaliza a minúsculas. | CR-002. | CONFIRMADA |
+| DEC-STF4 | Usuarios y tokens se administran solo por CLI (`python -m app.staff.cli`), sin endpoints. `ADMIN_TOKEN` y las rutas que protege no cambian. La migración a SSO queda pendiente (D10). | CR-002; spec 1.1 §10. | PROVISIONAL |
+| DEC-STF5 | `api_audit_events.staff_user_id` registra al actor interno. Los fallos de autenticación se auditan: con `staff_user_id` cuando la persona era conocida (403), sin él cuando no (401). Nunca se registra el token. | CR-002. | CONFIRMADA |
+
+## 7. Cotización por perfiles tarifarios (1.5.0, CR-003)
+
+Decisiones de negocio D2–D5 respondidas el 2026-11-04. Fórmula `excedente-v1` en `app.contracts.tariffs`.
+
+| Id | Decisión | Fuente | Estado |
+|----|----------|--------|--------|
+| DEC-TAR1 | El excedente empieza **justo después** del peso incluido: `max(0, P − L) × A`, sin umbral propio. Ejemplo: Barranquilla a 5,51 kg cobra 0,01 kg de excedente (28.050). | D2. | CONFIRMADA |
+| DEC-TAR2 | Peso y medidas con **2 decimales**: la entrada con más decimales se rechaza (422) y el peso volumétrico se cuantiza a 0,01 kg *half-up*. Nunca se redondea al kilogramo superior. Dinero: COP entero, *half-up* por línea (flete e IVA, como DEC-Q8). | D3; spec 1.1 §6.1 y §6.3. | CONFIRMADA |
+| DEC-TAR3 | `P` es el **peso facturable**, para todos los destinos: `máx(peso real, alto × ancho × largo / divisor)`, con el divisor del perfil (4000, el del PDF del reto). Ejemplo: 2 kg en 40×50×60 cm a Barranquilla → P = 30 kg → 150.500. | D4. | CONFIRMADA |
+| DEC-TAR4 | El **IVA se suma** al flete con la tasa del perfil (19 % en `matriz-pruebas`). La tasa es un dato del perfil, no del código. Seguro, recargos y otros componentes **no** se incluyen mientras no se definan. Pendiente: que contabilidad confirme si aplica IVA (el transporte de carga terrestre puede estar excluido según el art. 476 del E.T.; la mensajería, gravada). | D5. | PROVISIONAL |
+| DEC-TAR5 | El **origen no influye** en el precio: las reglas son por destino (código DANE). El origen se valida y se guarda en el snapshot. | Respuesta del 2026-11-04. | CONFIRMADA |
+| DEC-TAR6 | Perfiles versionados e inmutables: un cambio de regla es una versión nueva. Hay como máximo **un perfil ACTIVE por tipo**, garantizado por un índice único parcial. Solo se usan perfiles del tipo `TARIFF_ENVIRONMENT` que estén vigentes (`effective_from` ≤ ahora < `effective_until`). Cada cotización copia en `tariff_quotations` todos los valores usados, así que un cambio de perfil no altera las históricas. Se carga y activa por CLI (`python -m app.tariffs.cli`). | Spec 1.1 §5.1, §6.5. | CONFIRMADA |
+| DEC-TAR7 | Si se supera el peso o el volumen máximo del destino, se **advierte** y no se bloquea (igual que DEC-Q4). `POST /cotizar` (`provisional-v1`) se conserva sin cambios para el chat, el demo y el PDF. | Conflicto 1 de la revisión 1.1. | PROVISIONAL |
+

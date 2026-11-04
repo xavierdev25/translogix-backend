@@ -4,18 +4,12 @@ from collections.abc import Iterable
 from typing import Any
 from uuid import UUID
 
-import httpx
 from fastapi import FastAPI
-from sqlalchemy import text
 
 from app.clients.application.services import ClientAdminService
 from app.contracts.shipment_batches import ApiScope
 
 ALL_SCOPES = (ApiScope.BATCHES_CREATE, ApiScope.BATCHES_READ)
-
-
-def http(app: FastAPI) -> httpx.AsyncClient:
-    return httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test")
 
 
 async def new_client(
@@ -29,11 +23,6 @@ async def new_client(
         record, key = await admin.create_api_key(client.id, scopes)
         await session.commit()
     return client.id, record.id, key
-
-
-async def scalar(app: FastAPI, sql: str, **params: Any) -> Any:
-    async with app.state.container.sessions() as session:
-        return await session.scalar(text(sql), params)
 
 
 def auth(key: str) -> dict[str, str]:

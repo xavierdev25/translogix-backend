@@ -19,8 +19,8 @@ from app.contracts.normalizers import NUMERO_GUIA_PATTERN
 from app.contracts.shipment_batches import ApiScope
 from app.shipments.domain.models import GUIDE_MAX, GUIDE_MIN
 from app.shipments.infrastructure import repositories as shipment_repos
-from tests.shipments.conftest import AppFactory
-from tests.shipments.support import auth, envio, http, lote, new_client, scalar
+from tests.db import AppFactory, http, scalar
+from tests.shipments.support import auth, envio, lote, new_client
 
 URL = "/api/v1/shipment-batches"
 PII = ("Zuleima Parrado", "3157779911", "Carrera 99 # 88-77")

@@ -35,6 +35,8 @@ class EnvVar(StrEnum):
     BATCH_MAX_BODY_BYTES = "BATCH_MAX_BODY_BYTES"
     BATCH_RATE_LIMIT_PER_MINUTE = "BATCH_RATE_LIMIT_PER_MINUTE"
     BATCH_LEASE_SECONDS = "BATCH_LEASE_SECONDS"
+    # Added in 1.5.0 (CR-003): which tariff profiles this deployment may use.
+    TARIFF_ENVIRONMENT = "TARIFF_ENVIRONMENT"
 
 
 SECRET_ENV_VARS = frozenset(

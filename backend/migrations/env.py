@@ -10,7 +10,9 @@ from sqlalchemy.ext.asyncio import create_async_engine
 import app.audit.infrastructure.tables
 import app.batches.infrastructure.tables
 import app.clients.infrastructure.tables
-import app.shipments.infrastructure.tables  # noqa: F401
+import app.shipments.infrastructure.tables
+import app.staff.infrastructure.tables
+import app.tariffs.infrastructure.tables  # noqa: F401
 from app.db.models import Base
 
 config = context.config
