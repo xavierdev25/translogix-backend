@@ -1,0 +1,68 @@
+{
+  "reply": {
+    "session_id": "2d3e4f5a-6b7c-4d8e-8f9a-0b1c2d3e4f5a",
+    "in_reply_to": "0b9c8d7e-6f5a-4b4c-9d3e-2f1a0b9c8d7e",
+    "reply_id": "2a3b4c5d-6e7f-4a8b-9c9d-1e2f3a4b5c6d",
+    "channel": "WEB_CHAT",
+    "status": "AWAITING_USER",
+    "blocks": [
+      {
+        "type": "TEXT",
+        "text": "Tu cotización de Bogotá D.C. a Pereira: flete total $22.500. Se aplicó el flete mínimo de la ruta ($18.000) porque el peso facturable es de 6 kg. Entrega estimada en 24 horas."
+      },
+      {
+        "type": "QUOTE_SUMMARY",
+        "cotizacion_id": "c6e8a0b2-4d5f-4a1b-8c3d-5e7f9a1b3c4d",
+        "codigo_trayecto": "TLX-BOG-PEI-006",
+        "origen": "Bogotá D.C.",
+        "destino": "Pereira",
+        "peso_facturable_kg": 6.0,
+        "flete_total_cop": 22500,
+        "tiempo_entrega_horas": 24,
+        "formula_version": "provisional-v1",
+        "advertencias": []
+      },
+      {
+        "type": "QUICK_REPLIES",
+        "options": [
+          {
+            "id": "cotizar",
+            "title": "Cotizar otro envío"
+          },
+          {
+            "id": "asesor",
+            "title": "Hablar con un asesor"
+          }
+        ]
+      }
+    ],
+    "meta": {
+      "trace_id": "trc-01J9Z73FP3",
+      "intent": "COTIZACION",
+      "confidence_score": null,
+      "confidence_method": null,
+      "escalation": {
+        "escalate": false,
+        "primary": null,
+        "triggers": [],
+        "mensaje_cliente": null,
+        "rules_version": "1.0.2026",
+        "config_snapshot": {
+          "CRIT003_MODE": "claim_context",
+          "CRIT005_MODE": "incident_context",
+          "PRIORITY_ORDER": "CRIT-005>CRIT-003>CRIT-002>CRIT-004>CRIT-001>INFO-INTENTOS"
+        }
+      },
+      "services_called": [
+        "quotation",
+        "escalation"
+      ],
+      "evidence_ids": [
+        "c6e8a0b2-4d5f-4a1b-8c3d-5e7f9a1b3c4d"
+      ],
+      "llm_used": false,
+      "delivery_mode": "REAL"
+    },
+    "created_at": "2026-11-03T10:45:02-05:00"
+  }
+}

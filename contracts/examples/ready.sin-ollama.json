@@ -1,0 +1,8 @@
+{
+  "status": "not_ready",
+  "checks": {
+    "database": "ok",
+    "ollama": "fail",
+    "rag_index": "ok"
+  }
+}

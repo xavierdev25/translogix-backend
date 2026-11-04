@@ -1,0 +1,117 @@
+{
+  "method": "POST",
+  "path": "/api/v1/chat/messages",
+  "headers": {},
+  "body": {
+    "client_id": "e9cf84b3-34ff-4b52-92cd-fdbfb8ff493a",
+    "message_id": "4cd31600-e492-40ed-b032-dae9ed922107",
+    "text": "TLX-310482-CO"
+  },
+  "form": null,
+  "status": 200,
+  "response": {
+    "reply": {
+      "session_id": "8900701e-fe1c-410a-bee9-6a12d3d9f0ab",
+      "in_reply_to": "4cd31600-e492-40ed-b032-dae9ed922107",
+      "reply_id": "8210804f-c2d3-47e7-a990-7d589b00ee5d",
+      "channel": "WEB_CHAT",
+      "status": "ESCALATED",
+      "blocks": [
+        {
+          "type": "TEXT",
+          "text": "Guía TLX-310482-CO: Retenido por novedad. Tu envío está detenido temporalmente por una novedad operativa. Ubicación de referencia: Puesto de Control POLFA / DIAN - Aguachica, Cesar. Entrega estimada: 3 de noviembre de 2026, 6:00 p. m."
+        },
+        {
+          "type": "TRACKING_CARD",
+          "numero_guia": "TLX-310482-CO",
+          "estado": {
+            "codigo": "RETENIDO_NOVEDAD",
+            "etiqueta": "Retenido por novedad",
+            "explicacion": "Tu envío está detenido temporalmente por una novedad operativa."
+          },
+          "eta": "2026-11-03T18:00:00-05:00",
+          "ubicacion_referencia": "Puesto de Control POLFA / DIAN - Aguachica, Cesar",
+          "eventos": [
+            {
+              "timestamp": "2026-11-01T16:00:00-05:00",
+              "estado": "RECOGIDO_EN_ORIGEN",
+              "etiqueta": "Recogido en origen",
+              "ubicacion": "Barranquilla, Atlántico",
+              "descripcion_cliente": "Verificación de rótulos IMO Clase 3 y tarjeta de emergencia en vehículo."
+            },
+            {
+              "timestamp": "2026-11-02T04:10:00-05:00",
+              "estado": "EN_TRANSITO",
+              "etiqueta": "En tránsito",
+              "ubicacion": "Troncal del Magdalena - Bosconia",
+              "descripcion_cliente": "Ruta de carretera conforme a plan de contingencia."
+            },
+            {
+              "timestamp": "2026-11-02T15:20:00-05:00",
+              "estado": "RETENIDO_NOVEDAD",
+              "etiqueta": "Retenido por novedad",
+              "ubicacion": "Aguachica, Cesar",
+              "descripcion_cliente": "NOVEDAD OPERATIVA: Retención preventiva en puesto de control POLFA para verificación documental de factura comercial y tarjeta de emergencia."
+            }
+          ],
+          "flags": {
+            "requiere_refrigeracion": false,
+            "mercancia_peligrosa": true
+          }
+        },
+        {
+          "type": "HANDOFF_NOTICE",
+          "handoff_id": "6c72e632-2ce5-4664-94ec-aac9ba6ba360",
+          "prioridad": "URGENTE",
+          "cola": "OPERACIONES",
+          "mensaje_cliente": "Identificamos que tu consulta involucra carga especial sensible. Un coordinador de operaciones tomará la llamada/chat prioritariamente.",
+          "tiempo_espera_estimado_segundos": 45
+        }
+      ],
+      "meta": {
+        "trace_id": "e097c336-d0d9-415a-b658-579cb1bf43aa",
+        "intent": "TRACKING",
+        "confidence_score": null,
+        "confidence_method": null,
+        "escalation": {
+          "escalate": true,
+          "primary": {
+            "id_criterio": "CRIT-005",
+            "accion": "ESCALAR_URGENCIA_OPERACIONES",
+            "accion_raw": "ESCALAR_Urgencia_OPERACIONES",
+            "evidencia": "mercancia_peligrosa=true; estado_guia=RETENIDO_NOVEDAD",
+            "modo": "incident_context"
+          },
+          "triggers": [
+            {
+              "id_criterio": "CRIT-005",
+              "accion": "ESCALAR_URGENCIA_OPERACIONES",
+              "accion_raw": "ESCALAR_Urgencia_OPERACIONES",
+              "evidencia": "mercancia_peligrosa=true; estado_guia=RETENIDO_NOVEDAD",
+              "modo": "incident_context"
+            }
+          ],
+          "mensaje_cliente": "Identificamos que tu consulta involucra carga especial sensible. Un coordinador de operaciones tomará la llamada/chat prioritariamente.",
+          "rules_version": "1.0.2026",
+          "config_snapshot": {
+            "CRIT003_MODE": "claim_context",
+            "CRIT005_MODE": "incident_context",
+            "CONFIDENCE_THRESHOLD": "0.75",
+            "PRIORITY_ORDER": "CRIT-005>CRIT-003>CRIT-002>CRIT-004>CRIT-001>INFO-INTENTOS",
+            "omitidas": "CRIT-001:sin_respuesta_rag,CRIT-003:fuera_de_contexto_de_reclamo,INFO-INTENTOS:sin_dato"
+          }
+        },
+        "services_called": [
+          "tms",
+          "escalation"
+        ],
+        "evidence_ids": [
+          "TLX-310482-CO"
+        ],
+        "llm_used": false,
+        "delivery_mode": "SIMULATED"
+      },
+      "created_at": "2026-11-03T13:17:37.667457-05:00"
+    }
+  }
+}

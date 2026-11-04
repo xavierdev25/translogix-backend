@@ -1,0 +1,30 @@
+meta {
+  name: PBX simulado - guia dictada
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/v1/channels/pbx/simulate
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "call_id": "call-7d1e",
+    "transcript": "T L X nueve ocho cuatro cero dos uno C O, ¿dónde está?",
+    "turn_index": 1
+  }
+}
+
+script:pre-request {
+  const uuid = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16); });
+  bru.setVar("messageId", uuid());
+}
+
+tests {
+  test("HTTP 200", () => expect(res.status).to.equal(200));
+  test("reply.channel = PBX", () => expect(res.body?.["reply"]?.["channel"]).to.eql("PBX"));
+  test("reply.meta.intent = TRACKING", () => expect(res.body?.["reply"]?.["meta"]?.["intent"]).to.eql("TRACKING"));
+}

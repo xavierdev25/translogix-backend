@@ -1,0 +1,12 @@
+{
+  "call_id": "call-7d1e",
+  "caller_id": "+573000000001",
+  "turn_index": 1,
+  "event": "TURN",
+  "transcript": "T L X nueve ocho cuatro cero dos uno C O, ¿dónde está?",
+  "audio_ref": null,
+  "transcript_confidence": 0.86,
+  "dnis": "6015550100",
+  "silence_ms": 800,
+  "barge_in": false
+}

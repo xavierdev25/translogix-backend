@@ -1,0 +1,148 @@
+{
+  "method": "POST",
+  "path": "/api/v1/chat/messages",
+  "headers": {},
+  "body": {
+    "client_id": "cf7372c1-5c19-482b-a151-deee69c95d0d",
+    "session_id": "fa2d460f-9ed4-47ac-9323-0f3df47ea4e7",
+    "message_id": "3654d26d-0784-4e89-a138-18516fb71990",
+    "text": "Me llegó la caja rota"
+  },
+  "form": null,
+  "status": 200,
+  "response": {
+    "reply": {
+      "session_id": "fa2d460f-9ed4-47ac-9323-0f3df47ea4e7",
+      "in_reply_to": "3654d26d-0784-4e89-a138-18516fb71990",
+      "reply_id": "38d99da9-fca6-47fb-85ef-c28b6d28bfe0",
+      "channel": "WEB_CHAT",
+      "status": "ESCALATED",
+      "blocks": [
+        {
+          "type": "TEXT",
+          "text": "Lamentamos lo sucedido. La prueba de entrega de TLX-752190-CO registra «Carga intacta, sin averías.». Tu caso se trata como avería no aparente: tienes hasta el 5 de noviembre de 2026 para radicarlo."
+        },
+        {
+          "type": "REQUEST_ATTACHMENTS",
+          "checklist": [
+            {
+              "codigo": "GUIA",
+              "obligatorio": true,
+              "recibido": true,
+              "descripcion": "Número de guía de transporte (TLX-XXXXXX-CO)."
+            },
+            {
+              "codigo": "FACTURA_COMERCIAL",
+              "obligatorio": true,
+              "recibido": false,
+              "descripcion": "Factura comercial de venta con IVA, o documento equivalente que certifique el costo del producto."
+            },
+            {
+              "codigo": "CARTA_RECLAMACION",
+              "obligatorio": true,
+              "recibido": false,
+              "descripcion": "Carta de reclamación firmada, con el valor exacto reclamado y la descripción de lo ocurrido."
+            },
+            {
+              "codigo": "CERTIFICACION_BANCARIA",
+              "obligatorio": true,
+              "recibido": false,
+              "descripcion": "Certificación bancaria de no más de 30 días para el reembolso."
+            },
+            {
+              "codigo": "FOTOS_EMPAQUE",
+              "obligatorio": true,
+              "recibido": false,
+              "descripcion": "Fotos del empaque exterior con la etiqueta de despacho y de los materiales de amortiguación."
+            },
+            {
+              "codigo": "FOTOS_DANO",
+              "obligatorio": true,
+              "recibido": false,
+              "descripcion": "Fotos del daño interno y del estado del producto."
+            },
+            {
+              "codigo": "CEDULA_O_RUT",
+              "obligatorio": true,
+              "recibido": false,
+              "descripcion": "Copia de la cédula o del RUT."
+            },
+            {
+              "codigo": "ACTA_CON_SALVEDAD",
+              "obligatorio": false,
+              "recibido": false,
+              "descripcion": "Acta de entrega con salvedad (solo si la avería era visible al recibir)."
+            }
+          ]
+        },
+        {
+          "type": "PQRS_TICKET",
+          "ticket_id": "cc8c7dc6-36e3-4e7e-bb00-ce8a2c669b69",
+          "estado": "ESCALADO",
+          "faltantes": [
+            "FACTURA_COMERCIAL",
+            "CARTA_RECLAMACION",
+            "CERTIFICACION_BANCARIA",
+            "FOTOS_EMPAQUE",
+            "FOTOS_DANO",
+            "CEDULA_O_RUT"
+          ]
+        },
+        {
+          "type": "HANDOFF_NOTICE",
+          "handoff_id": "a4ef8b2d-22a2-4ab8-8232-12a9faf1c71e",
+          "prioridad": "ALTA",
+          "cola": "JURIDICO_PQRS",
+          "mensaje_cliente": "Dado que el valor reclamado supera el límite de trámite automático en chat ($5,000,000 COP), un gestor senior de PQRS tomará tu caso.",
+          "tiempo_espera_estimado_segundos": 45
+        }
+      ],
+      "meta": {
+        "trace_id": "15327022-ecbd-4a63-b64a-11f79aac8fae",
+        "intent": "PQRS",
+        "confidence_score": null,
+        "confidence_method": null,
+        "escalation": {
+          "escalate": true,
+          "primary": {
+            "id_criterio": "CRIT-003",
+            "accion": "ESCALAR_A_DEPARTAMENTO_JURIDICO_Y_PQRS",
+            "accion_raw": "ESCALAR_A_DEPARTAMENTO_JURIDICO_Y_PQRS",
+            "evidencia": "valor_declarado_cop > 5000000 (contexto de reclamación)",
+            "modo": "claim_context"
+          },
+          "triggers": [
+            {
+              "id_criterio": "CRIT-003",
+              "accion": "ESCALAR_A_DEPARTAMENTO_JURIDICO_Y_PQRS",
+              "accion_raw": "ESCALAR_A_DEPARTAMENTO_JURIDICO_Y_PQRS",
+              "evidencia": "valor_declarado_cop > 5000000 (contexto de reclamación)",
+              "modo": "claim_context"
+            }
+          ],
+          "mensaje_cliente": "Dado que el valor reclamado supera el límite de trámite automático en chat ($5,000,000 COP), un gestor senior de PQRS tomará tu caso.",
+          "rules_version": "1.0.2026",
+          "config_snapshot": {
+            "CRIT003_MODE": "claim_context",
+            "CRIT005_MODE": "incident_context",
+            "CONFIDENCE_THRESHOLD": "0.75",
+            "PRIORITY_ORDER": "CRIT-005>CRIT-003>CRIT-002>CRIT-004>CRIT-001>INFO-INTENTOS",
+            "omitidas": "CRIT-001:sin_respuesta_rag,INFO-INTENTOS:sin_dato"
+          }
+        },
+        "services_called": [
+          "tms",
+          "pqrs",
+          "escalation"
+        ],
+        "evidence_ids": [
+          "TLX-752190-CO",
+          "cc8c7dc6-36e3-4e7e-bb00-ce8a2c669b69"
+        ],
+        "llm_used": false,
+        "delivery_mode": "SIMULATED"
+      },
+      "created_at": "2026-11-03T13:17:37.698071-05:00"
+    }
+  }
+}

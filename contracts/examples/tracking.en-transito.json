@@ -1,0 +1,61 @@
+{
+  "numero_guia": "TLX-984021-CO",
+  "estado_actual": {
+    "codigo": "EN_TRANSITO",
+    "etiqueta": "En tránsito",
+    "explicacion": "Tu envío va en carretera hacia la ciudad de destino."
+  },
+  "origen_ciudad": "Bogotá D.C.",
+  "destino_ciudad": "Medellín",
+  "tipo_servicio": "Transporte Cadena de Frío (2°C a 8°C)",
+  "fecha_despacho": "2026-11-02T14:30:00-05:00",
+  "fecha_estimada_entrega": "2026-11-03T16:00:00-05:00",
+  "ubicacion_referencia": "Paso de Montaña Alto de la Línea - Sentido Bogotá-Ibague-Medellín",
+  "eventos": [
+    {
+      "timestamp": "2026-11-02T11:15:00-05:00",
+      "estado": "SOLICITUD_GENERADA",
+      "etiqueta": "Solicitud generada",
+      "ubicacion": "Portal Web Clientes TransLogix",
+      "descripcion_cliente": "Se creó la orden de despacho y se generó tu guía."
+    },
+    {
+      "timestamp": "2026-11-02T14:30:00-05:00",
+      "estado": "RECOGIDO_EN_ORIGEN",
+      "etiqueta": "Recogido en origen",
+      "ubicacion": "Zona Franca Fontibón, Bogotá D.C.",
+      "descripcion_cliente": "Recogimos tu carga, validamos la temperatura (4.2 °C) y la sellamos con precinto de seguridad."
+    },
+    {
+      "timestamp": "2026-11-02T18:45:00-05:00",
+      "estado": "EN_BODEGA_ORIGEN",
+      "etiqueta": "En bodega de origen",
+      "ubicacion": "Hub Central Zona Franca Fontibón",
+      "descripcion_cliente": "Tu carga se consolidó en un vehículo refrigerado."
+    },
+    {
+      "timestamp": "2026-11-03T02:15:00-05:00",
+      "estado": "EN_TRANSITO",
+      "etiqueta": "En tránsito",
+      "ubicacion": "Peaje Chicoral - Tolima",
+      "descripcion_cliente": "En ruta con monitoreo activo; temperatura estable a 3.8 °C."
+    },
+    {
+      "timestamp": "2026-11-03T08:30:00-05:00",
+      "estado": "EN_TRANSITO",
+      "etiqueta": "En tránsito",
+      "ubicacion": "Corredor Calarcá - Pereira",
+      "descripcion_cliente": "Vehículo en ruta regular hacia el centro de distribución de destino."
+    }
+  ],
+  "prueba_entrega": null,
+  "flags": {
+    "requiere_refrigeracion": true,
+    "mercancia_peligrosa": false
+  },
+  "ultima_temperatura_c": 3.8,
+  "fuente": {
+    "sistema": "TMS_SIMULADO",
+    "consultado_en": "2026-11-03T10:00:00-05:00"
+  }
+}

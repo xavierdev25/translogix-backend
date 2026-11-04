@@ -1,0 +1,32 @@
+meta {
+  name: Peticion copia POD (API)
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/v1/pqrs/crear-ticket
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "session_id": null,
+    "tipo": "PETICION",
+    "numero_guia": "TLX-752190-CO",
+    "tipo_novedad": null,
+    "descripcion": "Solicito copia de la prueba de entrega de la guía.",
+    "valor_reclamado_cop": null,
+    "documentos": []
+  }
+}
+
+script:pre-request {
+  const uuid = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16); });
+  bru.setVar("messageId", uuid());
+}
+
+tests {
+  test("HTTP 201", () => expect(res.status).to.equal(201));
+}

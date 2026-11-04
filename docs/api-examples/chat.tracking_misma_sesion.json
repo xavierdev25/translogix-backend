@@ -1,0 +1,109 @@
+{
+  "method": "POST",
+  "path": "/api/v1/chat/messages",
+  "headers": {},
+  "body": {
+    "client_id": "ca85aa16-726d-41d4-b466-b539344d7e56",
+    "session_id": "e0d4abfc-cb6a-4c30-9f56-2360d6430435",
+    "message_id": "20fac391-2d7c-4cf0-90c9-ac1c311f0bf5",
+    "text": "¿Dónde está mi guía TLX-984021-CO?"
+  },
+  "form": null,
+  "status": 200,
+  "response": {
+    "reply": {
+      "session_id": "e0d4abfc-cb6a-4c30-9f56-2360d6430435",
+      "in_reply_to": "20fac391-2d7c-4cf0-90c9-ac1c311f0bf5",
+      "reply_id": "f9fe97a8-cbac-450f-a27c-83bb930cebfa",
+      "channel": "WEB_CHAT",
+      "status": "AWAITING_USER",
+      "blocks": [
+        {
+          "type": "TEXT",
+          "text": "Guía TLX-984021-CO: En tránsito. Tu envío va en carretera hacia la ciudad de destino. Ubicación de referencia: Paso de Montaña Alto de la Línea - Sentido Bogotá-Ibague-Medellín. Entrega estimada: 3 de noviembre de 2026, 4:00 p. m. Última temperatura reportada: 3,8 °C."
+        },
+        {
+          "type": "TRACKING_CARD",
+          "numero_guia": "TLX-984021-CO",
+          "estado": {
+            "codigo": "EN_TRANSITO",
+            "etiqueta": "En tránsito",
+            "explicacion": "Tu envío va en carretera hacia la ciudad de destino."
+          },
+          "eta": "2026-11-03T16:00:00-05:00",
+          "ubicacion_referencia": "Paso de Montaña Alto de la Línea - Sentido Bogotá-Ibague-Medellín",
+          "eventos": [
+            {
+              "timestamp": "2026-11-02T18:45:00-05:00",
+              "estado": "EN_BODEGA_ORIGEN",
+              "etiqueta": "En bodega de origen",
+              "ubicacion": "Hub Central Zona Franca Fontibón",
+              "descripcion_cliente": "Consolidación en camión refrigerado."
+            },
+            {
+              "timestamp": "2026-11-03T02:15:00-05:00",
+              "estado": "EN_TRANSITO",
+              "etiqueta": "En tránsito",
+              "ubicacion": "Peaje Chicoral - Tolima",
+              "descripcion_cliente": "Monitoreo GPS activo. Temperatura de termógrafo estable a 3.8°C."
+            },
+            {
+              "timestamp": "2026-11-03T08:30:00-05:00",
+              "estado": "EN_TRANSITO",
+              "etiqueta": "En tránsito",
+              "ubicacion": "Corredor Calarcá - Pereira",
+              "descripcion_cliente": "Vehículo en ruta regular. Arribo estimado a Hub Itagüí a las 12:30 PM."
+            }
+          ],
+          "flags": {
+            "requiere_refrigeracion": true,
+            "mercancia_peligrosa": false
+          }
+        },
+        {
+          "type": "QUICK_REPLIES",
+          "options": [
+            {
+              "id": "cotizar",
+              "title": "Cotizar un envío"
+            },
+            {
+              "id": "asesor",
+              "title": "Hablar con un asesor"
+            }
+          ]
+        }
+      ],
+      "meta": {
+        "trace_id": "d38245b6-d579-4229-a211-d29994abeb73",
+        "intent": "TRACKING",
+        "confidence_score": null,
+        "confidence_method": null,
+        "escalation": {
+          "escalate": false,
+          "primary": null,
+          "triggers": [],
+          "mensaje_cliente": null,
+          "rules_version": "1.0.2026",
+          "config_snapshot": {
+            "CRIT003_MODE": "claim_context",
+            "CRIT005_MODE": "incident_context",
+            "CONFIDENCE_THRESHOLD": "0.75",
+            "PRIORITY_ORDER": "CRIT-005>CRIT-003>CRIT-002>CRIT-004>CRIT-001>INFO-INTENTOS",
+            "omitidas": "CRIT-001:sin_respuesta_rag,CRIT-003:fuera_de_contexto_de_reclamo,INFO-INTENTOS:sin_dato"
+          }
+        },
+        "services_called": [
+          "tms",
+          "escalation"
+        ],
+        "evidence_ids": [
+          "TLX-984021-CO"
+        ],
+        "llm_used": false,
+        "delivery_mode": "SIMULATED"
+      },
+      "created_at": "2026-11-03T13:17:29.004216-05:00"
+    }
+  }
+}

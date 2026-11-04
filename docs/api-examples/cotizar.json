@@ -1,0 +1,48 @@
+{
+  "method": "POST",
+  "path": "/api/v1/cotizar",
+  "headers": {},
+  "body": {
+    "origen": "Bogotá D.C.",
+    "destino": "Medellín",
+    "alto_cm": 40,
+    "ancho_cm": 50,
+    "largo_cm": 60,
+    "peso_real_kg": 45.5,
+    "valor_declarado_cop": 12500000,
+    "requiere_cadena_frio": false,
+    "mercancia_peligrosa": false
+  },
+  "form": null,
+  "status": 200,
+  "response": {
+    "cotizacion_id": "b758b92e-43f5-4620-a6ff-953893b09ba2",
+    "ruta": {
+      "codigo_trayecto": "TLX-BOG-MED-001",
+      "origen": "Bogotá D.C.",
+      "destino": "Medellín"
+    },
+    "calculo": {
+      "peso_volumetrico_kg": 30.0,
+      "peso_facturable_kg": 45.5,
+      "tarifa_aplicada": {
+        "tipo": "REAL",
+        "cop_por_kg": 1450
+      },
+      "flete_minimo_cop": 18500,
+      "flete_minimo_aplicado": false,
+      "flete_base_cop": 65975,
+      "seguro_cop": 125000,
+      "recargos": [],
+      "flete_total_cop": 190975
+    },
+    "tiempo_entrega_horas": 24,
+    "advertencias": [],
+    "supuestos": [
+      "formula_version=provisional-v1",
+      "seguro_minimo_fuente=pdf(2500)",
+      "seguro_minimo_alternativo=csv(3500)"
+    ],
+    "formula_version": "provisional-v1"
+  }
+}

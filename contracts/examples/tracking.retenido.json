@@ -1,0 +1,47 @@
+{
+  "numero_guia": "TLX-310482-CO",
+  "estado_actual": {
+    "codigo": "RETENIDO_NOVEDAD",
+    "etiqueta": "Retenido por novedad",
+    "explicacion": "Tu envío está detenido temporalmente en un puesto de control para verificación documental."
+  },
+  "origen_ciudad": "Barranquilla",
+  "destino_ciudad": "Bucaramanga",
+  "tipo_servicio": "Transporte de Mercancía Peligrosa (Clase 3 - Líquidos Inflamables)",
+  "fecha_despacho": "2026-11-01T16:00:00-05:00",
+  "fecha_estimada_entrega": "2026-11-03T18:00:00-05:00",
+  "ubicacion_referencia": "Puesto de Control POLFA / DIAN - Aguachica, Cesar",
+  "eventos": [
+    {
+      "timestamp": "2026-11-01T16:00:00-05:00",
+      "estado": "RECOGIDO_EN_ORIGEN",
+      "etiqueta": "Recogido en origen",
+      "ubicacion": "Barranquilla, Atlántico",
+      "descripcion_cliente": "Recogimos tu carga y verificamos el rotulado de mercancía peligrosa (Clase 3) y la tarjeta de emergencia."
+    },
+    {
+      "timestamp": "2026-11-02T04:10:00-05:00",
+      "estado": "EN_TRANSITO",
+      "etiqueta": "En tránsito",
+      "ubicacion": "Troncal del Magdalena - Bosconia",
+      "descripcion_cliente": "En ruta por carretera según el plan de contingencia."
+    },
+    {
+      "timestamp": "2026-11-02T15:20:00-05:00",
+      "estado": "RETENIDO_NOVEDAD",
+      "etiqueta": "Retenido por novedad",
+      "ubicacion": "Aguachica, Cesar",
+      "descripcion_cliente": "Retención preventiva en un puesto de control (POLFA) para verificación documental de la factura comercial y la tarjeta de emergencia."
+    }
+  ],
+  "prueba_entrega": null,
+  "flags": {
+    "requiere_refrigeracion": false,
+    "mercancia_peligrosa": true
+  },
+  "ultima_temperatura_c": null,
+  "fuente": {
+    "sistema": "TMS_SIMULADO",
+    "consultado_en": "2026-11-03T10:00:00-05:00"
+  }
+}

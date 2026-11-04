@@ -1,0 +1,171 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ConversationState.schema.json",
+  "title": "ConversationState",
+  "x-contract-version": "1.2.0",
+  "$defs": {
+    "ChannelType": {
+      "enum": [
+        "WHATSAPP",
+        "WEB_CHAT",
+        "PBX"
+      ],
+      "title": "ChannelType",
+      "type": "string"
+    },
+    "ConversationStatus": {
+      "enum": [
+        "ACTIVE",
+        "AWAITING_USER",
+        "IDLE",
+        "ESCALATED",
+        "CLOSED"
+      ],
+      "title": "ConversationStatus",
+      "type": "string"
+    },
+    "Intent": {
+      "enum": [
+        "TRACKING",
+        "COTIZACION",
+        "CONSULTA_DOCUMENTAL",
+        "CARGA_ESPECIAL",
+        "PQRS",
+        "SALUDO",
+        "HABLAR_CON_HUMANO",
+        "DESCONOCIDA"
+      ],
+      "title": "Intent",
+      "type": "string"
+    },
+    "Sentiment": {
+      "enum": [
+        "POSITIVO",
+        "NEUTRO",
+        "NEGATIVO",
+        "MUY_NEGATIVO"
+      ],
+      "title": "Sentiment",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "session_id": {
+      "format": "uuid4",
+      "title": "Session Id",
+      "type": "string"
+    },
+    "channel": {
+      "$ref": "#/$defs/ChannelType",
+      "description": "Canal de origen, persistido (DEC-CH1)."
+    },
+    "external_user_id_hash": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "External User Id Hash",
+      "type": "string"
+    },
+    "status": {
+      "$ref": "#/$defs/ConversationStatus"
+    },
+    "active_intent": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Intent"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "slots": {
+      "additionalProperties": true,
+      "examples": [
+        {
+          "cotizacion": {
+            "origen": "Bogotá D.C."
+          }
+        }
+      ],
+      "title": "Slots",
+      "type": "object"
+    },
+    "numero_guia_consultada": {
+      "anyOf": [
+        {
+          "examples": [
+            "TLX-984021-CO"
+          ],
+          "pattern": "^TLX-\\d{6}-CO$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Numero Guia Consultada"
+    },
+    "confidence_scores": {
+      "description": "Solo turnos respondidos con RAG.",
+      "items": {
+        "maximum": 1,
+        "minimum": 0,
+        "type": "number"
+      },
+      "title": "Confidence Scores",
+      "type": "array"
+    },
+    "sentiment": {
+      "$ref": "#/$defs/Sentiment",
+      "default": "NEUTRO"
+    },
+    "fallback_count": {
+      "default": 0,
+      "description": "= intentos_previos del handoff.",
+      "minimum": 0,
+      "title": "Fallback Count",
+      "type": "integer"
+    },
+    "handoff_id": {
+      "anyOf": [
+        {
+          "format": "uuid4",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Handoff Id"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "updated_at": {
+      "format": "date-time",
+      "title": "Updated At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "session_id",
+    "channel",
+    "external_user_id_hash",
+    "status",
+    "active_intent",
+    "slots",
+    "numero_guia_consultada",
+    "confidence_scores",
+    "sentiment",
+    "fallback_count",
+    "handoff_id",
+    "created_at",
+    "updated_at"
+  ],
+  "type": "object"
+}

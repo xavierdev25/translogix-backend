@@ -1,0 +1,21 @@
+meta {
+  name: WhatsApp verificacion sin token (503)
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/v1/channels/whatsapp/webhook?hub.mode=subscribe&hub.verify_token=x&hub.challenge=1
+  body: none
+  auth: none
+}
+
+script:pre-request {
+  const uuid = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16); });
+  bru.setVar("messageId", uuid());
+}
+
+tests {
+  test("HTTP 503", () => expect(res.status).to.equal(503));
+  test("error.code = NO_CONFIGURADO", () => expect(res.body?.["error"]?.["code"]).to.eql("NO_CONFIGURADO"));
+}

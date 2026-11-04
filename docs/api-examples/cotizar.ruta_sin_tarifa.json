@@ -1,0 +1,29 @@
+{
+  "method": "POST",
+  "path": "/api/v1/cotizar",
+  "headers": {},
+  "body": {
+    "origen": "Barranquilla",
+    "destino": "Bucaramanga",
+    "alto_cm": 30,
+    "ancho_cm": 30,
+    "largo_cm": 30,
+    "peso_real_kg": 10,
+    "valor_declarado_cop": 1000000,
+    "requiere_cadena_frio": false,
+    "mercancia_peligrosa": false
+  },
+  "form": null,
+  "status": 422,
+  "response": {
+    "error": {
+      "code": "RUTA_SIN_TARIFA",
+      "message": "No tengo tarifa para esa ruta en la matriz disponible.",
+      "details": {
+        "origen": "Barranquilla",
+        "destino": "Bucaramanga"
+      },
+      "request_id": "c298a917-a361-44f4-9570-c1cced3ee968"
+    }
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "numero_guia": "TLX-752190-CO",
+  "estado_actual": {
+    "codigo": "ENTREGADO",
+    "etiqueta": "Entregado",
+    "explicacion": "Tu envío fue entregado en el destino."
+  },
+  "origen_ciudad": "Medellín",
+  "destino_ciudad": "Cali",
+  "tipo_servicio": "Transporte de Carga Masiva (FTL)",
+  "fecha_despacho": "2026-11-01T08:00:00-05:00",
+  "fecha_estimada_entrega": "2026-11-02T12:00:00-05:00",
+  "ubicacion_referencia": "Bodega Destino Yumbo - Entregado",
+  "eventos": [
+    {
+      "timestamp": "2026-11-01T08:00:00-05:00",
+      "estado": "RECOGIDO_EN_ORIGEN",
+      "etiqueta": "Recogido en origen",
+      "ubicacion": "Itagüí, Antioquia",
+      "descripcion_cliente": "Recogimos tu carga y la aseguramos para el viaje."
+    },
+    {
+      "timestamp": "2026-11-01T14:20:00-05:00",
+      "estado": "EN_TRANSITO",
+      "etiqueta": "En tránsito",
+      "ubicacion": "Hub Eje Cafetero Dosquebradas",
+      "descripcion_cliente": "Pasó el control de báscula: peso verificado conforme."
+    },
+    {
+      "timestamp": "2026-11-02T07:30:00-05:00",
+      "estado": "EN_REPARTO",
+      "etiqueta": "En reparto",
+      "ubicacion": "Hub Regional Yumbo - Valle",
+      "descripcion_cliente": "Tu envío salió en la ruta de distribución final."
+    },
+    {
+      "timestamp": "2026-11-02T11:45:00-05:00",
+      "estado": "ENTREGADO",
+      "etiqueta": "Entregado",
+      "ubicacion": "Bodega Cliente Yumbo",
+      "descripcion_cliente": "Mercancía recibida a satisfacción."
+    }
+  ],
+  "prueba_entrega": {
+    "recibido_por_iniciales": "R. B.",
+    "fecha_hora_entrega": "2026-11-02T11:45:00-05:00",
+    "observaciones": "Carga intacta, sin averías."
+  },
+  "flags": {
+    "requiere_refrigeracion": false,
+    "mercancia_peligrosa": false
+  },
+  "ultima_temperatura_c": null,
+  "fuente": {
+    "sistema": "TMS_SIMULADO",
+    "consultado_en": "2026-11-03T10:00:00-05:00"
+  }
+}

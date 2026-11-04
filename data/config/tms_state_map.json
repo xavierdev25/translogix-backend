@@ -1,0 +1,15 @@
+{
+  "_nota": "Etiqueta y explicación (es-CO) de cada estado del TMS. Un estado ausente se muestra con su código literal y oferta de asesor; nunca con una explicación inventada.",
+  "estados": {
+    "SOLICITUD_GENERADA": {"etiqueta": "Solicitud generada", "explicacion": "Tu orden de despacho fue creada y la guía ya está generada."},
+    "RECOGIDO_EN_ORIGEN": {"etiqueta": "Recogido en origen", "explicacion": "Recogimos tu envío en el punto de origen."},
+    "EN_BODEGA_ORIGEN": {"etiqueta": "En bodega de origen", "explicacion": "Tu envío está en nuestra bodega de origen, listo para su próximo despacho."},
+    "RELECTURA_HUB_FONTIBON": {"etiqueta": "En clasificación en Bogotá", "explicacion": "Tu paquete ya ingresó a nuestro centro principal de clasificación en Bogotá y se encuentra programado para salir en la ruta nocturna hacia tu ciudad."},
+    "EN_TRANSITO": {"etiqueta": "En tránsito", "explicacion": "Tu envío va en carretera hacia la ciudad de destino."},
+    "EN_BODEGA_DESTINO": {"etiqueta": "En bodega de destino", "explicacion": "Tu envío llegó al centro de distribución de la ciudad de destino."},
+    "EN_REPARTO": {"etiqueta": "En reparto", "explicacion": "Tu envío está en el vehículo de reparto y llegará a la dirección de entrega."},
+    "ENTREGADO": {"etiqueta": "Entregado", "explicacion": "Tu envío fue entregado en el destino."},
+    "RETENIDO_NOVEDAD": {"etiqueta": "Retenido por novedad", "explicacion": "Tu envío está detenido temporalmente por una novedad operativa."},
+    "EN_INVESTIGACION_SINIESTRO": {"etiqueta": "En investigación de siniestro", "explicacion": "Tu envío está en investigación porque no hay actualización de trazabilidad tras la fecha estimada."}
+  }
+}

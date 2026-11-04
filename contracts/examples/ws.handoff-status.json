@@ -1,0 +1,9 @@
+{
+  "type": "handoff_status",
+  "session_id": "2f3e4d5c-6b7a-4c8d-9e0f-1a2b3c4d5e6f",
+  "handoff_id": "7a6b5c4d-3e2f-4a1b-9c8d-7e6f5a4b3c2d",
+  "status": "PENDING",
+  "prioridad": "URGENTE",
+  "cola": "OPERACIONES",
+  "tiempo_espera_estimado_segundos": 45
+}

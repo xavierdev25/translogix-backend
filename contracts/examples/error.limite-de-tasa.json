@@ -1,0 +1,10 @@
+{
+  "error": {
+    "code": "LIMITE_DE_TASA",
+    "message": "Recibimos demasiadas solicitudes seguidas. Espera un momento e intenta de nuevo.",
+    "details": {
+      "reintentar_en_segundos": 30
+    },
+    "request_id": "0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e"
+  }
+}

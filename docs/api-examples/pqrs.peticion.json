@@ -1,0 +1,52 @@
+{
+  "method": "POST",
+  "path": "/api/v1/pqrs/crear-ticket",
+  "headers": {},
+  "body": {
+    "session_id": null,
+    "tipo": "PETICION",
+    "numero_guia": "TLX-752190-CO",
+    "tipo_novedad": null,
+    "descripcion": "Solicito copia de la prueba de entrega de la guía.",
+    "valor_reclamado_cop": null,
+    "documentos": []
+  },
+  "form": null,
+  "status": 201,
+  "response": {
+    "ticket_id": "0ad5e935-aa99-4511-969a-50f4f6850f81",
+    "estado": "ESCALADO",
+    "elegibilidad": null,
+    "checklist": [],
+    "faltantes": [],
+    "liquidacion_preliminar": null,
+    "escalamiento": {
+      "escalate": true,
+      "primary": {
+        "id_criterio": "CRIT-003",
+        "accion": "ESCALAR_A_DEPARTAMENTO_JURIDICO_Y_PQRS",
+        "accion_raw": "ESCALAR_A_DEPARTAMENTO_JURIDICO_Y_PQRS",
+        "evidencia": "valor_declarado_cop > 5000000 (contexto de reclamación)",
+        "modo": "claim_context"
+      },
+      "triggers": [
+        {
+          "id_criterio": "CRIT-003",
+          "accion": "ESCALAR_A_DEPARTAMENTO_JURIDICO_Y_PQRS",
+          "accion_raw": "ESCALAR_A_DEPARTAMENTO_JURIDICO_Y_PQRS",
+          "evidencia": "valor_declarado_cop > 5000000 (contexto de reclamación)",
+          "modo": "claim_context"
+        }
+      ],
+      "mensaje_cliente": "Dado que el valor reclamado supera el límite de trámite automático en chat ($5,000,000 COP), un gestor senior de PQRS tomará tu caso.",
+      "rules_version": "1.0.2026",
+      "config_snapshot": {
+        "CRIT003_MODE": "claim_context",
+        "CRIT005_MODE": "incident_context",
+        "CONFIDENCE_THRESHOLD": "0.75",
+        "PRIORITY_ORDER": "CRIT-005>CRIT-003>CRIT-002>CRIT-004>CRIT-001>INFO-INTENTOS",
+        "omitidas": "CRIT-001:sin_respuesta_rag,INFO-INTENTOS:sin_dato"
+      }
+    }
+  }
+}

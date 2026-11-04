@@ -1,0 +1,34 @@
+meta {
+  name: Cotizacion iterativa 1 - ruta
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/v1/chat/messages
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "client_id": "{{clientId}}",
+    "message_id": "{{messageId}}",
+    "text": "Quiero cotizar un envío de Bogotá a Medellín"
+  }
+}
+
+script:pre-request {
+  const uuid = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16); });
+  bru.setVar("messageId", uuid());
+  bru.setVar("clientId", uuid());
+}
+
+script:post-response {
+  if (res.body?.["reply"]?.["session_id"]) bru.setVar("sessionId", res.body?.["reply"]?.["session_id"]);
+}
+
+tests {
+  test("HTTP 200", () => expect(res.status).to.equal(200));
+  test("reply.meta.intent = COTIZACION", () => expect(res.body?.["reply"]?.["meta"]?.["intent"]).to.eql("COTIZACION"));
+}

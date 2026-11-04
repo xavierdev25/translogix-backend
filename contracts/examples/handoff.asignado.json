@@ -1,0 +1,38 @@
+{
+  "handoff_id": "7a6b5c4d-3e2f-4a1b-9c8d-7e6f5a4b3c2d",
+  "session_id": "2f3e4d5c-6b7a-4c8d-9e0f-1a2b3c4d5e6f",
+  "canal": "WEB_CHAT",
+  "numero_guia_consultada": "TLX-310482-CO",
+  "confidence_score_promedio": null,
+  "sentimiento_detectado": "NEUTRO",
+  "intentos_previos": 0,
+  "resumen_contexto": "Cliente consulta la guía TLX-310482-CO (mercancía peligrosa clase 3, Barranquilla → Bucaramanga), retenida en un puesto de control de Aguachica (Cesar) por verificación documental de factura comercial y tarjeta de emergencia.",
+  "historial": [
+    {
+      "rol": "USUARIO",
+      "texto": "TLX-310482-CO",
+      "timestamp": "2026-11-03T09:40:00-05:00",
+      "canal": "WEB_CHAT"
+    },
+    {
+      "rol": "ASISTENTE",
+      "texto": "Identificamos que tu consulta involucra carga especial sensible. Un coordinador de operaciones tomará la llamada/chat prioritariamente.",
+      "timestamp": "2026-11-03T09:40:04-05:00",
+      "canal": "WEB_CHAT"
+    }
+  ],
+  "prioridad": "URGENTE",
+  "cola_destino": "OPERACIONES",
+  "triggers": [
+    {
+      "id_criterio": "CRIT-005",
+      "accion": "ESCALAR_URGENCIA_OPERACIONES",
+      "accion_raw": "ESCALAR_Urgencia_OPERACIONES",
+      "evidencia": "mercancia_peligrosa=true; estado_guia=RETENIDO_NOVEDAD",
+      "modo": "incident_context"
+    }
+  ],
+  "tiempo_espera_estimado_segundos": 45,
+  "status": "ASSIGNED",
+  "created_at": "2026-11-03T09:40:04-05:00"
+}

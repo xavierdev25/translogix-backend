@@ -1,0 +1,12 @@
+{
+  "_simulado": true,
+  "_nota": "FIXTURE SIMULADO. Cuentas de los remitentes del dataset TMS simulado; los valores de envíos mensuales son ficticios.",
+  "_instruccion": "El equipo debe marcar UN NIT como CORPORATIVO_GOLD para demostrar CRIT-004 (DEC-ACC1). No lo decide el código.",
+  "cuentas": {
+    "900.123.456-7": {"tipo_cuenta": "ESTANDAR", "envios_mensuales_cuenta": 12},
+    "890.987.654-3": {"tipo_cuenta": "ESTANDAR", "envios_mensuales_cuenta": 12},
+    "800.554.321-9": {"tipo_cuenta": "ESTANDAR", "envios_mensuales_cuenta": 12},
+    "901.883.210-4": {"tipo_cuenta": "ESTANDAR", "envios_mensuales_cuenta": 12},
+    "860.443.219-1": {"tipo_cuenta": "ESTANDAR", "envios_mensuales_cuenta": 12}
+  }
+}

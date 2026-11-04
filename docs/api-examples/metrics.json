@@ -1,0 +1,36 @@
+{
+  "method": "GET",
+  "path": "/api/v1/metrics/channels",
+  "headers": {},
+  "body": null,
+  "form": null,
+  "status": 200,
+  "response": {
+    "generado_en": "2026-11-03T13:17:37.725593-05:00",
+    "desde": null,
+    "hasta": null,
+    "canales": [
+      {
+        "channel": "WHATSAPP",
+        "conversaciones": 1,
+        "mensajes_entrantes": 2,
+        "mensajes_salientes": 2,
+        "handoffs": 0
+      },
+      {
+        "channel": "WEB_CHAT",
+        "conversaciones": 41,
+        "mensajes_entrantes": 57,
+        "mensajes_salientes": 57,
+        "handoffs": 14
+      },
+      {
+        "channel": "PBX",
+        "conversaciones": 2,
+        "mensajes_entrantes": 2,
+        "mensajes_salientes": 2,
+        "handoffs": 0
+      }
+    ]
+  }
+}

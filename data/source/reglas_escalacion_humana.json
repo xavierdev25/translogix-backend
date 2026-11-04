@@ -1,0 +1,78 @@
+{
+  "version_reglas": "1.0.2026",
+  "sistema": "KODO TAKAI - Agent Escalation Protocol (TransLogix Colombia S.A.S.)",
+  "parametros_generales": {
+    "confidence_score_minimo": 0.75,
+    "maximo_intentos_fallidos_entregados": 2,
+    "tiempo_maximo_inactividad_minutos": 5,
+    "idioma_soporte_primario": "es-CO"
+  },
+  "criterios_escalacion": [
+    {
+      "id_criterio": "CRIT-001",
+      "categoria": "Score de Confianza de IA",
+      "descripcion": "Si la respuesta generada por el motor RAG tiene una probabilidad/confianza por debajo del umbral de seguridad.",
+      "regla_evaluacion": "confidence_score < 0.75",
+      "accion": "ESCALAR_A_HUMANO",
+      "mensaje_cliente": "Entiendo tu consulta, pero para asegurarme de darte la información exacta, voy a conectarte de inmediato con un especialista en servicio al cliente."
+    },
+    {
+      "id_criterio": "CRIT-002",
+      "categoria": "Sentimiento y Frustración del Cliente",
+      "descripcion": "Detección de lenguaje agresivo, insatisfacción manifiesta o palabras clave de molestia.",
+      "keywords_disparadoras": [
+        "pésimo servicio",
+        "demandar",
+        "supertransporte",
+        "sic",
+        "estafa",
+        "incompetentes",
+        "hablar con humano",
+        "pasar con asesor",
+        "gerente",
+        "abogado",
+        "denuncia",
+        "perdí mi dinero",
+        "ladrones"
+      ],
+      "accion": "ESCALAR_PRIORIDAD_ALTA",
+      "mensaje_cliente": "Lamento profundamente la molestia ocasionada. Estoy transfiriendo tu chat de inmediato a un supervisor de servicio al cliente para resolver tu situación."
+    },
+    {
+      "id_criterio": "CRIT-003",
+      "categoria": "Monto Monetario de Reclamación / Indemnización",
+      "descripcion": "Reclamaciones económicas o avalúo de mercancía extraviada/averiada por encima del límite automatizado.",
+      "regla_evaluacion": "valor_declarado_cop > 5000000 or valor_reclamacion_cop > 5000000",
+      "accion": "ESCALAR_A_DEPARTAMENTO_JURIDICO_Y_PQRS",
+      "mensaje_cliente": "Dado que el valor reclamado supera el límite de trámite automático en chat ($5,000,000 COP), un gestor senior de PQRS tomará tu caso."
+    },
+    {
+      "id_criterio": "CRIT-004",
+      "categoria": "Clientes Corporativos de Alto Volumen",
+      "descripcion": "Consultas o solicitudes provenientes de cuentas empresariales B2B prioritarias.",
+      "regla_evaluacion": "envios_mensuales_cuenta > 500 or tipo_cuenta == 'CORPORATIVO_GOLD'",
+      "accion": "ESCALAR_A_EJECUTIVO_CUENTA_DEDICADO",
+      "mensaje_cliente": "Hola! Al ser una cuenta corporativa preferencial, te transferimos directamente con tu ejecutivo de cuenta asignado."
+    },
+    {
+      "id_criterio": "CRIT-005",
+      "categoria": "Siniestro Crítico en Carga Especial",
+      "descripcion": "Novedades que involucren ruptura de cadena de frío en fármacos o incidentes con mercancías peligrosas.",
+      "regla_evaluacion": "mercancia_peligrosa == true or (requiere_refrigeracion == true and estado == 'RETENIDO_NOVEDAD')",
+      "accion": "ESCALAR_Urgencia_OPERACIONES",
+      "mensaje_cliente": "Identificamos que tu consulta involucra carga especial sensible. Un coordinador de operaciones tomará la llamada/chat prioritariamente."
+    }
+  ],
+  "flujo_transferencia_pwa": {
+    "conservar_historial_chat": true,
+    "generar_resumen_contexto_ia": true,
+    "tiempo_espera_estimado_segundos": 45,
+    "datos_adjuntos_a_payload_agente": [
+      "session_id",
+      "numero_guia_consultada",
+      "confidence_score_promedio",
+      "sentimiento_detectado",
+      "intentos_previos"
+    ]
+  }
+}

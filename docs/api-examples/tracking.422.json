@@ -1,0 +1,18 @@
+{
+  "method": "GET",
+  "path": "/api/v1/tracking/ABC-123",
+  "headers": {},
+  "body": null,
+  "form": null,
+  "status": 422,
+  "response": {
+    "error": {
+      "code": "GUIA_FORMATO_INVALIDO",
+      "message": "El número de guía no tiene un formato válido. Debe verse así: TLX-123456-CO.",
+      "details": {
+        "guia": "ABC-123"
+      },
+      "request_id": "1c3445c9-8532-44d6-a8d8-0166a7aaa6f5"
+    }
+  }
+}

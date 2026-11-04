@@ -1,0 +1,157 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "RagAnswer.schema.json",
+  "title": "RagAnswer",
+  "x-contract-version": "1.2.0",
+  "$defs": {
+    "Citation": {
+      "additionalProperties": false,
+      "properties": {
+        "doc_code": {
+          "$ref": "#/$defs/DocCode"
+        },
+        "doc_title": {
+          "title": "Doc Title",
+          "type": "string"
+        },
+        "section_path": {
+          "title": "Section Path",
+          "type": "string"
+        },
+        "chunk_id": {
+          "minLength": 1,
+          "title": "Chunk Id",
+          "type": "string"
+        },
+        "excerpt": {
+          "minLength": 1,
+          "title": "Excerpt",
+          "type": "string"
+        },
+        "score": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Score",
+          "type": "number"
+        }
+      },
+      "required": [
+        "doc_code",
+        "doc_title",
+        "section_path",
+        "chunk_id",
+        "excerpt",
+        "score"
+      ],
+      "title": "Citation",
+      "type": "object"
+    },
+    "Confidence": {
+      "additionalProperties": false,
+      "description": "Heuristic score in [0, 1]. It is explicitly *not* a probability.",
+      "properties": {
+        "score": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Score",
+          "type": "number"
+        },
+        "method": {
+          "const": "heuristic_v1",
+          "default": "heuristic_v1",
+          "title": "Method",
+          "type": "string"
+        },
+        "components": {
+          "additionalProperties": {
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number"
+          },
+          "title": "Components",
+          "type": "object"
+        },
+        "is_probability": {
+          "const": false,
+          "default": false,
+          "title": "Is Probability",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "score",
+        "method",
+        "components",
+        "is_probability"
+      ],
+      "title": "Confidence",
+      "type": "object"
+    },
+    "DocCode": {
+      "enum": [
+        "DOC-OPS-2026-03",
+        "DOC-PQRS-2026-04",
+        "COBERTURA",
+        "TARIFAS",
+        "REGLAS_ESCALACION"
+      ],
+      "title": "DocCode",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "answer_text": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Answer Text"
+    },
+    "grounded": {
+      "description": "False: no se genera texto afirmativo.",
+      "title": "Grounded",
+      "type": "boolean"
+    },
+    "citations": {
+      "items": {
+        "$ref": "#/$defs/Citation"
+      },
+      "title": "Citations",
+      "type": "array"
+    },
+    "confidence": {
+      "$ref": "#/$defs/Confidence"
+    },
+    "retrieval": {
+      "additionalProperties": true,
+      "description": "top_k, scores y filtros usados.",
+      "examples": [
+        {
+          "filters": {
+            "tipo": "normativa_carga"
+          },
+          "scores": [
+            0.82,
+            0.71
+          ],
+          "top_k": 5
+        }
+      ],
+      "title": "Retrieval",
+      "type": "object"
+    }
+  },
+  "required": [
+    "answer_text",
+    "grounded",
+    "citations",
+    "confidence",
+    "retrieval"
+  ],
+  "type": "object"
+}

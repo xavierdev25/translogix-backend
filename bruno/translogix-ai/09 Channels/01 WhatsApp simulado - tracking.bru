@@ -1,0 +1,64 @@
+meta {
+  name: WhatsApp simulado - tracking
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/channels/whatsapp/simulate
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "object": "whatsapp_business_account",
+    "entry": [
+      {
+        "id": "100000000000000",
+        "changes": [
+          {
+            "field": "messages",
+            "value": {
+              "messaging_product": "whatsapp",
+              "metadata": {
+                "display_phone_number": "570000000000",
+                "phone_number_id": "100000000000001"
+              },
+              "contacts": [
+                {
+                  "profile": {
+                    "name": "Cliente Demo"
+                  },
+                  "wa_id": "573000000000"
+                }
+              ],
+              "messages": [
+                {
+                  "from": "573000000000",
+                  "id": "wamid.SIMULATED-0001",
+                  "timestamp": "1762182000",
+                  "type": "text",
+                  "text": {
+                    "body": "¿Dónde está mi guía TLX-984021-CO?"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
+
+script:pre-request {
+  const uuid = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16); });
+  bru.setVar("messageId", uuid());
+}
+
+tests {
+  test("HTTP 200", () => expect(res.status).to.equal(200));
+  test("delivery_mode = SIMULATED", () => expect(res.body?.["delivery_mode"]).to.eql("SIMULATED"));
+  test("results.0.reply.meta.intent = TRACKING", () => expect(res.body?.["results"][0]?.["reply"]?.["meta"]?.["intent"]).to.eql("TRACKING"));
+}

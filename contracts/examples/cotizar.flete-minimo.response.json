@@ -1,0 +1,30 @@
+{
+  "cotizacion_id": "c6e8a0b2-4d5f-4a1b-8c3d-5e7f9a1b3c4d",
+  "ruta": {
+    "codigo_trayecto": "TLX-BOG-PEI-006",
+    "origen": "Bogotá D.C.",
+    "destino": "Pereira"
+  },
+  "calculo": {
+    "peso_volumetrico_kg": 6.0,
+    "peso_facturable_kg": 6.0,
+    "tarifa_aplicada": {
+      "tipo": "VOLUMETRICO",
+      "cop_por_kg": 1580
+    },
+    "flete_minimo_cop": 18000,
+    "flete_minimo_aplicado": true,
+    "flete_base_cop": 18000,
+    "seguro_cop": 4500,
+    "recargos": [],
+    "flete_total_cop": 22500
+  },
+  "tiempo_entrega_horas": 24,
+  "advertencias": [],
+  "supuestos": [
+    "formula_version=provisional-v1",
+    "seguro_minimo_fuente=pdf(2500)",
+    "seguro_minimo_alternativo=csv(3500)"
+  ],
+  "formula_version": "provisional-v1"
+}

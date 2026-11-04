@@ -1,0 +1,21 @@
+{
+  "method": "POST",
+  "path": "/api/v1/admin/rag/reindex",
+  "headers": {
+    "X-Admin-Token": "<ADMIN_TOKEN>"
+  },
+  "body": {
+    "force": false
+  },
+  "form": null,
+  "status": 200,
+  "response": {
+    "status": "COMPLETED",
+    "documentos": 0,
+    "chunks": 0,
+    "omitidos_sin_cambios": 4,
+    "duracion_ms": 4,
+    "embed_model": "qwen3-embedding:0.6b",
+    "embed_dim": 1024
+  }
+}

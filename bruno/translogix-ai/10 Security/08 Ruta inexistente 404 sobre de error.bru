@@ -1,0 +1,21 @@
+meta {
+  name: Ruta inexistente (404 sobre de error)
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{baseUrl}}/api/v1/admin/usuarios
+  body: none
+  auth: none
+}
+
+script:pre-request {
+  const uuid = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16); });
+  bru.setVar("messageId", uuid());
+}
+
+tests {
+  test("HTTP 404", () => expect(res.status).to.equal(404));
+  test("error.request_id presente", () => expect(res.body?.["error"]?.["request_id"]).to.not.equal(undefined));
+}

@@ -1,0 +1,82 @@
+{
+  "method": "POST",
+  "path": "/api/v1/chat/messages",
+  "headers": {},
+  "body": {
+    "client_id": "9fb37184-d2a4-4f18-a252-eb2f4819a544",
+    "message_id": "e0878bc7-d8b2-4134-85d5-54f4c9287aca",
+    "text": "¿Puedo enviar 5 litros de ácido clorhídrico de Bogotá a Cali?"
+  },
+  "form": null,
+  "status": 200,
+  "response": {
+    "reply": {
+      "session_id": "f23709fb-0db6-4bc3-9fff-4906915137db",
+      "in_reply_to": "e0878bc7-d8b2-4134-85d5-54f4c9287aca",
+      "reply_id": "8879b4af-b446-4398-9e27-1d63ce50ade3",
+      "channel": "WEB_CHAT",
+      "status": "AWAITING_USER",
+      "blocks": [
+        {
+          "type": "TEXT",
+          "text": "Sí, puedes enviar 5 litros de ácido clorhídrico de Bogotá a Cali, siempre que esté en envase primario hermético, bolsa de seguridad calibre 4 y caja de cartón corrugado de doble pared. Debes adjuntar la Hoja de Seguridad (MSDS) en español de 16 secciones y la Tarjeta de Emergencia NTC 4532."
+        },
+        {
+          "type": "CITATIONS",
+          "items": [
+            {
+              "doc_code": "DOC-OPS-2026-03",
+              "doc_title": "Manual operativo de mercancías peligrosas, estándares de embalaje y restricciones de carga",
+              "section_path": "6. GUÍA DE ATENCIÓN DE DUDAS EN LA PWA (PROMPTS Y CONTEXTO RAG)",
+              "chunk_id": "DOC-OPS-2026-03:0018",
+              "excerpt": "El motor RAG debe procesar las consultas de los usuarios en la PWA evaluando este manual de acuerdo a las siguientes reglas:\n\n* **Consulta:** *\"¿Puedo enviar 5 litros de ácido clor hídrico de Bogotá a Cali?\"*\n  * **Respuesta RAG esperada:** *\"El ácido clorhídrico es una sustancia corrosiva (Clase 8 ONU). En TransLogix Express en modalidad paquetería solo aceptamos envases con un máximo de 5 litros"
+            }
+          ]
+        },
+        {
+          "type": "QUICK_REPLIES",
+          "options": [
+            {
+              "id": "cotizar",
+              "title": "Cotizar un envío"
+            },
+            {
+              "id": "asesor",
+              "title": "Hablar con un asesor"
+            }
+          ]
+        }
+      ],
+      "meta": {
+        "trace_id": "c33d2f27-b21c-478c-97f4-b6bdcaa859db",
+        "intent": "CARGA_ESPECIAL",
+        "confidence_score": 0.8828,
+        "confidence_method": "heuristic_v1",
+        "escalation": {
+          "escalate": false,
+          "primary": null,
+          "triggers": [],
+          "mensaje_cliente": null,
+          "rules_version": "1.0.2026",
+          "config_snapshot": {
+            "CRIT003_MODE": "claim_context",
+            "CRIT005_MODE": "incident_context",
+            "CONFIDENCE_THRESHOLD": "0.75",
+            "PRIORITY_ORDER": "CRIT-005>CRIT-003>CRIT-002>CRIT-004>CRIT-001>INFO-INTENTOS",
+            "omitidas": "CRIT-003:sin_valores,CRIT-004:sin_datos_cuenta,CRIT-005:sin_datos_de_carga,INFO-INTENTOS:sin_dato"
+          }
+        },
+        "services_called": [
+          "rag",
+          "escalation"
+        ],
+        "evidence_ids": [
+          "DOC-OPS-2026-03:0018"
+        ],
+        "llm_used": true,
+        "delivery_mode": "SIMULATED"
+      },
+      "created_at": "2026-11-03T13:17:29.033933-05:00"
+    }
+  }
+}

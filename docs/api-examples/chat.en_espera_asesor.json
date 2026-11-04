@@ -1,0 +1,44 @@
+{
+  "method": "POST",
+  "path": "/api/v1/chat/messages",
+  "headers": {},
+  "body": {
+    "client_id": "e9cf84b3-34ff-4b52-92cd-fdbfb8ff493a",
+    "session_id": "8900701e-fe1c-410a-bee9-6a12d3d9f0ab",
+    "message_id": "681b467f-8537-4e95-8b0f-8f56d25c3ef6",
+    "text": "¿Sigo esperando?"
+  },
+  "form": null,
+  "status": 200,
+  "response": {
+    "reply": {
+      "session_id": "8900701e-fe1c-410a-bee9-6a12d3d9f0ab",
+      "in_reply_to": "681b467f-8537-4e95-8b0f-8f56d25c3ef6",
+      "reply_id": "494bc388-56b6-4813-a02b-e1ef513964c2",
+      "channel": "WEB_CHAT",
+      "status": "ESCALATED",
+      "blocks": [
+        {
+          "type": "TEXT",
+          "text": "Tu caso ya está con un asesor de TransLogix. Te responderá en este mismo chat."
+        }
+      ],
+      "meta": {
+        "trace_id": "7a3c117b-8557-4528-9196-d799f65c6213",
+        "intent": "TRACKING",
+        "confidence_score": null,
+        "confidence_method": null,
+        "escalation": null,
+        "services_called": [
+          "escalation"
+        ],
+        "evidence_ids": [
+          "6c72e632-2ce5-4664-94ec-aac9ba6ba360"
+        ],
+        "llm_used": false,
+        "delivery_mode": "SIMULATED"
+      },
+      "created_at": "2026-11-03T13:17:37.676802-05:00"
+    }
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "method": "POST",
+  "path": "/api/v1/chat/messages",
+  "headers": {},
+  "body": {
+    "client_id": "a302af25-8307-486b-91cb-4bebb009ccc0",
+    "message_id": "50095cf8-9f67-4a08-a6ad-44f4547cf531",
+    "text": "Quiero hablar con un asesor"
+  },
+  "form": null,
+  "status": 200,
+  "response": {
+    "reply": {
+      "session_id": "e691d3a8-9716-4f12-b57b-4eb2f11481a1",
+      "in_reply_to": "50095cf8-9f67-4a08-a6ad-44f4547cf531",
+      "reply_id": "57a9eed5-c0d3-4b4e-96a7-b553e99eb313",
+      "channel": "WEB_CHAT",
+      "status": "ESCALATED",
+      "blocks": [
+        {
+          "type": "HANDOFF_NOTICE",
+          "handoff_id": "4a9cbcae-2bf4-488f-901c-dfd0eb336279",
+          "prioridad": "ALTA",
+          "cola": "SUPERVISOR",
+          "mensaje_cliente": "Lamento profundamente la molestia ocasionada. Estoy transfiriendo tu chat de inmediato a un supervisor de servicio al cliente para resolver tu situación.",
+          "tiempo_espera_estimado_segundos": 45
+        }
+      ],
+      "meta": {
+        "trace_id": "ae4b4ed8-0113-4a85-b29d-b8eded2fb24e",
+        "intent": "HABLAR_CON_HUMANO",
+        "confidence_score": null,
+        "confidence_method": null,
+        "escalation": {
+          "escalate": true,
+          "primary": {
+            "id_criterio": "CRIT-002",
+            "accion": "ESCALAR_PRIORIDAD_ALTA",
+            "accion_raw": "ESCALAR_PRIORIDAD_ALTA",
+            "evidencia": "solicitud explícita de asesor",
+            "modo": "intent"
+          },
+          "triggers": [
+            {
+              "id_criterio": "CRIT-002",
+              "accion": "ESCALAR_PRIORIDAD_ALTA",
+              "accion_raw": "ESCALAR_PRIORIDAD_ALTA",
+              "evidencia": "solicitud explícita de asesor",
+              "modo": "intent"
+            }
+          ],
+          "mensaje_cliente": "Lamento profundamente la molestia ocasionada. Estoy transfiriendo tu chat de inmediato a un supervisor de servicio al cliente para resolver tu situación.",
+          "rules_version": "1.0.2026",
+          "config_snapshot": {
+            "CRIT003_MODE": "claim_context",
+            "CRIT005_MODE": "incident_context",
+            "CONFIDENCE_THRESHOLD": "0.75",
+            "PRIORITY_ORDER": "CRIT-005>CRIT-003>CRIT-002>CRIT-004>CRIT-001>INFO-INTENTOS",
+            "omitidas": "CRIT-001:sin_respuesta_rag,CRIT-003:sin_valores,CRIT-004:sin_datos_cuenta,CRIT-005:sin_datos_de_carga,INFO-INTENTOS:sin_dato"
+          }
+        },
+        "services_called": [
+          "escalation"
+        ],
+        "evidence_ids": [],
+        "llm_used": false,
+        "delivery_mode": "SIMULATED"
+      },
+      "created_at": "2026-11-03T13:17:37.684572-05:00"
+    }
+  }
+}

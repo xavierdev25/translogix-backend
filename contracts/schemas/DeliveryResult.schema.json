@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "DeliveryResult.schema.json",
+  "title": "DeliveryResult",
+  "x-contract-version": "1.2.0",
+  "$defs": {
+    "DeliveryMode": {
+      "enum": [
+        "REAL",
+        "SIMULATED"
+      ],
+      "title": "DeliveryMode",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "delivery_mode": {
+      "$ref": "#/$defs/DeliveryMode"
+    },
+    "status": {
+      "enum": [
+        "SENT",
+        "QUEUED",
+        "FAILED",
+        "NOT_ATTEMPTED"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "provider_message_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Provider Message Id"
+    },
+    "error_code": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Error Code"
+    }
+  },
+  "required": [
+    "delivery_mode",
+    "status",
+    "provider_message_id",
+    "error_code"
+  ],
+  "type": "object"
+}

@@ -1,0 +1,96 @@
+{
+  "reply": {
+    "session_id": "2f3e4d5c-6b7a-4c8d-9e0f-1a2b3c4d5e6f",
+    "in_reply_to": "0e9d8c7b-6a5f-4e4d-9c3b-2a1f0e9d8c7b",
+    "reply_id": "1d2e3f4a-5b6c-4d7e-8f9a-0b1c2d3e4f5a",
+    "channel": "WEB_CHAT",
+    "status": "ESCALATED",
+    "blocks": [
+      {
+        "type": "TEXT",
+        "text": "Tu envío TLX-310482-CO está retenido en un puesto de control en Aguachica (Cesar) para verificación documental. Por tratarse de carga especial, te comunico de inmediato con Operaciones."
+      },
+      {
+        "type": "TRACKING_CARD",
+        "numero_guia": "TLX-310482-CO",
+        "estado": {
+          "codigo": "RETENIDO_NOVEDAD",
+          "etiqueta": "Retenido por novedad",
+          "explicacion": "Tu envío está detenido temporalmente en un puesto de control para verificación documental."
+        },
+        "eta": "2026-11-03T18:00:00-05:00",
+        "ubicacion_referencia": "Puesto de Control POLFA / DIAN - Aguachica, Cesar",
+        "eventos": [
+          {
+            "timestamp": "2026-11-02T04:10:00-05:00",
+            "estado": "EN_TRANSITO",
+            "etiqueta": "En tránsito",
+            "ubicacion": "Troncal del Magdalena - Bosconia",
+            "descripcion_cliente": "En ruta por carretera según el plan de contingencia."
+          },
+          {
+            "timestamp": "2026-11-02T15:20:00-05:00",
+            "estado": "RETENIDO_NOVEDAD",
+            "etiqueta": "Retenido por novedad",
+            "ubicacion": "Aguachica, Cesar",
+            "descripcion_cliente": "Retención preventiva en un puesto de control (POLFA) para verificación documental de la factura comercial y la tarjeta de emergencia."
+          }
+        ],
+        "flags": {
+          "requiere_refrigeracion": false,
+          "mercancia_peligrosa": true
+        }
+      },
+      {
+        "type": "HANDOFF_NOTICE",
+        "handoff_id": "7a6b5c4d-3e2f-4a1b-9c8d-7e6f5a4b3c2d",
+        "prioridad": "URGENTE",
+        "cola": "OPERACIONES",
+        "mensaje_cliente": "Identificamos que tu consulta involucra carga especial sensible. Un coordinador de operaciones tomará la llamada/chat prioritariamente.",
+        "tiempo_espera_estimado_segundos": 45
+      }
+    ],
+    "meta": {
+      "trace_id": "trc-01J9Z6R4C2",
+      "intent": "TRACKING",
+      "confidence_score": null,
+      "confidence_method": null,
+      "escalation": {
+        "escalate": true,
+        "primary": {
+          "id_criterio": "CRIT-005",
+          "accion": "ESCALAR_URGENCIA_OPERACIONES",
+          "accion_raw": "ESCALAR_Urgencia_OPERACIONES",
+          "evidencia": "mercancia_peligrosa=true; estado_guia=RETENIDO_NOVEDAD",
+          "modo": "incident_context"
+        },
+        "triggers": [
+          {
+            "id_criterio": "CRIT-005",
+            "accion": "ESCALAR_URGENCIA_OPERACIONES",
+            "accion_raw": "ESCALAR_Urgencia_OPERACIONES",
+            "evidencia": "mercancia_peligrosa=true; estado_guia=RETENIDO_NOVEDAD",
+            "modo": "incident_context"
+          }
+        ],
+        "mensaje_cliente": "Identificamos que tu consulta involucra carga especial sensible. Un coordinador de operaciones tomará la llamada/chat prioritariamente.",
+        "rules_version": "1.0.2026",
+        "config_snapshot": {
+          "CRIT003_MODE": "claim_context",
+          "CRIT005_MODE": "incident_context",
+          "PRIORITY_ORDER": "CRIT-005>CRIT-003>CRIT-002>CRIT-004>CRIT-001>INFO-INTENTOS"
+        }
+      },
+      "services_called": [
+        "tms",
+        "escalation"
+      ],
+      "evidence_ids": [
+        "TLX-310482-CO"
+      ],
+      "llm_used": false,
+      "delivery_mode": "REAL"
+    },
+    "created_at": "2026-11-03T09:40:04-05:00"
+  }
+}

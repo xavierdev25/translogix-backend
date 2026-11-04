@@ -1,0 +1,24 @@
+{
+  "items": [
+    {
+      "handoff_id": "7a6b5c4d-3e2f-4a1b-9c8d-7e6f5a4b3c2d",
+      "session_id": "2f3e4d5c-6b7a-4c8d-9e0f-1a2b3c4d5e6f",
+      "canal": "WEB_CHAT",
+      "prioridad": "URGENTE",
+      "cola_destino": "OPERACIONES",
+      "numero_guia_consultada": "TLX-310482-CO",
+      "status": "PENDING",
+      "created_at": "2026-11-03T09:40:04-05:00"
+    },
+    {
+      "handoff_id": "9c8d7e6f-5a4b-4c3d-9e2f-1a0b9c8d7e6f",
+      "session_id": "4b5c6d7e-8f9a-4b0c-9d1e-2f3a4b5c6d7e",
+      "canal": "WEB_CHAT",
+      "prioridad": "NORMAL",
+      "cola_destino": "SERVICIO_CLIENTE",
+      "numero_guia_consultada": null,
+      "status": "PENDING",
+      "created_at": "2026-11-03T10:40:02-05:00"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "method": "GET",
+  "path": "/api/v1/chat/sessions/e0d4abfc-cb6a-4c30-9f56-2360d6430435/history",
+  "headers": {
+    "X-Client-Id": "e3c6c417-87af-45b7-b743-24eeffb796f7"
+  },
+  "body": null,
+  "form": null,
+  "status": 404,
+  "response": {
+    "error": {
+      "code": "NO_ENCONTRADO",
+      "message": "No encontramos el recurso solicitado.",
+      "details": {
+        "recurso": "session"
+      },
+      "request_id": "85176565-368e-422a-ae2d-6044fbc0f0e5"
+    }
+  }
+}

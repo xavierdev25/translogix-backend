@@ -1,0 +1,21 @@
+meta {
+  name: Ready (BD, Ollama, indice RAG)
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/ready
+  body: none
+  auth: none
+}
+
+script:pre-request {
+  const uuid = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16); });
+  bru.setVar("messageId", uuid());
+}
+
+tests {
+  test("HTTP 200", () => expect(res.status).to.equal(200));
+  test("checks.database = ok", () => expect(res.body?.["checks"]?.["database"]).to.eql("ok"));
+}

@@ -1,0 +1,55 @@
+{
+  "method": "POST",
+  "path": "/api/v1/chat/messages",
+  "headers": {},
+  "body": {
+    "client_id": "f03689da-5cb4-4153-8692-e374e5dcfa7c",
+    "session_id": "9b95492e-d891-44aa-b149-abddd96057c2",
+    "message_id": "428c2daf-e2ee-43f7-9984-0129b4c82c40",
+    "text": "45,5 kg"
+  },
+  "form": null,
+  "status": 200,
+  "response": {
+    "reply": {
+      "session_id": "9b95492e-d891-44aa-b149-abddd96057c2",
+      "in_reply_to": "428c2daf-e2ee-43f7-9984-0129b4c82c40",
+      "reply_id": "85722960-977a-4888-82a4-f467a981f93d",
+      "channel": "WEB_CHAT",
+      "status": "AWAITING_USER",
+      "blocks": [
+        {
+          "type": "TEXT",
+          "text": "¿Cuál es el valor declarado de la mercancía en pesos?"
+        }
+      ],
+      "meta": {
+        "trace_id": "5d737568-2bc9-41bd-b258-ae726dd9948a",
+        "intent": "COTIZACION",
+        "confidence_score": null,
+        "confidence_method": null,
+        "escalation": {
+          "escalate": false,
+          "primary": null,
+          "triggers": [],
+          "mensaje_cliente": null,
+          "rules_version": "1.0.2026",
+          "config_snapshot": {
+            "CRIT003_MODE": "claim_context",
+            "CRIT005_MODE": "incident_context",
+            "CONFIDENCE_THRESHOLD": "0.75",
+            "PRIORITY_ORDER": "CRIT-005>CRIT-003>CRIT-002>CRIT-004>CRIT-001>INFO-INTENTOS",
+            "omitidas": "CRIT-001:sin_respuesta_rag,CRIT-003:sin_valores,CRIT-004:sin_datos_cuenta,CRIT-005:sin_datos_de_carga,INFO-INTENTOS:sin_dato"
+          }
+        },
+        "services_called": [
+          "escalation"
+        ],
+        "evidence_ids": [],
+        "llm_used": false,
+        "delivery_mode": "SIMULATED"
+      },
+      "created_at": "2026-11-03T13:17:29.025217-05:00"
+    }
+  }
+}

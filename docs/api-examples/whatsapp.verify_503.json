@@ -1,0 +1,18 @@
+{
+  "method": "GET",
+  "path": "/api/v1/channels/whatsapp/webhook?hub.mode=subscribe&hub.verify_token=x&hub.challenge=123",
+  "headers": {},
+  "body": null,
+  "form": null,
+  "status": 503,
+  "response": {
+    "error": {
+      "code": "NO_CONFIGURADO",
+      "message": "Esta función no está configurada en este entorno.",
+      "details": {
+        "variable": "WHATSAPP_VERIFY_TOKEN"
+      },
+      "request_id": "7386a794-5c50-4458-a328-60689c269595"
+    }
+  }
+}

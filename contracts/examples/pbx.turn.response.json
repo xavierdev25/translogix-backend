@@ -1,0 +1,99 @@
+{
+  "reply": {
+    "session_id": "5c6d7e8f-9a0b-4c1d-8e2f-3a4b5c6d7e8f",
+    "in_reply_to": "call-7d1e:1",
+    "reply_id": "8e9f0a1b-2c3d-4e4f-9a5b-7c8d9e0f1a2b",
+    "channel": "PBX",
+    "status": "AWAITING_USER",
+    "blocks": [
+      {
+        "type": "TEXT",
+        "text": "Tu guía TLX-984021-CO va en camino a Medellín. La entrega estimada es hoy, 3 de noviembre, a las 4:00 p. m."
+      },
+      {
+        "type": "TRACKING_CARD",
+        "numero_guia": "TLX-984021-CO",
+        "estado": {
+          "codigo": "EN_TRANSITO",
+          "etiqueta": "En tránsito",
+          "explicacion": "Tu envío va en carretera hacia la ciudad de destino."
+        },
+        "eta": "2026-11-03T16:00:00-05:00",
+        "ubicacion_referencia": "Paso de Montaña Alto de la Línea - Sentido Bogotá-Ibague-Medellín",
+        "eventos": [
+          {
+            "timestamp": "2026-11-03T02:15:00-05:00",
+            "estado": "EN_TRANSITO",
+            "etiqueta": "En tránsito",
+            "ubicacion": "Peaje Chicoral - Tolima",
+            "descripcion_cliente": "En ruta con monitoreo activo; temperatura estable a 3.8 °C."
+          },
+          {
+            "timestamp": "2026-11-03T08:30:00-05:00",
+            "estado": "EN_TRANSITO",
+            "etiqueta": "En tránsito",
+            "ubicacion": "Corredor Calarcá - Pereira",
+            "descripcion_cliente": "Vehículo en ruta regular hacia el centro de distribución de destino."
+          }
+        ],
+        "flags": {
+          "requiere_refrigeracion": true,
+          "mercancia_peligrosa": false
+        }
+      },
+      {
+        "type": "QUICK_REPLIES",
+        "options": [
+          {
+            "id": "cotizar",
+            "title": "Cotizar un envío"
+          },
+          {
+            "id": "pqrs",
+            "title": "Radicar una PQRS"
+          },
+          {
+            "id": "asesor",
+            "title": "Hablar con un asesor"
+          }
+        ]
+      }
+    ],
+    "meta": {
+      "trace_id": "trc-01J9Z6ZBK9",
+      "intent": "TRACKING",
+      "confidence_score": null,
+      "confidence_method": null,
+      "escalation": {
+        "escalate": false,
+        "primary": null,
+        "triggers": [],
+        "mensaje_cliente": null,
+        "rules_version": "1.0.2026",
+        "config_snapshot": {
+          "CRIT003_MODE": "claim_context",
+          "CRIT005_MODE": "incident_context",
+          "PRIORITY_ORDER": "CRIT-005>CRIT-003>CRIT-002>CRIT-004>CRIT-001>INFO-INTENTOS"
+        }
+      },
+      "services_called": [
+        "tms",
+        "escalation"
+      ],
+      "evidence_ids": [
+        "TLX-984021-CO"
+      ],
+      "llm_used": false,
+      "delivery_mode": "SIMULATED"
+    },
+    "created_at": "2026-11-03T10:05:13-05:00"
+  },
+  "speech_text": "Tu guía T L X, nueve, ocho, cuatro, cero, dos, uno, C O está en tránsito hacia Medellín, a la altura del Alto de la Línea. Llega hoy hacia las cuatro de la tarde. ¿Algo más?",
+  "transfer": false,
+  "delivery": {
+    "delivery_mode": "SIMULATED",
+    "status": "NOT_ATTEMPTED",
+    "provider_message_id": null,
+    "error_code": null
+  }
+}

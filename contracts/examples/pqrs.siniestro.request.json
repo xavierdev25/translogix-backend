@@ -1,0 +1,14 @@
+{
+  "session_id": "c1a2b3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
+  "tipo": "SINIESTRO",
+  "numero_guia": "TLX-752190-CO",
+  "tipo_novedad": "AVERIA_NO_APARENTE",
+  "descripcion": "Al abrir las cajas encontramos herramientas dañadas; el empaque exterior no mostraba golpes.",
+  "valor_reclamado_cop": 4000000,
+  "documentos": [
+    {
+      "codigo": "FACTURA_COMERCIAL",
+      "attachment_id": "f1e2d3c4-b5a6-4978-8a9b-0c1d2e3f4a5b"
+    }
+  ]
+}

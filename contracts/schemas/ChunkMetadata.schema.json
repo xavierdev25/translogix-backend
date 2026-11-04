@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ChunkMetadata.schema.json",
+  "title": "ChunkMetadata",
+  "x-contract-version": "1.2.0",
+  "$defs": {
+    "ChunkTipo": {
+      "enum": [
+        "normativa_carga",
+        "reglamento_pqrs",
+        "embalaje",
+        "cobertura",
+        "tarifa",
+        "politica"
+      ],
+      "title": "ChunkTipo",
+      "type": "string"
+    },
+    "DocCode": {
+      "enum": [
+        "DOC-OPS-2026-03",
+        "DOC-PQRS-2026-04",
+        "COBERTURA",
+        "TARIFAS",
+        "REGLAS_ESCALACION"
+      ],
+      "title": "DocCode",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "doc_code": {
+      "$ref": "#/$defs/DocCode"
+    },
+    "doc_title": {
+      "title": "Doc Title",
+      "type": "string"
+    },
+    "source_file": {
+      "title": "Source File",
+      "type": "string"
+    },
+    "section_path": {
+      "examples": [
+        "2. Clasificación > Clase 8: Sustancias Corrosivas"
+      ],
+      "title": "Section Path",
+      "type": "string"
+    },
+    "tipo": {
+      "$ref": "#/$defs/ChunkTipo"
+    },
+    "zona": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Derivada del departamento (DEC-R2).",
+      "title": "Zona"
+    },
+    "clase_un": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Clase Un"
+    },
+    "aliases": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Aliases",
+      "type": "array"
+    },
+    "chunk_index": {
+      "minimum": 0,
+      "title": "Chunk Index",
+      "type": "integer"
+    },
+    "content_hash": {
+      "description": "SHA-256 del contenido.",
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Content Hash",
+      "type": "string"
+    },
+    "ingested_at": {
+      "format": "date-time",
+      "title": "Ingested At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "doc_code",
+    "doc_title",
+    "source_file",
+    "section_path",
+    "tipo",
+    "zona",
+    "clase_un",
+    "aliases",
+    "chunk_index",
+    "content_hash",
+    "ingested_at"
+  ],
+  "type": "object"
+}

@@ -1,0 +1,54 @@
+{
+  "reply": {
+    "session_id": "1c2d3e4f-5a6b-4c7d-9e8f-9a0b1c2d3e4f",
+    "in_reply_to": "9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d",
+    "reply_id": "1f2a3b4c-5d6e-4f7a-8b8c-0d1e2f3a4b5c",
+    "channel": "WEB_CHAT",
+    "status": "AWAITING_USER",
+    "blocks": [
+      {
+        "type": "TEXT",
+        "text": "No tengo tarifa para la ruta Barranquilla → Bucaramanga en la matriz disponible, así que no puedo darte un valor. Si quieres, te comunico con un asesor."
+      },
+      {
+        "type": "QUICK_REPLIES",
+        "options": [
+          {
+            "id": "otra_ruta",
+            "title": "Cotizar otra ruta"
+          },
+          {
+            "id": "asesor",
+            "title": "Hablar con un asesor"
+          }
+        ]
+      }
+    ],
+    "meta": {
+      "trace_id": "trc-01J9Z72EN2",
+      "intent": "COTIZACION",
+      "confidence_score": null,
+      "confidence_method": null,
+      "escalation": {
+        "escalate": false,
+        "primary": null,
+        "triggers": [],
+        "mensaje_cliente": null,
+        "rules_version": "1.0.2026",
+        "config_snapshot": {
+          "CRIT003_MODE": "claim_context",
+          "CRIT005_MODE": "incident_context",
+          "PRIORITY_ORDER": "CRIT-005>CRIT-003>CRIT-002>CRIT-004>CRIT-001>INFO-INTENTOS"
+        }
+      },
+      "services_called": [
+        "quotation",
+        "escalation"
+      ],
+      "evidence_ids": [],
+      "llm_used": false,
+      "delivery_mode": "REAL"
+    },
+    "created_at": "2026-11-03T10:35:01-05:00"
+  }
+}

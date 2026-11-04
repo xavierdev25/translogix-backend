@@ -1,0 +1,32 @@
+meta {
+  name: Cotizacion iterativa 4 - valor
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{baseUrl}}/api/v1/chat/messages
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "client_id": "{{clientId}}",
+    "message_id": "{{messageId}}",
+    "text": "El valor declarado es 12.500.000",
+    "session_id": "{{sessionId}}"
+  }
+}
+
+script:pre-request {
+  const uuid = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16); });
+  bru.setVar("messageId", uuid());
+  if (!bru.getVar("clientId")) bru.setVar("clientId", uuid());
+}
+
+tests {
+  test("HTTP 200", () => expect(res.status).to.equal(200));
+  test("reply.blocks.1.type = QUOTE_SUMMARY", () => expect(res.body?.["reply"]?.["blocks"][1]?.["type"]).to.eql("QUOTE_SUMMARY"));
+  test("reply.blocks.1.flete_total_cop = 190975", () => expect(res.body?.["reply"]?.["blocks"][1]?.["flete_total_cop"]).to.eql(190975));
+}

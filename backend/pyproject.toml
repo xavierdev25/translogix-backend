@@ -1,0 +1,70 @@
+[project]
+name = "translogix-backend"
+version = "0.1.0"
+description = "TransLogix AI — backend (contratos de integración P01)"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "alembic>=1.14",
+    "asyncpg>=0.30",
+    "fastapi>=0.115",
+    "httpx>=0.28",
+    "pgvector>=0.3",
+    "pydantic>=2.9",
+    "pydantic-settings>=2.6",
+    "python-multipart>=0.0.33",
+    "sqlalchemy[asyncio]>=2.0.36,<2.1",
+    "tzdata>=2024.1",
+    "uvicorn[standard]>=0.32",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "pytest-asyncio>=0.25",
+    "ruff>=0.8",
+    "mypy>=1.13",
+    "pyyaml>=6.0",
+    "types-pyyaml>=6.0",
+    "openapi-spec-validator>=0.7",
+    "jsonschema>=4.23",
+    "types-jsonschema>=4.23",
+    "pytest-cov>=6",
+]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = [
+    "E", "W", "F", "I", "B", "UP", "N", "SIM", "RUF", "S", "ASYNC",
+    "PT", "C4", "DTZ", "T20", "FAST", "PIE", "RET", "PERF",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "PLR2004"]
+"app/contracts/__main__.py" = ["T201"]
+# "›" is the context separator the ingestion spec prescribes ("[DOC › sección]").
+"app/modules/rag/*.py" = ["RUF001", "RUF003"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+packages = ["app", "tests"]
+plugins = ["pydantic.mypy"]
+
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-ra --strict-markers"
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+filterwarnings = ["error"]

@@ -1,0 +1,61 @@
+# Changelog del contrato
+
+Versionado semántico sobre `info.version` de `openapi.yaml` (`CONTRACT_VERSION`), aplicable **a
+partir de la Puerta A** (contrato congelado):
+
+* **MAJOR**: quitar o renombrar un campo, endpoint o valor de enumerado; volver obligatorio un campo
+  de entrada; endurecer una validación.
+* **MINOR**: añadir un campo opcional de entrada, un campo de salida, un endpoint o un valor de enumerado.
+* **PATCH**: descripciones, ejemplos y documentación.
+
+Antes de la Puerta A las versiones pueden incluir ajustes no aditivos (nadie consume todavía).
+Los demás agentes proponen cambios en [`docs/contract-change-requests.md`](../docs/contract-change-requests.md).
+
+## 1.2.0 — 2026-11-03 · candidata a Puerta A (`contracts-v1`)
+
+Alineación con el prompt oficial de P01 y con lo que exigen P02–P09 del Prompt Pack.
+Detalle y motivos en [`DECISIONS.md`](DECISIONS.md); incoherencias halladas en `docs/evidence/P01.md`.
+
+| Cambio | Motivo |
+|--------|--------|
+| `ports.py` declara los 17 puertos (`TmsPort`, `QuotationPort`, `RagPort`, `SpecialCargoPort`, `EscalationPort`, `HandoffPort`, `PqrsPort`, `AccountDirectoryPort`, `LlmPort`, `EmbeddingPort`, `VectorStorePort`, `AuditPort`, `Clock`, además de los 4 de canal y voz) y sus modelos (`AccountProfile`, `LlmMessage/Completion`, `IndexedChunk`, `ScoredChunk`, `AuditEvent`). | Prompt P01 ítem 3. |
+| `fakes.py`: un fake determinista por puerto; `FakeConversationService()` sin argumentos responde a los tres canales (con respuesta simulada de respaldo). Sustituye a `GoldenConversationService`. | Prompt P01 ítem 4 y criterio de aceptación. |
+| `EstadoTicket.FUERA_DE_PLAZO` y `Elegibilidad.fundamento` (documento y sección). | Prompt P01 (a); P09, DEC-P2. |
+| `POST /api/v1/attachments` (P1) y `PATCH /api/v1/handoffs/{id}` (P1). | Prompt P01 (b); P07 (bandeja). |
+| `WhatsAppWebhookPayload`: cuerpo tipado del webhook, el mismo para la simulación. | Prompt P01 (c). |
+| `Cop` estricto (rechaza `125000.0`, `"125000"`). | Prompt P01 ítem 6. |
+| `TmsShipment.intentos_entrega_fallidos` (opcional). | DEC-E4 / P07 (INFO-INTENTOS). |
+| `EnvVar.CLOCK_OVERRIDE`; se retira `now_bogota()` (la hora sale del puerto `Clock`). | Bloque común, regla 10. |
+| Mensajes por defecto de `RUTA_SIN_TARIFA` y `CIUDAD_NO_RECONOCIDA` alineados con P03 ("no tengo tarifa en la matriz disponible"). | Prompt P03. |
+| 35 ejemplos nuevos (89 en total): uno por código de error, `ConversationReply` completo para S1–S16, quinta guía, adjuntos, bandeja, estado de conversación, entrada del motor, metadatos de chunk y evento de auditoría. `supuestos` registra el mínimo de seguro alternativo (P03); el saneado de eventos usa la redacción de P04. | Prompt P01 ítem 5. |
+| `contracts/vectors/`: vectores de conformidad de normalización de guía, hash de usuario y PII. | P02 implementa `shared/` y debe reproducirlos (DEC-C17). |
+| Manifiesto de mocks: sección `errors` por operación y marca `pendiente_de_servicio_real`. | DEC-C18, DEC-C23. |
+
+## 1.1.0 — 2026-11-03
+
+Alineación con el documento maestro (escenarios §G y decisiones §H). Detalle en [`DECISIONS.md`](DECISIONS.md).
+
+| Cambio | Motivo |
+|--------|--------|
+| `CalculoFlete` añade `flete_minimo_cop` y `flete_minimo_aplicado`; el flete base no puede quedar bajo el mínimo. | DEC-Q2, escenario S9 (total 22.500). |
+| `PbxTurnResponse.speech_text` se valida: sin dígitos, Markdown, URLs ni emoji, y como máximo 40 palabras. | DEC-C16, escenario S16. |
+| El ejemplo de siniestro sobre TLX-752190-CO pasa a `ESCALADO` con CRIT-003 → JURIDICO_PQRS. El ejemplo §5.4 del documento (`escalamiento: null`) contradecía S14. | DEC-E2. |
+| `EscalationInput.incident_reported`: en `incident_context` un estado de novedad de la guía también es incidente. | DEC-E3, escenario S4. |
+| Nuevos artefactos generados: `schemas/` (JSON Schema), `mocks/manifest.json`, `types/api.d.ts`. Nuevo fake `app.contracts.fakes.GoldenConversationService`. | Puerta A: "OpenAPI + modelos + ejemplos + mocks"; tipos TS. |
+| 33 ejemplos nuevos: todas las operaciones tienen al menos una respuesta, y quedan cubiertos 16 de los 18 escenarios de la demo. | Mocks de frontend y E2E. |
+| Las utilidades (`normalizers`, `pii`, `money`, `timezone`) pasan de `app.shared` a `app.contracts`; el exportador pasa a `python -m app.contracts`. | Propiedad de carpetas del maestro (§B.3); DEC-C17. |
+
+## 1.0.0 — 2026-11-03
+
+Primera materialización del documento de contratos. Diferencias con el texto original:
+
+| Cambio | Tipo | Decisión |
+|--------|------|----------|
+| `ErrorCode` añade `NO_CONFIGURADO` y `NO_AUTORIZADO`. | aditivo | DEC-C2 |
+| `TipoNovedad` añade `SAQUEO`. | aditivo | DEC-C3 |
+| `MessageContent` añade `system_event` (obligatorio con `message_type=SYSTEM_EVENT`). | aditivo | DEC-C6 |
+| `EscalationInput.sentiment` y `HandoffPayload.sentimiento_detectado` pasan de `str` a `Sentiment`. | aclaración | DEC-C8 |
+| `ESCALAR_Urgencia_OPERACIONES` (JSON) se canoniza como `ESCALAR_URGENCIA_OPERACIONES`; el original va en `accion_raw`. | aclaración (prevista) | — |
+| `GET /handoffs` y `GET /handoffs/{id}` requieren `X-Admin-Token`. | seguridad | DEC-C13 |
+| Se definen las formas que el documento dejaba abiertas. | aditivo | DEC-C6 |
+| Tabla código de error → estado HTTP y mensajes por defecto en es-CO. | aditivo | DEC-C1, DEC-C2 |

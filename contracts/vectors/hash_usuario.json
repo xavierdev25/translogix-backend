@@ -1,0 +1,41 @@
+{
+  "algoritmo": "hex(HMAC-SHA256(key=PII_HASH_SALT, msg=utf8(canonical(id)))); canonical: ids telefónicos -> solo dígitos; otros -> trim + minúsculas; máscara = '…' + últimos 4 del canónico (DEC-C5)",
+  "salt_de_prueba": "vector-salt-not-a-secret-0001",
+  "casos": [
+    {
+      "canal": "WHATSAPP",
+      "entrada": "573109876543",
+      "canonico": "573109876543",
+      "hash": "b7b3948f0251b1c48541c5cafa7ce3983ba3216ddd2195276b320265e3d93c05",
+      "mascara": "…6543"
+    },
+    {
+      "canal": "PBX",
+      "entrada": "+57 310 987 6543",
+      "canonico": "573109876543",
+      "hash": "b7b3948f0251b1c48541c5cafa7ce3983ba3216ddd2195276b320265e3d93c05",
+      "mascara": "…6543"
+    },
+    {
+      "canal": "PBX",
+      "entrada": "(+57) 310-987-6543",
+      "canonico": "573109876543",
+      "hash": "b7b3948f0251b1c48541c5cafa7ce3983ba3216ddd2195276b320265e3d93c05",
+      "mascara": "…6543"
+    },
+    {
+      "canal": "WEB_CHAT",
+      "entrada": "5B9E2F4A-1C3D-4E8F-A7B6-2D1C0E9F8A7B",
+      "canonico": "5b9e2f4a-1c3d-4e8f-a7b6-2d1c0e9f8a7b",
+      "hash": "c073d3f1f4fc6cce6dd213542de20da3dc7c3e5e9f4ebfb00e00a3a669d4860a",
+      "mascara": "…8a7b"
+    },
+    {
+      "canal": "WEB_CHAT",
+      "entrada": "5b9e2f4a-1c3d-4e8f-a7b6-2d1c0e9f8a7b",
+      "canonico": "5b9e2f4a-1c3d-4e8f-a7b6-2d1c0e9f8a7b",
+      "hash": "c073d3f1f4fc6cce6dd213542de20da3dc7c3e5e9f4ebfb00e00a3a669d4860a",
+      "mascara": "…8a7b"
+    }
+  ]
+}

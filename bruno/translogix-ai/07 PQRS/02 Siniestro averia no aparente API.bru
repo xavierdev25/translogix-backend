@@ -1,0 +1,39 @@
+meta {
+  name: Siniestro averia no aparente (API)
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/v1/pqrs/crear-ticket
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "session_id": null,
+    "tipo": "SINIESTRO",
+    "numero_guia": "TLX-752190-CO",
+    "tipo_novedad": "AVERIA_NO_APARENTE",
+    "descripcion": "Al abrir las cajas encontramos herramientas dañadas; el empaque exterior no mostraba golpes.",
+    "valor_reclamado_cop": 4000000,
+    "documentos": [
+      {
+        "codigo": "FACTURA_COMERCIAL",
+        "attachment_id": "{{attachmentId}}"
+      }
+    ]
+  }
+}
+
+script:pre-request {
+  const uuid = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16); });
+  bru.setVar("messageId", uuid());
+}
+
+tests {
+  test("HTTP 201", () => expect(res.status).to.equal(201));
+  test("ticket_id presente", () => expect(res.body?.["ticket_id"]).to.not.equal(undefined));
+  test("checklist presente", () => expect(res.body?.["checklist"]).to.not.equal(undefined));
+}

@@ -1,0 +1,85 @@
+{
+  "descripcion": "normalize = la entrada completa es una guía; extract = primera guía en texto libre. Salida canónica TLX-dddddd-CO o null.",
+  "casos": [
+    {
+      "entrada": "TLX-984021-CO",
+      "normalize": "TLX-984021-CO",
+      "extract": "TLX-984021-CO"
+    },
+    {
+      "entrada": "tlx 984021 co",
+      "normalize": "TLX-984021-CO",
+      "extract": "TLX-984021-CO"
+    },
+    {
+      "entrada": "TLX984021CO",
+      "normalize": "TLX-984021-CO",
+      "extract": "TLX-984021-CO"
+    },
+    {
+      "entrada": "  tlx-984021-co ",
+      "normalize": "TLX-984021-CO",
+      "extract": "TLX-984021-CO"
+    },
+    {
+      "entrada": "t l x nueve ocho cuatro cero dos uno c o",
+      "normalize": "TLX-984021-CO",
+      "extract": "TLX-984021-CO"
+    },
+    {
+      "entrada": "te ele equis nueve ocho cuatro cero dos uno ce o",
+      "normalize": "TLX-984021-CO",
+      "extract": "TLX-984021-CO"
+    },
+    {
+      "entrada": "T L X guion 9 8 4 0 2 1 guion C O",
+      "normalize": "TLX-984021-CO",
+      "extract": "TLX-984021-CO"
+    },
+    {
+      "entrada": "T L X nueve ocho cuatro cero dos uno C O, ¿dónde está?",
+      "normalize": null,
+      "extract": "TLX-984021-CO"
+    },
+    {
+      "entrada": "¿Dónde está mi guía TLX-984021-CO?",
+      "normalize": null,
+      "extract": "TLX-984021-CO"
+    },
+    {
+      "entrada": "mi guía es t l x tres uno cero cuatro ocho dos c o gracias",
+      "normalize": null,
+      "extract": "TLX-310482-CO"
+    },
+    {
+      "entrada": "TLX-98402-CO",
+      "normalize": null,
+      "extract": null
+    },
+    {
+      "entrada": "TLX-9840211-CO",
+      "normalize": null,
+      "extract": null
+    },
+    {
+      "entrada": "ABC-984021-CO",
+      "normalize": null,
+      "extract": null
+    },
+    {
+      "entrada": "TLX-984021-PE",
+      "normalize": null,
+      "extract": null
+    },
+    {
+      "entrada": "hola, quiero cotizar",
+      "normalize": null,
+      "extract": null
+    },
+    {
+      "entrada": "",
+      "normalize": null,
+      "extract": null
+    }
+  ]
+}

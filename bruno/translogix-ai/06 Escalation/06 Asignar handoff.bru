@@ -1,0 +1,31 @@
+meta {
+  name: Asignar handoff
+  type: http
+  seq: 6
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/handoffs/{{handoffId}}
+  body: json
+  auth: none
+}
+
+headers {
+  X-Admin-Token: {{adminToken}}
+}
+
+body:json {
+  {
+    "status": "ASSIGNED"
+  }
+}
+
+script:pre-request {
+  const uuid = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16); });
+  bru.setVar("messageId", uuid());
+}
+
+tests {
+  test("HTTP 200", () => expect(res.status).to.equal(200));
+  test("status = ASSIGNED", () => expect(res.body?.["status"]).to.eql("ASSIGNED"));
+}

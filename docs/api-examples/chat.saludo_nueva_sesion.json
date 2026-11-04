@@ -1,0 +1,71 @@
+{
+  "method": "POST",
+  "path": "/api/v1/chat/messages",
+  "headers": {},
+  "body": {
+    "client_id": "ca85aa16-726d-41d4-b466-b539344d7e56",
+    "message_id": "6ac9ecf4-42fa-4593-9a5a-56b7c6a0cc57",
+    "text": "Hola"
+  },
+  "form": null,
+  "status": 200,
+  "response": {
+    "reply": {
+      "session_id": "e0d4abfc-cb6a-4c30-9f56-2360d6430435",
+      "in_reply_to": "6ac9ecf4-42fa-4593-9a5a-56b7c6a0cc57",
+      "reply_id": "7f5a1e99-c6dc-4d4f-8851-243961f57978",
+      "channel": "WEB_CHAT",
+      "status": "AWAITING_USER",
+      "blocks": [
+        {
+          "type": "TEXT",
+          "text": "¡Hola! Soy el asistente de TransLogix. Puedo rastrear una guía, cotizar un envío, resolver dudas sobre mercancías especiales o ayudarte a radicar una PQRS."
+        },
+        {
+          "type": "QUICK_REPLIES",
+          "options": [
+            {
+              "id": "rastrear",
+              "title": "Rastrear una guía"
+            },
+            {
+              "id": "cotizar",
+              "title": "Cotizar un envío"
+            },
+            {
+              "id": "asesor",
+              "title": "Hablar con un asesor"
+            }
+          ]
+        }
+      ],
+      "meta": {
+        "trace_id": "ee15da20-34c5-48ee-816c-f47679888426",
+        "intent": "SALUDO",
+        "confidence_score": null,
+        "confidence_method": null,
+        "escalation": {
+          "escalate": false,
+          "primary": null,
+          "triggers": [],
+          "mensaje_cliente": null,
+          "rules_version": "1.0.2026",
+          "config_snapshot": {
+            "CRIT003_MODE": "claim_context",
+            "CRIT005_MODE": "incident_context",
+            "CONFIDENCE_THRESHOLD": "0.75",
+            "PRIORITY_ORDER": "CRIT-005>CRIT-003>CRIT-002>CRIT-004>CRIT-001>INFO-INTENTOS",
+            "omitidas": "CRIT-001:sin_respuesta_rag,CRIT-003:sin_valores,CRIT-004:sin_datos_cuenta,CRIT-005:sin_datos_de_carga,INFO-INTENTOS:sin_dato"
+          }
+        },
+        "services_called": [
+          "escalation"
+        ],
+        "evidence_ids": [],
+        "llm_used": false,
+        "delivery_mode": "SIMULATED"
+      },
+      "created_at": "2026-11-03T13:17:28.994065-05:00"
+    }
+  }
+}

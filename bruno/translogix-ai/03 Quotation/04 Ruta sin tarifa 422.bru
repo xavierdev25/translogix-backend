@@ -1,0 +1,35 @@
+meta {
+  name: Ruta sin tarifa (422)
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/v1/cotizar
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "origen": "Barranquilla",
+    "destino": "Bucaramanga",
+    "alto_cm": 30,
+    "ancho_cm": 30,
+    "largo_cm": 30,
+    "peso_real_kg": 10,
+    "valor_declarado_cop": 1000000,
+    "requiere_cadena_frio": false,
+    "mercancia_peligrosa": false
+  }
+}
+
+script:pre-request {
+  const uuid = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16); });
+  bru.setVar("messageId", uuid());
+}
+
+tests {
+  test("HTTP 422", () => expect(res.status).to.equal(422));
+  test("error.code = RUTA_SIN_TARIFA", () => expect(res.body?.["error"]?.["code"]).to.eql("RUTA_SIN_TARIFA"));
+}

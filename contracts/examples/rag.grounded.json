@@ -1,0 +1,44 @@
+{
+  "answer_text": "Sí, con condiciones. El ácido clorhídrico es una sustancia corrosiva (Clase 8): en paquetería se acepta en envases de máximo 5 litros, con sobre-empaque en caja de cartón corrugado de doble pared (7 capas). Debes entregar la Hoja de Datos de Seguridad (MSDS) en español, con 16 secciones, y la Tarjeta de Emergencia NTC 4532.",
+  "grounded": true,
+  "citations": [
+    {
+      "doc_code": "DOC-OPS-2026-03",
+      "doc_title": "Manual operativo de mercancías peligrosas, estándares de embalaje y restricciones de carga",
+      "section_path": "2. Clasificación de mercancías peligrosas > Clase 8: Sustancias Corrosivas",
+      "chunk_id": "DOC-OPS-2026-03:0009",
+      "excerpt": "Líquidos corrosivos en envases no superiores a 5 litros en paquetería, con sobre-empaque en cajas de cartón corrugado de doble pared (7 capas).",
+      "score": 0.88
+    },
+    {
+      "doc_code": "DOC-OPS-2026-03",
+      "doc_title": "Manual operativo de mercancías peligrosas, estándares de embalaje y restricciones de carga",
+      "section_path": "3. Documentación obligatoria para el transporte de carga especial",
+      "chunk_id": "DOC-OPS-2026-03:0011",
+      "excerpt": "Debe cumplir con el Sistema Globalmente Armonizado (SGA / GHS) en 16 secciones. Debe estar redactada totalmente en idioma español.",
+      "score": 0.79
+    }
+  ],
+  "confidence": {
+    "score": 0.84,
+    "method": "heuristic_v1",
+    "components": {
+      "top_sim": 0.88,
+      "margin": 0.26,
+      "term_coverage": 0.92,
+      "answerable": 1.0
+    },
+    "is_probability": false
+  },
+  "retrieval": {
+    "top_k": 5,
+    "scores": [
+      0.88,
+      0.79,
+      0.55
+    ],
+    "filters": {
+      "doc_code": "DOC-OPS-2026-03"
+    }
+  }
+}

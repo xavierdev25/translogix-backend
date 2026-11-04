@@ -1,0 +1,190 @@
+{
+  "method": "POST",
+  "path": "/api/v1/channels/whatsapp/simulate",
+  "headers": {},
+  "body": {
+    "object": "whatsapp_business_account",
+    "entry": [
+      {
+        "id": "100000000000000",
+        "changes": [
+          {
+            "field": "messages",
+            "value": {
+              "messaging_product": "whatsapp",
+              "metadata": {
+                "display_phone_number": "570000000000",
+                "phone_number_id": "100000000000001"
+              },
+              "contacts": [
+                {
+                  "profile": {
+                    "name": "Cliente Demo"
+                  },
+                  "wa_id": "573000000000"
+                }
+              ],
+              "messages": [
+                {
+                  "from": "573000000000",
+                  "id": "wamid.SIMULATED-0001",
+                  "timestamp": "1762182000",
+                  "type": "text",
+                  "text": {
+                    "body": "¿Dónde está mi guía TLX-984021-CO?"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "form": null,
+  "status": 200,
+  "response": {
+    "delivery_mode": "SIMULATED",
+    "results": [
+      {
+        "in_reply_to": "wamid.SIMULATED-0001",
+        "reply": {
+          "session_id": "f94da3bb-87a8-437c-878d-273fb284a335",
+          "in_reply_to": "wamid.SIMULATED-0001",
+          "reply_id": "4594f341-e97e-45c3-81af-8ab2b73df718",
+          "channel": "WHATSAPP",
+          "status": "AWAITING_USER",
+          "blocks": [
+            {
+              "type": "TEXT",
+              "text": "Guía TLX-984021-CO: En tránsito. Tu envío va en carretera hacia la ciudad de destino. Ubicación de referencia: Paso de Montaña Alto de la Línea - Sentido Bogotá-Ibague-Medellín. Entrega estimada: 3 de noviembre de 2026, 4:00 p. m. Última temperatura reportada: 3,8 °C."
+            },
+            {
+              "type": "TRACKING_CARD",
+              "numero_guia": "TLX-984021-CO",
+              "estado": {
+                "codigo": "EN_TRANSITO",
+                "etiqueta": "En tránsito",
+                "explicacion": "Tu envío va en carretera hacia la ciudad de destino."
+              },
+              "eta": "2026-11-03T16:00:00-05:00",
+              "ubicacion_referencia": "Paso de Montaña Alto de la Línea - Sentido Bogotá-Ibague-Medellín",
+              "eventos": [
+                {
+                  "timestamp": "2026-11-02T18:45:00-05:00",
+                  "estado": "EN_BODEGA_ORIGEN",
+                  "etiqueta": "En bodega de origen",
+                  "ubicacion": "Hub Central Zona Franca Fontibón",
+                  "descripcion_cliente": "Consolidación en camión refrigerado."
+                },
+                {
+                  "timestamp": "2026-11-03T02:15:00-05:00",
+                  "estado": "EN_TRANSITO",
+                  "etiqueta": "En tránsito",
+                  "ubicacion": "Peaje Chicoral - Tolima",
+                  "descripcion_cliente": "Monitoreo GPS activo. Temperatura de termógrafo estable a 3.8°C."
+                },
+                {
+                  "timestamp": "2026-11-03T08:30:00-05:00",
+                  "estado": "EN_TRANSITO",
+                  "etiqueta": "En tránsito",
+                  "ubicacion": "Corredor Calarcá - Pereira",
+                  "descripcion_cliente": "Vehículo en ruta regular. Arribo estimado a Hub Itagüí a las 12:30 PM."
+                }
+              ],
+              "flags": {
+                "requiere_refrigeracion": true,
+                "mercancia_peligrosa": false
+              }
+            },
+            {
+              "type": "QUICK_REPLIES",
+              "options": [
+                {
+                  "id": "cotizar",
+                  "title": "Cotizar un envío"
+                },
+                {
+                  "id": "asesor",
+                  "title": "Hablar con un asesor"
+                }
+              ]
+            }
+          ],
+          "meta": {
+            "trace_id": "7f4753be-7479-4616-bcff-4036aa7544ec",
+            "intent": "TRACKING",
+            "confidence_score": null,
+            "confidence_method": null,
+            "escalation": {
+              "escalate": false,
+              "primary": null,
+              "triggers": [],
+              "mensaje_cliente": null,
+              "rules_version": "1.0.2026",
+              "config_snapshot": {
+                "omitidas": "CRIT-001:sin_respuesta_rag,CRIT-003:fuera_de_contexto_de_reclamo,INFO-INTENTOS:sin_dato",
+                "CRIT003_MODE": "claim_context",
+                "CRIT005_MODE": "incident_context",
+                "PRIORITY_ORDER": "CRIT-005>CRIT-003>CRIT-002>CRIT-004>CRIT-001>INFO-INTENTOS",
+                "CONFIDENCE_THRESHOLD": "0.75"
+              }
+            },
+            "services_called": [
+              "tms",
+              "escalation"
+            ],
+            "evidence_ids": [
+              "TLX-984021-CO"
+            ],
+            "llm_used": false,
+            "delivery_mode": "SIMULATED"
+          },
+          "created_at": "2026-11-03T12:24:23.430459-05:00"
+        },
+        "outbound": {
+          "channel": "WHATSAPP",
+          "session_id": "f94da3bb-87a8-437c-878d-273fb284a335",
+          "reply_id": "4594f341-e97e-45c3-81af-8ab2b73df718",
+          "delivery_mode": "SIMULATED",
+          "parts": [
+            {
+              "type": "interactive",
+              "interactive": {
+                "type": "button",
+                "body": {
+                  "text": "Guía TLX-984021-CO: En tránsito. Tu envío va en carretera hacia la ciudad de destino. Ubicación de referencia: Paso de Montaña Alto de la Línea - Sentido Bogotá-Ibague-Medellín. Entrega estimada: 3 de noviembre de 2026, 4:00 p. m. Última temperatura reportada: 3,8 °C."
+                },
+                "action": {
+                  "buttons": [
+                    {
+                      "type": "reply",
+                      "reply": {
+                        "id": "cotizar",
+                        "title": "Cotizar un envío"
+                      }
+                    },
+                    {
+                      "type": "reply",
+                      "reply": {
+                        "id": "asesor",
+                        "title": "Hablar con un asesor"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ],
+          "plain_text": "Guía TLX-984021-CO: En tránsito. Tu envío va en carretera hacia la ciudad de destino. Ubicación de referencia: Paso de Montaña Alto de la Línea - Sentido Bogotá-Ibague-Medellín. Entrega estimada: 3 de noviembre de 2026, 4:00 p. m. Última temperatura reportada: 3,8 °C."
+        },
+        "delivery": {
+          "delivery_mode": "SIMULATED",
+          "status": "NOT_ATTEMPTED",
+          "provider_message_id": null,
+          "error_code": null
+        }
+      }
+    ]
+  }
+}

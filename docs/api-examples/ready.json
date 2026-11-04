@@ -1,0 +1,16 @@
+{
+  "method": "GET",
+  "path": "/ready",
+  "headers": {},
+  "body": null,
+  "form": null,
+  "status": 200,
+  "response": {
+    "status": "ready",
+    "checks": {
+      "database": "ok",
+      "ollama": "ok",
+      "rag_index": "ok"
+    }
+  }
+}

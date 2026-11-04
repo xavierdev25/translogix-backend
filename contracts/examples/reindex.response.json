@@ -1,0 +1,9 @@
+{
+  "status": "COMPLETED",
+  "documentos": 5,
+  "chunks": 64,
+  "omitidos_sin_cambios": 0,
+  "duracion_ms": 18342,
+  "embed_model": "modelo-de-embeddings-ejemplo",
+  "embed_dim": 768
+}

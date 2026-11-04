@@ -1,0 +1,268 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "AuditEvent.schema.json",
+  "title": "AuditEvent",
+  "x-contract-version": "1.2.0",
+  "$defs": {
+    "ChannelType": {
+      "enum": [
+        "WHATSAPP",
+        "WEB_CHAT",
+        "PBX"
+      ],
+      "title": "ChannelType",
+      "type": "string"
+    },
+    "EscalationAction": {
+      "enum": [
+        "ESCALAR_A_HUMANO",
+        "ESCALAR_PRIORIDAD_ALTA",
+        "ESCALAR_A_DEPARTAMENTO_JURIDICO_Y_PQRS",
+        "ESCALAR_A_EJECUTIVO_CUENTA_DEDICADO",
+        "ESCALAR_URGENCIA_OPERACIONES",
+        "OFRECER_HANDOFF"
+      ],
+      "title": "EscalationAction",
+      "type": "string"
+    },
+    "EscalationDecision": {
+      "additionalProperties": false,
+      "properties": {
+        "escalate": {
+          "title": "Escalate",
+          "type": "boolean"
+        },
+        "primary": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EscalationTrigger"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "triggers": {
+          "items": {
+            "$ref": "#/$defs/EscalationTrigger"
+          },
+          "title": "Triggers",
+          "type": "array"
+        },
+        "mensaje_cliente": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Texto del JSON para el criterio primario.",
+          "title": "Mensaje Cliente"
+        },
+        "rules_version": {
+          "default": "1.0.2026",
+          "title": "Rules Version",
+          "type": "string"
+        },
+        "config_snapshot": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "examples": [
+            {
+              "CRIT003_MODE": "claim_context",
+              "CRIT005_MODE": "incident_context"
+            }
+          ],
+          "title": "Config Snapshot",
+          "type": "object"
+        }
+      },
+      "required": [
+        "escalate",
+        "primary",
+        "triggers",
+        "mensaje_cliente",
+        "rules_version",
+        "config_snapshot"
+      ],
+      "title": "EscalationDecision",
+      "type": "object"
+    },
+    "EscalationTrigger": {
+      "additionalProperties": false,
+      "properties": {
+        "id_criterio": {
+          "enum": [
+            "CRIT-001",
+            "CRIT-002",
+            "CRIT-003",
+            "CRIT-004",
+            "CRIT-005",
+            "INFO-INTENTOS"
+          ],
+          "title": "Id Criterio",
+          "type": "string"
+        },
+        "accion": {
+          "$ref": "#/$defs/EscalationAction"
+        },
+        "accion_raw": {
+          "description": "Acción tal como aparece en el JSON de reglas.",
+          "title": "Accion Raw",
+          "type": "string"
+        },
+        "evidencia": {
+          "description": "Qué dato disparó la regla, sin PII.",
+          "maxLength": 1000,
+          "minLength": 1,
+          "title": "Evidencia",
+          "type": "string"
+        },
+        "modo": {
+          "examples": [
+            "claim_context",
+            "incident_context",
+            "literal"
+          ],
+          "title": "Modo",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id_criterio",
+        "accion",
+        "accion_raw",
+        "evidencia",
+        "modo"
+      ],
+      "title": "EscalationTrigger",
+      "type": "object"
+    },
+    "Intent": {
+      "enum": [
+        "TRACKING",
+        "COTIZACION",
+        "CONSULTA_DOCUMENTAL",
+        "CARGA_ESPECIAL",
+        "PQRS",
+        "SALUDO",
+        "HABLAR_CON_HUMANO",
+        "DESCONOCIDA"
+      ],
+      "title": "Intent",
+      "type": "string"
+    },
+    "ServiceName": {
+      "enum": [
+        "tms",
+        "quotation",
+        "rag",
+        "escalation",
+        "pqrs"
+      ],
+      "title": "ServiceName",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "One row of ``audit_events`` (§8). Never carries PII or message text.",
+  "properties": {
+    "id": {
+      "format": "uuid4",
+      "title": "Id",
+      "type": "string"
+    },
+    "trace_id": {
+      "minLength": 1,
+      "title": "Trace Id",
+      "type": "string"
+    },
+    "session_id": {
+      "anyOf": [
+        {
+          "format": "uuid4",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Session Id"
+    },
+    "channel": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ChannelType"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "intent": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Intent"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "services_called": {
+      "items": {
+        "$ref": "#/$defs/ServiceName"
+      },
+      "title": "Services Called",
+      "type": "array"
+    },
+    "escalation": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/EscalationDecision"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "evidence_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Evidence Ids",
+      "type": "array"
+    },
+    "llm_used": {
+      "title": "Llm Used",
+      "type": "boolean"
+    },
+    "latency_ms": {
+      "minimum": 0,
+      "title": "Latency Ms",
+      "type": "integer"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "trace_id",
+    "session_id",
+    "channel",
+    "intent",
+    "services_called",
+    "escalation",
+    "evidence_ids",
+    "llm_used",
+    "latency_ms",
+    "created_at"
+  ],
+  "type": "object"
+}

@@ -1,0 +1,28 @@
+{
+  "channel": "PBX",
+  "message_id": "call-7d1e:1",
+  "external_user_id": "+573000000001",
+  "session_id": null,
+  "message_type": "AUDIO_TRANSCRIPT",
+  "content": {
+    "text": "T L X nueve ocho cuatro cero dos uno C O, ¿dónde está?",
+    "attachments": [],
+    "interactive_reply_id": null,
+    "asr": {
+      "transcript_confidence": 0.86,
+      "language": "es-CO",
+      "provider": "simulated"
+    },
+    "system_event": null
+  },
+  "timestamp": "2026-11-03T10:05:12-05:00",
+  "metadata": {
+    "call_id": "call-7d1e",
+    "ani_hash": "9f2c6d1a8b3e4f5071a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d5e6f708",
+    "dnis": "6015550100",
+    "turn_index": 1,
+    "silence_ms": 800,
+    "barge_in": false
+  },
+  "delivery_mode": "SIMULATED"
+}

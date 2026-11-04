@@ -1,0 +1,16 @@
+{
+  "method": "GET",
+  "path": "/api/v1/no-existe",
+  "headers": {},
+  "body": null,
+  "form": null,
+  "status": 404,
+  "response": {
+    "error": {
+      "code": "NO_ENCONTRADO",
+      "message": "No encontramos el recurso solicitado.",
+      "details": {},
+      "request_id": "c9594127-fa07-49dc-8be6-b095df467deb"
+    }
+  }
+}

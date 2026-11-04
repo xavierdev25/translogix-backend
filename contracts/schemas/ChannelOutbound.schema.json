@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ChannelOutbound.schema.json",
+  "title": "ChannelOutbound",
+  "x-contract-version": "1.2.0",
+  "$defs": {
+    "ChannelType": {
+      "enum": [
+        "WHATSAPP",
+        "WEB_CHAT",
+        "PBX"
+      ],
+      "title": "ChannelType",
+      "type": "string"
+    },
+    "DeliveryMode": {
+      "enum": [
+        "REAL",
+        "SIMULATED"
+      ],
+      "title": "DeliveryMode",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "What ``render_outbound`` produces: ready for ``deliver``, no network involved.\n\nThe recipient is not included: the adapter resolves it from the value it\nholds in memory, so plain user ids never travel through the core.",
+  "properties": {
+    "channel": {
+      "$ref": "#/$defs/ChannelType"
+    },
+    "session_id": {
+      "title": "Session Id",
+      "type": "string"
+    },
+    "reply_id": {
+      "title": "Reply Id",
+      "type": "string"
+    },
+    "delivery_mode": {
+      "$ref": "#/$defs/DeliveryMode"
+    },
+    "parts": {
+      "description": "Cuerpos con la forma del proveedor, en orden de envío.",
+      "items": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "minItems": 1,
+      "title": "Parts",
+      "type": "array"
+    },
+    "plain_text": {
+      "description": "Versión en texto plano (PBX: texto hablable).",
+      "title": "Plain Text",
+      "type": "string"
+    }
+  },
+  "required": [
+    "channel",
+    "session_id",
+    "reply_id",
+    "delivery_mode",
+    "parts",
+    "plain_text"
+  ],
+  "type": "object"
+}

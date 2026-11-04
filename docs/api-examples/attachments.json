@@ -1,0 +1,18 @@
+{
+  "method": "POST",
+  "path": "/api/v1/attachments",
+  "headers": {},
+  "body": null,
+  "form": {
+    "declared_doc_code": "FACTURA_COMERCIAL"
+  },
+  "status": 201,
+  "response": {
+    "attachment_id": "1e80dc4a-c133-40e4-9063-bf4d812fafe3",
+    "kind": "DOCUMENT",
+    "mime_type": "application/pdf",
+    "size_bytes": 22,
+    "declared_doc_code": "FACTURA_COMERCIAL",
+    "sha256": "1d8926bbed2a7919dbb3408182acaf7a32f47ce00293589898b8a81c579ff11b"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "method": "POST",
+  "path": "/api/v1/chat/messages",
+  "headers": {},
+  "body": {
+    "client_id": "ca85aa16-726d-41d4-b466-b539344d7e56",
+    "message_id": "81487e34-6ebb-42b0-95f0-404bd6aa24b7",
+    "text": "  "
+  },
+  "form": null,
+  "status": 422,
+  "response": {
+    "error": {
+      "code": "VALIDACION",
+      "message": "Revisa los datos enviados: hay campos inválidos o incompletos.",
+      "details": {
+        "campos": [
+          {
+            "loc": [
+              "body"
+            ],
+            "msg": "Value error, a message needs text or at least one attachment",
+            "type": "value_error"
+          }
+        ]
+      },
+      "request_id": "85a8b71f-8745-44a4-b63c-28e83e9b8ea2"
+    }
+  }
+}

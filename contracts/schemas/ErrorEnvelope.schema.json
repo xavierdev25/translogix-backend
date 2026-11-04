@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ErrorEnvelope.schema.json",
+  "title": "ErrorEnvelope",
+  "x-contract-version": "1.2.0",
+  "$defs": {
+    "ErrorBody": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "$ref": "#/$defs/ErrorCode"
+        },
+        "message": {
+          "description": "Mensaje en español para el usuario final.",
+          "minLength": 1,
+          "title": "Message",
+          "type": "string"
+        },
+        "details": {
+          "additionalProperties": true,
+          "title": "Details",
+          "type": "object"
+        },
+        "request_id": {
+          "pattern": "^[A-Za-z0-9._-]{1,128}$",
+          "title": "Request Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "message",
+        "details",
+        "request_id"
+      ],
+      "title": "ErrorBody",
+      "type": "object"
+    },
+    "ErrorCode": {
+      "enum": [
+        "VALIDACION",
+        "GUIA_FORMATO_INVALIDO",
+        "GUIA_NO_ENCONTRADA",
+        "RUTA_SIN_TARIFA",
+        "CIUDAD_NO_RECONOCIDA",
+        "SERVICIO_NO_DISPONIBLE",
+        "EXCEDE_LIMITE_COBERTURA",
+        "LLM_NO_DISPONIBLE",
+        "RAG_SIN_EVIDENCIA",
+        "FIRMA_INVALIDA",
+        "LIMITE_DE_TASA",
+        "NO_ENCONTRADO",
+        "ERROR_INTERNO",
+        "NO_CONFIGURADO",
+        "NO_AUTORIZADO"
+      ],
+      "title": "ErrorCode",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "The single error shape returned by every endpoint.",
+  "properties": {
+    "error": {
+      "$ref": "#/$defs/ErrorBody"
+    }
+  },
+  "required": [
+    "error"
+  ],
+  "type": "object"
+}

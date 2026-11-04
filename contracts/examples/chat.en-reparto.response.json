@@ -1,0 +1,87 @@
+{
+  "reply": {
+    "session_id": "9a0b1c2d-3e4f-4a5b-9c6d-7e8f9a0b1c2d",
+    "in_reply_to": "7e6f5a4b-3c2d-4e1f-8a0b-9c8d7e6f5a4b",
+    "reply_id": "9d0e1f2a-3b4c-4d5e-8f6a-8b9c0d1e2f3a",
+    "channel": "WEB_CHAT",
+    "status": "AWAITING_USER",
+    "blocks": [
+      {
+        "type": "TEXT",
+        "text": "Tu guía TLX-551904-CO está en reparto en Pereira. La entrega estimada es hoy, 3 de noviembre, a las 2:00 p. m."
+      },
+      {
+        "type": "TRACKING_CARD",
+        "numero_guia": "TLX-551904-CO",
+        "estado": {
+          "codigo": "EN_REPARTO",
+          "etiqueta": "En reparto",
+          "explicacion": "Tu envío está en el vehículo de reparto y llegará hoy a la dirección de entrega."
+        },
+        "eta": "2026-11-03T14:00:00-05:00",
+        "ubicacion_referencia": "Ruta de reparto urbano - Pereira",
+        "eventos": [
+          {
+            "timestamp": "2026-11-03T06:45:00-05:00",
+            "estado": "EN_BODEGA_DESTINO",
+            "etiqueta": "En bodega de destino",
+            "ubicacion": "Hub Eje Cafetero Dosquebradas",
+            "descripcion_cliente": "Tu paquete llegó al centro de distribución de destino y se asignó a una ruta urbana."
+          },
+          {
+            "timestamp": "2026-11-03T09:15:00-05:00",
+            "estado": "EN_REPARTO",
+            "etiqueta": "En reparto",
+            "ubicacion": "Pereira, Risaralda",
+            "descripcion_cliente": "Asignado a un conductor para la ruta de reparto."
+          }
+        ],
+        "flags": {
+          "requiere_refrigeracion": false,
+          "mercancia_peligrosa": false
+        }
+      },
+      {
+        "type": "QUICK_REPLIES",
+        "options": [
+          {
+            "id": "cotizar",
+            "title": "Cotizar un envío"
+          },
+          {
+            "id": "asesor",
+            "title": "Hablar con un asesor"
+          }
+        ]
+      }
+    ],
+    "meta": {
+      "trace_id": "trc-01J9Z70CL0",
+      "intent": "TRACKING",
+      "confidence_score": null,
+      "confidence_method": null,
+      "escalation": {
+        "escalate": false,
+        "primary": null,
+        "triggers": [],
+        "mensaje_cliente": null,
+        "rules_version": "1.0.2026",
+        "config_snapshot": {
+          "CRIT003_MODE": "claim_context",
+          "CRIT005_MODE": "incident_context",
+          "PRIORITY_ORDER": "CRIT-005>CRIT-003>CRIT-002>CRIT-004>CRIT-001>INFO-INTENTOS"
+        }
+      },
+      "services_called": [
+        "tms",
+        "escalation"
+      ],
+      "evidence_ids": [
+        "TLX-551904-CO"
+      ],
+      "llm_used": false,
+      "delivery_mode": "REAL"
+    },
+    "created_at": "2026-11-03T10:15:01-05:00"
+  }
+}

@@ -1,0 +1,32 @@
+meta {
+  name: Chat 2 - caja rota: ticket + CRIT-003
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/api/v1/chat/messages
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "client_id": "{{clientId}}",
+    "message_id": "{{messageId}}",
+    "text": "Me llegó la caja rota",
+    "session_id": "{{sessionId}}"
+  }
+}
+
+script:pre-request {
+  const uuid = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16); });
+  bru.setVar("messageId", uuid());
+  if (!bru.getVar("clientId")) bru.setVar("clientId", uuid());
+}
+
+tests {
+  test("HTTP 200", () => expect(res.status).to.equal(200));
+  test("reply.meta.intent = PQRS", () => expect(res.body?.["reply"]?.["meta"]?.["intent"]).to.eql("PQRS"));
+  test("reply.blocks.2.type = PQRS_TICKET", () => expect(res.body?.["reply"]?.["blocks"][2]?.["type"]).to.eql("PQRS_TICKET"));
+}

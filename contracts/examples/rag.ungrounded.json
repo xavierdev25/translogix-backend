@@ -1,0 +1,24 @@
+{
+  "answer_text": null,
+  "grounded": false,
+  "citations": [],
+  "confidence": {
+    "score": 0.31,
+    "method": "heuristic_v1",
+    "components": {
+      "top_sim": 0.41,
+      "margin": 0.03,
+      "term_coverage": 0.35,
+      "answerable": 0.0
+    },
+    "is_probability": false
+  },
+  "retrieval": {
+    "top_k": 5,
+    "scores": [
+      0.41,
+      0.38
+    ],
+    "filters": {}
+  }
+}

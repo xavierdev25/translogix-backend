@@ -1,0 +1,322 @@
+[
+  {
+    "numero_guia": "TLX-984021-CO",
+    "remitente": {
+      "nombre_empresa": "Laboratorios PharmaSur S.A.",
+      "nit": "900.123.456-7",
+      "ciudad_origen": "Bogotá D.C.",
+      "direccion_recogida": "Calle 26 # 96J-15, Bodega 4"
+    },
+    "destinatario": {
+      "nombre_contacto": "Dra. Elena Gómez",
+      "empresa_destino": "Clínica San Juan de Dios",
+      "ciudad_destino": "Medellín",
+      "departamento": "Antioquia",
+      "direccion_entrega": "Carrera 48 # 32-10, Recepción Farmacia"
+    },
+    "especificaciones_carga": {
+      "tipo_servicio": "Transporte Cadena de Frío (2°C a 8°C)",
+      "peso_kg": 45.5,
+      "dimensiones_cm": {
+        "alto": 40,
+        "ancho": 50,
+        "largo": 60
+      },
+      "peso_volumetrico_kg": 30.0,
+      "peso_liquidado_kg": 45.5,
+      "unidades": 2,
+      "declarado_cop": 12500000,
+      "requiere_refrigeracion": true,
+      "mercancia_peligrosa": false
+    },
+    "estado_actual": "EN_TRANSITO",
+    "ubicacion_gps_actual": {
+      "latitud": 5.06889,
+      "longitud": -75.51738,
+      "referencia": "Paso de Montaña Alto de la Línea - Sentido Bogotá-Ibague-Medellín"
+    },
+    "fecha_despacho": "2026-11-02T14:30:00-05:00",
+    "fecha_estimada_entrega": "2026-11-03T16:00:00-05:00",
+    "historial_trazabilidad": [
+      {
+        "timestamp": "2026-11-02T11:15:00-05:00",
+        "estado": "SOLICITUD_GENERADA",
+        "hub_ubicacion": "Portal Web Clientes TransLogix",
+        "descripcion": "Orden de despacho creada y guía generada exitosamente."
+      },
+      {
+        "timestamp": "2026-11-02T14:30:00-05:00",
+        "estado": "RECOGIDO_EN_ORIGEN",
+        "hub_ubicacion": "Zona Franca Fontibón, Bogotá D.C.",
+        "descripcion": "Carga inspeccionada, temperatura validada en 4.2°C y precinto de seguridad #TLX-8841 aplicado."
+      },
+      {
+        "timestamp": "2026-11-02T18:45:00-05:00",
+        "estado": "EN_BODEGA_ORIGEN",
+        "hub_ubicacion": "Hub Central Zona Franca Fontibón",
+        "descripcion": "Consolidación en camión refrigerado Placa WKN-482."
+      },
+      {
+        "timestamp": "2026-11-03T02:15:00-05:00",
+        "estado": "EN_TRANSITO",
+        "hub_ubicacion": "Peaje Chicoral - Tolima",
+        "descripcion": "Monitoreo GPS activo. Temperatura de termógrafo estable a 3.8°C."
+      },
+      {
+        "timestamp": "2026-11-03T08:30:00-05:00",
+        "estado": "EN_TRANSITO",
+        "hub_ubicacion": "Corredor Calarcá - Pereira",
+        "descripcion": "Vehículo en ruta regular. Arribo estimado a Hub Itagüí a las 12:30 PM."
+      }
+    ],
+    "prueba_entrega": null
+  },
+  {
+    "numero_guia": "TLX-752190-CO",
+    "remitente": {
+      "nombre_empresa": "Industrial Tools de Colombia S.A.S.",
+      "nit": "890.987.654-3",
+      "ciudad_origen": "Medellín",
+      "direccion_recogida": "Calle 29 # 43A-18, Itagüí"
+    },
+    "destinatario": {
+      "nombre_contacto": "Ing. Roberto Bermúdez",
+      "empresa_destino": "Constructora del Pacífico",
+      "ciudad_destino": "Cali",
+      "departamento": "Valle del Cauca",
+      "direccion_entrega": "Zona Industrial Yumbo, Bodega 12"
+    },
+    "especificaciones_carga": {
+      "tipo_servicio": "Transporte de Carga Masiva (FTL)",
+      "peso_kg": 3200.0,
+      "dimensiones_cm": {
+        "alto": 180,
+        "ancho": 220,
+        "largo": 400
+      },
+      "peso_volumetrico_kg": 3960.0,
+      "peso_liquidado_kg": 3960.0,
+      "unidades": 4,
+      "declarado_cop": 85000000,
+      "requiere_refrigeracion": false,
+      "mercancia_peligrosa": false
+    },
+    "estado_actual": "ENTREGADO",
+    "ubicacion_gps_actual": {
+      "latitud": 3.5358,
+      "longitud": -76.495,
+      "referencia": "Bodega Destino Yumbo - Entregado"
+    },
+    "fecha_despacho": "2026-11-01T08:00:00-05:00",
+    "fecha_estimada_entrega": "2026-11-02T12:00:00-05:00",
+    "historial_trazabilidad": [
+      {
+        "timestamp": "2026-11-01T08:00:00-05:00",
+        "estado": "RECOGIDO_EN_ORIGEN",
+        "hub_ubicacion": "Itagüí, Antioquia",
+        "descripcion": "Carga pesada estibada y amarrada con trincas de seguridad."
+      },
+      {
+        "timestamp": "2026-11-01T14:20:00-05:00",
+        "estado": "EN_TRANSITO",
+        "hub_ubicacion": "Hub Eje Cafetero Dosquebradas",
+        "descripcion": "Paso por báscula de control: Peso verificado 3,200 kg conformes."
+      },
+      {
+        "timestamp": "2026-11-02T07:30:00-05:00",
+        "estado": "EN_REPARTO",
+        "hub_ubicacion": "Hub Regional Yumbo - Valle",
+        "descripcion": "Vehículo en ruta de distribución final."
+      },
+      {
+        "timestamp": "2026-11-02T11:45:00-05:00",
+        "estado": "ENTREGADO",
+        "hub_ubicacion": "Bodega Cliente Yumbo",
+        "descripcion": "Mercancía recibida a satisfacción. Firmado por Ing. Roberto Bermúdez."
+      }
+    ],
+    "prueba_entrega": {
+      "recibido_por": "Roberto Bermúdez",
+      "documento_identidad": "C.C. 16.789.432",
+      "fecha_hora_entrega": "2026-11-02T11:45:00-05:00",
+      "firma_digital_url": "https://cdn.translogix.com.co/pod/TLX-752190-CO_pod.png",
+      "observaciones_recibido": "Carga intacta, sin averías."
+    }
+  },
+  {
+    "numero_guia": "TLX-310482-CO",
+    "remitente": {
+      "nombre_empresa": "Químicos del Caribe S.A.",
+      "nit": "800.554.321-9",
+      "ciudad_origen": "Barranquilla",
+      "direccion_recogida": "Vía 40 # 73-290, Barranquilla"
+    },
+    "destinatario": {
+      "nombre_contacto": "Ing. Mario Castañeda",
+      "empresa_destino": "TecnoSintéticos Bucaramanga",
+      "ciudad_destino": "Bucaramanga",
+      "departamento": "Santander",
+      "direccion_entrega": "Zona Industrial Chimitá, Bodega 8"
+    },
+    "especificaciones_carga": {
+      "tipo_servicio": "Transporte de Mercancía Peligrosa (Clase 3 - Líquidos Inflamables)",
+      "peso_kg": 850.0,
+      "dimensiones_cm": {
+        "alto": 120,
+        "ancho": 100,
+        "largo": 120
+      },
+      "peso_volumetrico_kg": 360.0,
+      "peso_liquidado_kg": 850.0,
+      "unidades": 4,
+      "declarado_cop": 34000000,
+      "requiere_refrigeracion": false,
+      "mercancia_peligrosa": true,
+      "clase_un": "UN 1263 (Pinturas y solventes)",
+      "hoja_seguridad_msds_adjunta": true
+    },
+    "estado_actual": "RETENIDO_NOVEDAD",
+    "ubicacion_gps_actual": {
+      "latitud": 7.3756,
+      "longitud": -73.6521,
+      "referencia": "Puesto de Control POLFA / DIAN - Aguachica, Cesar"
+    },
+    "fecha_despacho": "2026-11-01T16:00:00-05:00",
+    "fecha_estimada_entrega": "2026-11-03T18:00:00-05:00",
+    "historial_trazabilidad": [
+      {
+        "timestamp": "2026-11-01T16:00:00-05:00",
+        "estado": "RECOGIDO_EN_ORIGEN",
+        "hub_ubicacion": "Barranquilla, Atlántico",
+        "descripcion": "Verificación de rótulos IMO Clase 3 y tarjeta de emergencia en vehículo."
+      },
+      {
+        "timestamp": "2026-11-02T04:10:00-05:00",
+        "estado": "EN_TRANSITO",
+        "hub_ubicacion": "Troncal del Magdalena - Bosconia",
+        "descripcion": "Ruta de carretera conforme a plan de contingencia."
+      },
+      {
+        "timestamp": "2026-11-02T15:20:00-05:00",
+        "estado": "RETENIDO_NOVEDAD",
+        "hub_ubicacion": "Aguachica, Cesar",
+        "descripcion": "NOVEDAD OPERATIVA: Retención preventiva en puesto de control POLFA para verificación documental de factura comercial y tarjeta de emergencia."
+      }
+    ],
+    "prueba_entrega": null
+  },
+  {
+    "numero_guia": "TLX-551904-CO",
+    "remitente": {
+      "nombre_empresa": "Moda & Estilo Retail Colombia",
+      "nit": "901.883.210-4",
+      "ciudad_origen": "Bogotá D.C.",
+      "direccion_recogida": "Calle 13 # 68D-31, Centro Comercial Plaza Central"
+    },
+    "destinatario": {
+      "nombre_contacto": "Camila Restrepo",
+      "empresa_destino": "Particular",
+      "ciudad_destino": "Pereira",
+      "departamento": "Risaralda",
+      "direccion_entrega": "Carrera 15 # 4-22, Apt 502, Pinares"
+    },
+    "especificaciones_carga": {
+      "tipo_servicio": "Paquetería Exprés Última Milla",
+      "peso_kg": 3.2,
+      "dimensiones_cm": {
+        "alto": 20,
+        "ancho": 30,
+        "largo": 40
+      },
+      "peso_volumetrico_kg": 6.0,
+      "peso_liquidado_kg": 6.0,
+      "unidades": 1,
+      "declarado_cop": 450000,
+      "requiere_refrigeracion": false,
+      "mercancia_peligrosa": false
+    },
+    "estado_actual": "EN_REPARTO",
+    "ubicacion_gps_actual": {
+      "latitud": 4.8133,
+      "longitud": -75.6961,
+      "referencia": "Van de Reparto #44 - Sector Pinares, Pereira"
+    },
+    "fecha_despacho": "2026-11-02T19:00:00-05:00",
+    "fecha_estimada_entrega": "2026-11-03T14:00:00-05:00",
+    "historial_trazabilidad": [
+      {
+        "timestamp": "2026-11-02T19:00:00-05:00",
+        "estado": "RECOGIDO_EN_ORIGEN",
+        "hub_ubicacion": "Bogotá D.C.",
+        "descripcion": "Paquete ingresado a clasificación automatizada."
+      },
+      {
+        "timestamp": "2026-11-03T01:30:00-05:00",
+        "estado": "EN_TRANSITO",
+        "hub_ubicacion": "Corredor Bogotá-La Línea",
+        "descripcion": "Despacho intermunicipal express nocturno."
+      },
+      {
+        "timestamp": "2026-11-03T06:45:00-05:00",
+        "estado": "EN_BODEGA_DESTINO",
+        "hub_ubicacion": "Hub Eje Cafetero Dosquebradas",
+        "descripcion": "Recepción y asignación a ruta de distribución urbana."
+      },
+      {
+        "timestamp": "2026-11-03T09:15:00-05:00",
+        "estado": "EN_REPARTO",
+        "hub_ubicacion": "Pereira, Risaralda",
+        "descripcion": "Asignado a conductor Juan Carlos Páez (Tel: 310-987-6543)."
+      }
+    ],
+    "prueba_entrega": null
+  },
+  {
+    "numero_guia": "TLX-118493-CO",
+    "remitente": {
+      "nombre_empresa": "Agroinsumos del Llano S.A.",
+      "nit": "860.443.219-1",
+      "ciudad_origen": "Villavicencio",
+      "direccion_recogida": "Anillo Vial Km 3, Parque Industrial"
+    },
+    "destinatario": {
+      "nombre_contacto": "Germán Morales",
+      "empresa_destino": "Hacienda La Esperanza",
+      "ciudad_destino": "Florencia",
+      "departamento": "Caquetá",
+      "direccion_entrega": "Km 12 Vía Morelia, Florencia"
+    },
+    "especificaciones_carga": {
+      "tipo_servicio": "Carga Semimasiva (Zona ZOMAC)",
+      "peso_kg": 650.0,
+      "dimensiones_cm": {
+        "alto": 100,
+        "ancho": 120,
+        "largo": 120
+      },
+      "peso_volumetrico_kg": 360.0,
+      "peso_liquidado_kg": 650.0,
+      "unidades": 13,
+      "declarado_cop": 18500000,
+      "requiere_refrigeracion": false,
+      "mercancia_peligrosa": false
+    },
+    "estado_actual": "EN_BODEGA_ORIGEN",
+    "ubicacion_gps_actual": {
+      "latitud": 4.142,
+      "longitud": -73.6266,
+      "referencia": "Sub-Hub Llanos Villavicencio"
+    },
+    "fecha_despacho": "2026-11-03T08:00:00-05:00",
+    "fecha_estimada_entrega": "2026-11-06T17:00:00-05:00",
+    "historial_trazabilidad": [
+      {
+        "timestamp": "2026-11-03T08:00:00-05:00",
+        "estado": "EN_BODEGA_ORIGEN",
+        "hub_ubicacion": "Villavicencio, Meta",
+        "descripcion": "Mercancía consolidada. Programado despacho semanal a Florencia (Zona ZOMAC) para el día Jueves."
+      }
+    ],
+    "prueba_entrega": null
+  }
+]

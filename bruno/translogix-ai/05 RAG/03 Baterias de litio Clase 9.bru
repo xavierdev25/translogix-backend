@@ -1,0 +1,30 @@
+meta {
+  name: Baterias de litio (Clase 9)
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/v1/chat/messages
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "client_id": "{{clientId}}",
+    "message_id": "{{messageId}}",
+    "text": "¿Puedo enviar baterías de litio?"
+  }
+}
+
+script:pre-request {
+  const uuid = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16); });
+  bru.setVar("messageId", uuid());
+  bru.setVar("clientId", uuid());
+}
+
+tests {
+  test("HTTP 200", () => expect(res.status).to.equal(200));
+  test("reply.blocks.1.type = CITATIONS", () => expect(res.body?.["reply"]?.["blocks"][1]?.["type"]).to.eql("CITATIONS"));
+}

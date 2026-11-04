@@ -1,0 +1,54 @@
+{
+  "method": "POST",
+  "path": "/api/v1/chat/messages",
+  "headers": {},
+  "body": {
+    "client_id": "f03689da-5cb4-4153-8692-e374e5dcfa7c",
+    "message_id": "9e65f828-4cba-464e-a9af-d13b8f7af48c",
+    "text": "Quiero cotizar un envío de Bogotá a Medellín"
+  },
+  "form": null,
+  "status": 200,
+  "response": {
+    "reply": {
+      "session_id": "9b95492e-d891-44aa-b149-abddd96057c2",
+      "in_reply_to": "9e65f828-4cba-464e-a9af-d13b8f7af48c",
+      "reply_id": "89fbcaf1-3fed-4456-bfc9-88cd27a334e0",
+      "channel": "WEB_CHAT",
+      "status": "AWAITING_USER",
+      "blocks": [
+        {
+          "type": "TEXT",
+          "text": "¿Cuáles son las medidas del paquete? Escríbelas como alto x ancho x largo en centímetros, por ejemplo 40x50x60."
+        }
+      ],
+      "meta": {
+        "trace_id": "28e43415-3d6a-406c-b1d3-25ed30532008",
+        "intent": "COTIZACION",
+        "confidence_score": null,
+        "confidence_method": null,
+        "escalation": {
+          "escalate": false,
+          "primary": null,
+          "triggers": [],
+          "mensaje_cliente": null,
+          "rules_version": "1.0.2026",
+          "config_snapshot": {
+            "CRIT003_MODE": "claim_context",
+            "CRIT005_MODE": "incident_context",
+            "CONFIDENCE_THRESHOLD": "0.75",
+            "PRIORITY_ORDER": "CRIT-005>CRIT-003>CRIT-002>CRIT-004>CRIT-001>INFO-INTENTOS",
+            "omitidas": "CRIT-001:sin_respuesta_rag,CRIT-003:sin_valores,CRIT-004:sin_datos_cuenta,CRIT-005:sin_datos_de_carga,INFO-INTENTOS:sin_dato"
+          }
+        },
+        "services_called": [
+          "escalation"
+        ],
+        "evidence_ids": [],
+        "llm_used": false,
+        "delivery_mode": "SIMULATED"
+      },
+      "created_at": "2026-11-03T13:17:29.016854-05:00"
+    }
+  }
+}

@@ -1,0 +1,25 @@
+meta {
+  name: Historial con X-Client-Id ajeno (404)
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/v1/chat/sessions/{{sessionId}}/history
+  body: none
+  auth: none
+}
+
+headers {
+  X-Client-Id: 00000000-0000-4000-8000-000000000000
+}
+
+script:pre-request {
+  const uuid = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16); });
+  bru.setVar("messageId", uuid());
+}
+
+tests {
+  test("HTTP 404", () => expect(res.status).to.equal(404));
+  test("error.code = NO_ENCONTRADO", () => expect(res.body?.["error"]?.["code"]).to.eql("NO_ENCONTRADO"));
+}

@@ -1,0 +1,23 @@
+meta {
+  name: En reparto TLX-551904-CO
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/v1/tracking/{{guiaReparto}}
+  body: none
+  auth: none
+}
+
+script:pre-request {
+  const uuid = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16); });
+  bru.setVar("messageId", uuid());
+}
+
+tests {
+  test("HTTP 200", () => expect(res.status).to.equal(200));
+  test("estado_actual.codigo = EN_REPARTO", () => expect(res.body?.["estado_actual"]?.["codigo"]).to.eql("EN_REPARTO"));
+  test("sin \"Placa\" en la respuesta", () => expect(JSON.stringify(res.body)).to.not.include("Placa"));
+  test("sin \"Tel\" en la respuesta", () => expect(JSON.stringify(res.body)).to.not.include("Tel"));
+}

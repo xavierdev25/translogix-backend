@@ -1,0 +1,68 @@
+{
+  "reply": {
+    "session_id": "c1a2b3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
+    "in_reply_to": "3a2b1c0d-9e8f-4a7b-8c6d-5e4f3a2b1c0d",
+    "reply_id": "3f4a5b6c-7d8e-4f9a-8b1c-2d3e4f5a6b7c",
+    "channel": "WEB_CHAT",
+    "status": "AWAITING_USER",
+    "blocks": [
+      {
+        "type": "TEXT",
+        "text": "Tu cotización de Bogotá D.C. a Medellín: flete total $190.975, con peso facturable de 45,5 kg y entrega estimada en 24 horas. Valores calculados con la fórmula provisional-v1."
+      },
+      {
+        "type": "QUOTE_SUMMARY",
+        "cotizacion_id": "a3c5e7f9-1b2d-4f6a-8c0e-2d4f6a8c0e1b",
+        "codigo_trayecto": "TLX-BOG-MED-001",
+        "origen": "Bogotá D.C.",
+        "destino": "Medellín",
+        "peso_facturable_kg": 45.5,
+        "flete_total_cop": 190975,
+        "tiempo_entrega_horas": 24,
+        "formula_version": "provisional-v1",
+        "advertencias": []
+      },
+      {
+        "type": "QUICK_REPLIES",
+        "options": [
+          {
+            "id": "cadena_frio",
+            "title": "Agregar cadena de frío"
+          },
+          {
+            "id": "asesor",
+            "title": "Hablar con un asesor"
+          }
+        ]
+      }
+    ],
+    "meta": {
+      "trace_id": "trc-01J9Z6T6E4",
+      "intent": "COTIZACION",
+      "confidence_score": null,
+      "confidence_method": null,
+      "escalation": {
+        "escalate": false,
+        "primary": null,
+        "triggers": [],
+        "mensaje_cliente": null,
+        "rules_version": "1.0.2026",
+        "config_snapshot": {
+          "CRIT003_MODE": "claim_context",
+          "CRIT005_MODE": "incident_context",
+          "PRIORITY_ORDER": "CRIT-005>CRIT-003>CRIT-002>CRIT-004>CRIT-001>INFO-INTENTOS"
+        }
+      },
+      "services_called": [
+        "quotation",
+        "escalation"
+      ],
+      "evidence_ids": [
+        "a3c5e7f9-1b2d-4f6a-8c0e-2d4f6a8c0e1b"
+      ],
+      "llm_used": false,
+      "delivery_mode": "REAL"
+    },
+    "created_at": "2026-11-03T10:20:03-05:00"
+  }
+}

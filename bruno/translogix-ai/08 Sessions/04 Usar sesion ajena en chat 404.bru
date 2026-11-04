@@ -1,0 +1,31 @@
+meta {
+  name: Usar sesion ajena en chat (404)
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/v1/chat/messages
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "client_id": "{{clientId}}",
+    "message_id": "{{messageId}}",
+    "text": "hola",
+    "session_id": "{{sessionId}}"
+  }
+}
+
+script:pre-request {
+  const uuid = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16); });
+  bru.setVar("messageId", uuid());
+  bru.setVar("clientId", uuid());
+}
+
+tests {
+  test("HTTP 404", () => expect(res.status).to.equal(404));
+  test("error.code = NO_ENCONTRADO", () => expect(res.body?.["error"]?.["code"]).to.eql("NO_ENCONTRADO"));
+}

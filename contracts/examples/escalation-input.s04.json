@@ -1,0 +1,15 @@
+{
+  "intent": "TRACKING",
+  "user_text_normalized": "tlx-310482-co",
+  "confidence_score": null,
+  "sentiment": "NEUTRO",
+  "valor_declarado_cop": 34000000,
+  "valor_reclamacion_cop": null,
+  "envios_mensuales_cuenta": null,
+  "tipo_cuenta": null,
+  "mercancia_peligrosa": true,
+  "requiere_refrigeracion": false,
+  "estado_guia": "RETENIDO_NOVEDAD",
+  "intentos_entrega_fallidos": null,
+  "incident_reported": false
+}

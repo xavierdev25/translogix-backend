@@ -1,0 +1,30 @@
+meta {
+  name: Subir factura (adjunto PDF)
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/attachments
+  body: multipartForm
+  auth: none
+}
+
+body:multipart-form {
+  file: @file(fixtures/factura_demo.pdf)
+  declared_doc_code: FACTURA_COMERCIAL
+}
+
+script:pre-request {
+  const uuid = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16); });
+  bru.setVar("messageId", uuid());
+}
+
+script:post-response {
+  if (res.body?.["attachment_id"]) bru.setVar("attachmentId", res.body?.["attachment_id"]);
+}
+
+tests {
+  test("HTTP 201", () => expect(res.status).to.equal(201));
+  test("mime_type = application/pdf", () => expect(res.body?.["mime_type"]).to.eql("application/pdf"));
+}

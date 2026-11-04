@@ -1,0 +1,58 @@
+{
+  "reply": {
+    "session_id": "3a4b5c6d-7e8f-4a9b-8c0d-1e2f3a4b5c6d",
+    "in_reply_to": "6d5e4f3a-2b1c-4d0e-9f9a-8b7c6d5e4f3a",
+    "reply_id": "6c7d8e9f-0a1b-4c2d-9e3f-5a6b7c8d9e0f",
+    "channel": "WEB_CHAT",
+    "status": "ESCALATED",
+    "blocks": [
+      {
+        "type": "HANDOFF_NOTICE",
+        "handoff_id": "8b7c6d5e-4f3a-4b2c-8d1e-0f9a8b7c6d5e",
+        "prioridad": "ALTA",
+        "cola": "SUPERVISOR",
+        "mensaje_cliente": "Lamento profundamente la molestia ocasionada. Estoy transfiriendo tu chat de inmediato a un supervisor de servicio al cliente para resolver tu situación.",
+        "tiempo_espera_estimado_segundos": 45
+      }
+    ],
+    "meta": {
+      "trace_id": "trc-01J9Z6X9H7",
+      "intent": "DESCONOCIDA",
+      "confidence_score": null,
+      "confidence_method": null,
+      "escalation": {
+        "escalate": true,
+        "primary": {
+          "id_criterio": "CRIT-002",
+          "accion": "ESCALAR_PRIORIDAD_ALTA",
+          "accion_raw": "ESCALAR_PRIORIDAD_ALTA",
+          "evidencia": "palabras clave: pésimo servicio, demandar, supertransporte",
+          "modo": "literal"
+        },
+        "triggers": [
+          {
+            "id_criterio": "CRIT-002",
+            "accion": "ESCALAR_PRIORIDAD_ALTA",
+            "accion_raw": "ESCALAR_PRIORIDAD_ALTA",
+            "evidencia": "palabras clave: pésimo servicio, demandar, supertransporte",
+            "modo": "literal"
+          }
+        ],
+        "mensaje_cliente": "Lamento profundamente la molestia ocasionada. Estoy transfiriendo tu chat de inmediato a un supervisor de servicio al cliente para resolver tu situación.",
+        "rules_version": "1.0.2026",
+        "config_snapshot": {
+          "CRIT003_MODE": "claim_context",
+          "CRIT005_MODE": "incident_context",
+          "PRIORITY_ORDER": "CRIT-005>CRIT-003>CRIT-002>CRIT-004>CRIT-001>INFO-INTENTOS"
+        }
+      },
+      "services_called": [
+        "escalation"
+      ],
+      "evidence_ids": [],
+      "llm_used": false,
+      "delivery_mode": "REAL"
+    },
+    "created_at": "2026-11-03T10:50:01-05:00"
+  }
+}

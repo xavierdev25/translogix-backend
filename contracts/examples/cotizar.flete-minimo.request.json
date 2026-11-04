@@ -1,0 +1,11 @@
+{
+  "origen": "Bogotá D.C.",
+  "destino": "Pereira",
+  "alto_cm": 20,
+  "ancho_cm": 30,
+  "largo_cm": 40,
+  "peso_real_kg": 3.2,
+  "valor_declarado_cop": 450000,
+  "requiere_cadena_frio": false,
+  "mercancia_peligrosa": false
+}

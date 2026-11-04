@@ -1,0 +1,33 @@
+{
+  "escalate": true,
+  "primary": {
+    "id_criterio": "CRIT-005",
+    "accion": "ESCALAR_URGENCIA_OPERACIONES",
+    "accion_raw": "ESCALAR_Urgencia_OPERACIONES",
+    "evidencia": "mercancia_peligrosa=true; estado_guia=RETENIDO_NOVEDAD; incidente reportado",
+    "modo": "incident_context"
+  },
+  "triggers": [
+    {
+      "id_criterio": "CRIT-002",
+      "accion": "ESCALAR_PRIORIDAD_ALTA",
+      "accion_raw": "ESCALAR_PRIORIDAD_ALTA",
+      "evidencia": "palabra clave: demandar",
+      "modo": "literal"
+    },
+    {
+      "id_criterio": "CRIT-005",
+      "accion": "ESCALAR_URGENCIA_OPERACIONES",
+      "accion_raw": "ESCALAR_Urgencia_OPERACIONES",
+      "evidencia": "mercancia_peligrosa=true; estado_guia=RETENIDO_NOVEDAD; incidente reportado",
+      "modo": "incident_context"
+    }
+  ],
+  "mensaje_cliente": "Identificamos que tu consulta involucra carga especial sensible. Un coordinador de operaciones tomará la llamada/chat prioritariamente.",
+  "rules_version": "1.0.2026",
+  "config_snapshot": {
+    "CRIT003_MODE": "claim_context",
+    "CRIT005_MODE": "incident_context",
+    "PRIORITY_ORDER": "CRIT-005>CRIT-003>CRIT-002>CRIT-004>CRIT-001>INFO-INTENTOS"
+  }
+}

@@ -1,0 +1,918 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ConversationReply.schema.json",
+  "title": "ConversationReply",
+  "x-contract-version": "1.2.0",
+  "$defs": {
+    "ChannelType": {
+      "enum": [
+        "WHATSAPP",
+        "WEB_CHAT",
+        "PBX"
+      ],
+      "title": "ChannelType",
+      "type": "string"
+    },
+    "ChecklistItemDetallado": {
+      "additionalProperties": false,
+      "properties": {
+        "codigo": {
+          "$ref": "#/$defs/DocumentoCodigo"
+        },
+        "obligatorio": {
+          "title": "Obligatorio",
+          "type": "boolean"
+        },
+        "recibido": {
+          "title": "Recibido",
+          "type": "boolean"
+        },
+        "descripcion": {
+          "title": "Descripcion",
+          "type": "string"
+        }
+      },
+      "required": [
+        "codigo",
+        "obligatorio",
+        "recibido",
+        "descripcion"
+      ],
+      "title": "ChecklistItemDetallado",
+      "type": "object"
+    },
+    "CitationItem": {
+      "additionalProperties": false,
+      "properties": {
+        "doc_code": {
+          "$ref": "#/$defs/DocCode"
+        },
+        "doc_title": {
+          "title": "Doc Title",
+          "type": "string"
+        },
+        "section_path": {
+          "title": "Section Path",
+          "type": "string"
+        },
+        "chunk_id": {
+          "title": "Chunk Id",
+          "type": "string"
+        },
+        "excerpt": {
+          "title": "Excerpt",
+          "type": "string"
+        }
+      },
+      "required": [
+        "doc_code",
+        "doc_title",
+        "section_path",
+        "chunk_id",
+        "excerpt"
+      ],
+      "title": "CitationItem",
+      "type": "object"
+    },
+    "CitationsBlock": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "CITATIONS",
+          "default": "CITATIONS",
+          "title": "Type",
+          "type": "string"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/CitationItem"
+          },
+          "minItems": 1,
+          "title": "Items",
+          "type": "array"
+        }
+      },
+      "required": [
+        "type",
+        "items"
+      ],
+      "title": "CitationsBlock",
+      "type": "object"
+    },
+    "ColaDestino": {
+      "enum": [
+        "SERVICIO_CLIENTE",
+        "SUPERVISOR",
+        "JURIDICO_PQRS",
+        "EJECUTIVO_CUENTA",
+        "OPERACIONES"
+      ],
+      "title": "ColaDestino",
+      "type": "string"
+    },
+    "ConversationStatus": {
+      "enum": [
+        "ACTIVE",
+        "AWAITING_USER",
+        "IDLE",
+        "ESCALATED",
+        "CLOSED"
+      ],
+      "title": "ConversationStatus",
+      "type": "string"
+    },
+    "DeliveryMode": {
+      "enum": [
+        "REAL",
+        "SIMULATED"
+      ],
+      "title": "DeliveryMode",
+      "type": "string"
+    },
+    "DocCode": {
+      "enum": [
+        "DOC-OPS-2026-03",
+        "DOC-PQRS-2026-04",
+        "COBERTURA",
+        "TARIFAS",
+        "REGLAS_ESCALACION"
+      ],
+      "title": "DocCode",
+      "type": "string"
+    },
+    "DocumentoCodigo": {
+      "description": "Claim checklist codes (DEC-P4).",
+      "enum": [
+        "GUIA",
+        "FACTURA_COMERCIAL",
+        "CARTA_RECLAMACION",
+        "CERTIFICACION_BANCARIA",
+        "FOTOS_EMPAQUE",
+        "FOTOS_DANO",
+        "CEDULA_O_RUT",
+        "ACTA_CON_SALVEDAD"
+      ],
+      "title": "DocumentoCodigo",
+      "type": "string"
+    },
+    "EscalationAction": {
+      "enum": [
+        "ESCALAR_A_HUMANO",
+        "ESCALAR_PRIORIDAD_ALTA",
+        "ESCALAR_A_DEPARTAMENTO_JURIDICO_Y_PQRS",
+        "ESCALAR_A_EJECUTIVO_CUENTA_DEDICADO",
+        "ESCALAR_URGENCIA_OPERACIONES",
+        "OFRECER_HANDOFF"
+      ],
+      "title": "EscalationAction",
+      "type": "string"
+    },
+    "EscalationDecision": {
+      "additionalProperties": false,
+      "properties": {
+        "escalate": {
+          "title": "Escalate",
+          "type": "boolean"
+        },
+        "primary": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EscalationTrigger"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "triggers": {
+          "items": {
+            "$ref": "#/$defs/EscalationTrigger"
+          },
+          "title": "Triggers",
+          "type": "array"
+        },
+        "mensaje_cliente": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Texto del JSON para el criterio primario.",
+          "title": "Mensaje Cliente"
+        },
+        "rules_version": {
+          "default": "1.0.2026",
+          "title": "Rules Version",
+          "type": "string"
+        },
+        "config_snapshot": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "examples": [
+            {
+              "CRIT003_MODE": "claim_context",
+              "CRIT005_MODE": "incident_context"
+            }
+          ],
+          "title": "Config Snapshot",
+          "type": "object"
+        }
+      },
+      "required": [
+        "escalate",
+        "primary",
+        "triggers",
+        "mensaje_cliente",
+        "rules_version",
+        "config_snapshot"
+      ],
+      "title": "EscalationDecision",
+      "type": "object"
+    },
+    "EscalationTrigger": {
+      "additionalProperties": false,
+      "properties": {
+        "id_criterio": {
+          "enum": [
+            "CRIT-001",
+            "CRIT-002",
+            "CRIT-003",
+            "CRIT-004",
+            "CRIT-005",
+            "INFO-INTENTOS"
+          ],
+          "title": "Id Criterio",
+          "type": "string"
+        },
+        "accion": {
+          "$ref": "#/$defs/EscalationAction"
+        },
+        "accion_raw": {
+          "description": "Acción tal como aparece en el JSON de reglas.",
+          "title": "Accion Raw",
+          "type": "string"
+        },
+        "evidencia": {
+          "description": "Qué dato disparó la regla, sin PII.",
+          "maxLength": 1000,
+          "minLength": 1,
+          "title": "Evidencia",
+          "type": "string"
+        },
+        "modo": {
+          "examples": [
+            "claim_context",
+            "incident_context",
+            "literal"
+          ],
+          "title": "Modo",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id_criterio",
+        "accion",
+        "accion_raw",
+        "evidencia",
+        "modo"
+      ],
+      "title": "EscalationTrigger",
+      "type": "object"
+    },
+    "EstadoTicket": {
+      "enum": [
+        "BORRADOR",
+        "RADICADO",
+        "FUERA_DE_PLAZO",
+        "ESCALADO"
+      ],
+      "title": "EstadoTicket",
+      "type": "string"
+    },
+    "EstadoVista": {
+      "additionalProperties": false,
+      "properties": {
+        "codigo": {
+          "examples": [
+            "EN_TRANSITO"
+          ],
+          "pattern": "^[A-Z][A-Z0-9_]*$",
+          "title": "Codigo",
+          "type": "string"
+        },
+        "etiqueta": {
+          "description": "Texto visible al cliente; no puede contener datos personales (DEC-S1).",
+          "maxLength": 1000,
+          "minLength": 1,
+          "title": "Etiqueta",
+          "type": "string"
+        },
+        "explicacion": {
+          "description": "Texto visible al cliente; no puede contener datos personales (DEC-S1).",
+          "maxLength": 1000,
+          "minLength": 1,
+          "title": "Explicacion",
+          "type": "string"
+        }
+      },
+      "required": [
+        "codigo",
+        "etiqueta",
+        "explicacion"
+      ],
+      "title": "EstadoVista",
+      "type": "object"
+    },
+    "EventoVista": {
+      "additionalProperties": false,
+      "properties": {
+        "timestamp": {
+          "format": "date-time",
+          "title": "Timestamp",
+          "type": "string"
+        },
+        "estado": {
+          "pattern": "^[A-Z][A-Z0-9_]*$",
+          "title": "Estado",
+          "type": "string"
+        },
+        "etiqueta": {
+          "description": "Texto visible al cliente; no puede contener datos personales (DEC-S1).",
+          "maxLength": 1000,
+          "minLength": 1,
+          "title": "Etiqueta",
+          "type": "string"
+        },
+        "ubicacion": {
+          "anyOf": [
+            {
+              "description": "Texto visible al cliente; no puede contener datos personales (DEC-S1).",
+              "maxLength": 1000,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ubicacion"
+        },
+        "descripcion_cliente": {
+          "description": "Texto visible al cliente; no puede contener datos personales (DEC-S1).",
+          "maxLength": 1000,
+          "minLength": 1,
+          "title": "Descripcion Cliente",
+          "type": "string"
+        }
+      },
+      "required": [
+        "timestamp",
+        "estado",
+        "etiqueta",
+        "ubicacion",
+        "descripcion_cliente"
+      ],
+      "title": "EventoVista",
+      "type": "object"
+    },
+    "HandoffNoticeBlock": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "HANDOFF_NOTICE",
+          "default": "HANDOFF_NOTICE",
+          "title": "Type",
+          "type": "string"
+        },
+        "handoff_id": {
+          "format": "uuid4",
+          "title": "Handoff Id",
+          "type": "string"
+        },
+        "prioridad": {
+          "$ref": "#/$defs/Prioridad"
+        },
+        "cola": {
+          "$ref": "#/$defs/ColaDestino"
+        },
+        "mensaje_cliente": {
+          "title": "Mensaje Cliente",
+          "type": "string"
+        },
+        "tiempo_espera_estimado_segundos": {
+          "minimum": 0,
+          "title": "Tiempo Espera Estimado Segundos",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "type",
+        "handoff_id",
+        "prioridad",
+        "cola",
+        "mensaje_cliente",
+        "tiempo_espera_estimado_segundos"
+      ],
+      "title": "HandoffNoticeBlock",
+      "type": "object"
+    },
+    "Intent": {
+      "enum": [
+        "TRACKING",
+        "COTIZACION",
+        "CONSULTA_DOCUMENTAL",
+        "CARGA_ESPECIAL",
+        "PQRS",
+        "SALUDO",
+        "HABLAR_CON_HUMANO",
+        "DESCONOCIDA"
+      ],
+      "title": "Intent",
+      "type": "string"
+    },
+    "PqrsTicketBlock": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "PQRS_TICKET",
+          "default": "PQRS_TICKET",
+          "title": "Type",
+          "type": "string"
+        },
+        "ticket_id": {
+          "format": "uuid4",
+          "title": "Ticket Id",
+          "type": "string"
+        },
+        "estado": {
+          "$ref": "#/$defs/EstadoTicket"
+        },
+        "faltantes": {
+          "items": {
+            "$ref": "#/$defs/DocumentoCodigo"
+          },
+          "title": "Faltantes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "type",
+        "ticket_id",
+        "estado",
+        "faltantes"
+      ],
+      "title": "PqrsTicketBlock",
+      "type": "object"
+    },
+    "Prioridad": {
+      "enum": [
+        "NORMAL",
+        "ALTA",
+        "URGENTE"
+      ],
+      "title": "Prioridad",
+      "type": "string"
+    },
+    "QuickRepliesBlock": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "QUICK_REPLIES",
+          "default": "QUICK_REPLIES",
+          "title": "Type",
+          "type": "string"
+        },
+        "options": {
+          "items": {
+            "$ref": "#/$defs/QuickReplyOption"
+          },
+          "maxItems": 3,
+          "minItems": 1,
+          "title": "Options",
+          "type": "array"
+        }
+      },
+      "required": [
+        "type",
+        "options"
+      ],
+      "title": "QuickRepliesBlock",
+      "type": "object"
+    },
+    "QuickReplyOption": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "title": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "title"
+      ],
+      "title": "QuickReplyOption",
+      "type": "object"
+    },
+    "QuoteSummaryBlock": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "QUOTE_SUMMARY",
+          "default": "QUOTE_SUMMARY",
+          "title": "Type",
+          "type": "string"
+        },
+        "cotizacion_id": {
+          "format": "uuid4",
+          "title": "Cotizacion Id",
+          "type": "string"
+        },
+        "codigo_trayecto": {
+          "title": "Codigo Trayecto",
+          "type": "string"
+        },
+        "origen": {
+          "title": "Origen",
+          "type": "string"
+        },
+        "destino": {
+          "title": "Destino",
+          "type": "string"
+        },
+        "peso_facturable_kg": {
+          "exclusiveMinimum": 0,
+          "title": "Peso Facturable Kg",
+          "type": "number"
+        },
+        "flete_total_cop": {
+          "description": "Pesos colombianos (COP), entero.",
+          "minimum": 0,
+          "title": "Flete Total Cop",
+          "type": "integer"
+        },
+        "tiempo_entrega_horas": {
+          "exclusiveMinimum": 0,
+          "title": "Tiempo Entrega Horas",
+          "type": "integer"
+        },
+        "formula_version": {
+          "title": "Formula Version",
+          "type": "string"
+        },
+        "advertencias": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Advertencias",
+          "type": "array"
+        }
+      },
+      "required": [
+        "type",
+        "cotizacion_id",
+        "codigo_trayecto",
+        "origen",
+        "destino",
+        "peso_facturable_kg",
+        "flete_total_cop",
+        "tiempo_entrega_horas",
+        "formula_version",
+        "advertencias"
+      ],
+      "title": "QuoteSummaryBlock",
+      "type": "object"
+    },
+    "ReplyMeta": {
+      "additionalProperties": false,
+      "properties": {
+        "trace_id": {
+          "minLength": 1,
+          "title": "Trace Id",
+          "type": "string"
+        },
+        "intent": {
+          "$ref": "#/$defs/Intent"
+        },
+        "confidence_score": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Solo RAG; null en tracking/cotización.",
+          "title": "Confidence Score"
+        },
+        "confidence_method": {
+          "anyOf": [
+            {
+              "const": "heuristic_v1",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Confidence Method"
+        },
+        "escalation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EscalationDecision"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "services_called": {
+          "items": {
+            "$ref": "#/$defs/ServiceName"
+          },
+          "title": "Services Called",
+          "type": "array"
+        },
+        "evidence_ids": {
+          "description": "chunk_id / guía / cotizacion_id usados.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Ids",
+          "type": "array"
+        },
+        "llm_used": {
+          "title": "Llm Used",
+          "type": "boolean"
+        },
+        "delivery_mode": {
+          "$ref": "#/$defs/DeliveryMode"
+        }
+      },
+      "required": [
+        "trace_id",
+        "intent",
+        "confidence_score",
+        "confidence_method",
+        "escalation",
+        "services_called",
+        "evidence_ids",
+        "llm_used",
+        "delivery_mode"
+      ],
+      "title": "ReplyMeta",
+      "type": "object"
+    },
+    "RequestAttachmentsBlock": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "REQUEST_ATTACHMENTS",
+          "default": "REQUEST_ATTACHMENTS",
+          "title": "Type",
+          "type": "string"
+        },
+        "checklist": {
+          "items": {
+            "$ref": "#/$defs/ChecklistItemDetallado"
+          },
+          "minItems": 1,
+          "title": "Checklist",
+          "type": "array"
+        }
+      },
+      "required": [
+        "type",
+        "checklist"
+      ],
+      "title": "RequestAttachmentsBlock",
+      "type": "object"
+    },
+    "ServiceName": {
+      "enum": [
+        "tms",
+        "quotation",
+        "rag",
+        "escalation",
+        "pqrs"
+      ],
+      "title": "ServiceName",
+      "type": "string"
+    },
+    "TextBlock": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "TEXT",
+          "default": "TEXT",
+          "title": "Type",
+          "type": "string"
+        },
+        "text": {
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "text"
+      ],
+      "title": "TextBlock",
+      "type": "object"
+    },
+    "TrackingCardBlock": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "TRACKING_CARD",
+          "default": "TRACKING_CARD",
+          "title": "Type",
+          "type": "string"
+        },
+        "numero_guia": {
+          "examples": [
+            "TLX-984021-CO"
+          ],
+          "pattern": "^TLX-\\d{6}-CO$",
+          "title": "Numero Guia",
+          "type": "string"
+        },
+        "estado": {
+          "$ref": "#/$defs/EstadoVista"
+        },
+        "eta": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Eta"
+        },
+        "ubicacion_referencia": {
+          "anyOf": [
+            {
+              "description": "Texto visible al cliente; no puede contener datos personales (DEC-S1).",
+              "maxLength": 1000,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Ubicacion Referencia"
+        },
+        "eventos": {
+          "items": {
+            "$ref": "#/$defs/EventoVista"
+          },
+          "title": "Eventos",
+          "type": "array"
+        },
+        "flags": {
+          "$ref": "#/$defs/TrackingFlags"
+        }
+      },
+      "required": [
+        "type",
+        "numero_guia",
+        "estado",
+        "eta",
+        "ubicacion_referencia",
+        "eventos",
+        "flags"
+      ],
+      "title": "TrackingCardBlock",
+      "type": "object"
+    },
+    "TrackingFlags": {
+      "additionalProperties": false,
+      "properties": {
+        "requiere_refrigeracion": {
+          "title": "Requiere Refrigeracion",
+          "type": "boolean"
+        },
+        "mercancia_peligrosa": {
+          "title": "Mercancia Peligrosa",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "requiere_refrigeracion",
+        "mercancia_peligrosa"
+      ],
+      "title": "TrackingFlags",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "session_id": {
+      "format": "uuid4",
+      "title": "Session Id",
+      "type": "string"
+    },
+    "in_reply_to": {
+      "description": "message_id del InboundMessage.",
+      "title": "In Reply To",
+      "type": "string"
+    },
+    "reply_id": {
+      "format": "uuid4",
+      "title": "Reply Id",
+      "type": "string"
+    },
+    "channel": {
+      "$ref": "#/$defs/ChannelType"
+    },
+    "status": {
+      "$ref": "#/$defs/ConversationStatus"
+    },
+    "blocks": {
+      "items": {
+        "discriminator": {
+          "mapping": {
+            "CITATIONS": "#/$defs/CitationsBlock",
+            "HANDOFF_NOTICE": "#/$defs/HandoffNoticeBlock",
+            "PQRS_TICKET": "#/$defs/PqrsTicketBlock",
+            "QUICK_REPLIES": "#/$defs/QuickRepliesBlock",
+            "QUOTE_SUMMARY": "#/$defs/QuoteSummaryBlock",
+            "REQUEST_ATTACHMENTS": "#/$defs/RequestAttachmentsBlock",
+            "TEXT": "#/$defs/TextBlock",
+            "TRACKING_CARD": "#/$defs/TrackingCardBlock"
+          },
+          "propertyName": "type"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/$defs/TextBlock"
+          },
+          {
+            "$ref": "#/$defs/QuickRepliesBlock"
+          },
+          {
+            "$ref": "#/$defs/TrackingCardBlock"
+          },
+          {
+            "$ref": "#/$defs/QuoteSummaryBlock"
+          },
+          {
+            "$ref": "#/$defs/CitationsBlock"
+          },
+          {
+            "$ref": "#/$defs/RequestAttachmentsBlock"
+          },
+          {
+            "$ref": "#/$defs/PqrsTicketBlock"
+          },
+          {
+            "$ref": "#/$defs/HandoffNoticeBlock"
+          }
+        ]
+      },
+      "minItems": 1,
+      "title": "Blocks",
+      "type": "array"
+    },
+    "meta": {
+      "$ref": "#/$defs/ReplyMeta"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "session_id",
+    "in_reply_to",
+    "reply_id",
+    "channel",
+    "status",
+    "blocks",
+    "meta",
+    "created_at"
+  ],
+  "type": "object"
+}

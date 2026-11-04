@@ -1,0 +1,131 @@
+{
+  "method": "GET",
+  "path": "/api/v1/chat/sessions/e0d4abfc-cb6a-4c30-9f56-2360d6430435/history",
+  "headers": {
+    "X-Client-Id": "ca85aa16-726d-41d4-b466-b539344d7e56"
+  },
+  "body": null,
+  "form": null,
+  "status": 200,
+  "response": {
+    "session_id": "e0d4abfc-cb6a-4c30-9f56-2360d6430435",
+    "channel": "WEB_CHAT",
+    "status": "AWAITING_USER",
+    "messages": [
+      {
+        "message_id": "6ac9ecf4-42fa-4593-9a5a-56b7c6a0cc57",
+        "direction": "INBOUND",
+        "message_type": "TEXT",
+        "text": "Hola",
+        "blocks": null,
+        "delivery_mode": "SIMULATED",
+        "created_at": "2026-11-03T13:17:28.994065-05:00"
+      },
+      {
+        "message_id": "7f5a1e99-c6dc-4d4f-8851-243961f57978",
+        "direction": "OUTBOUND",
+        "message_type": null,
+        "text": "¡Hola! Soy el asistente de TransLogix. Puedo rastrear una guía, cotizar un envío, resolver dudas sobre mercancías especiales o ayudarte a radicar una PQRS.",
+        "blocks": [
+          {
+            "type": "TEXT",
+            "text": "¡Hola! Soy el asistente de TransLogix. Puedo rastrear una guía, cotizar un envío, resolver dudas sobre mercancías especiales o ayudarte a radicar una PQRS."
+          },
+          {
+            "type": "QUICK_REPLIES",
+            "options": [
+              {
+                "id": "rastrear",
+                "title": "Rastrear una guía"
+              },
+              {
+                "id": "cotizar",
+                "title": "Cotizar un envío"
+              },
+              {
+                "id": "asesor",
+                "title": "Hablar con un asesor"
+              }
+            ]
+          }
+        ],
+        "delivery_mode": "SIMULATED",
+        "created_at": "2026-11-03T13:17:28.994065-05:00"
+      },
+      {
+        "message_id": "20fac391-2d7c-4cf0-90c9-ac1c311f0bf5",
+        "direction": "INBOUND",
+        "message_type": "TEXT",
+        "text": "¿Dónde está mi guía TLX-984021-CO?",
+        "blocks": null,
+        "delivery_mode": "SIMULATED",
+        "created_at": "2026-11-03T13:17:29.004216-05:00"
+      },
+      {
+        "message_id": "f9fe97a8-cbac-450f-a27c-83bb930cebfa",
+        "direction": "OUTBOUND",
+        "message_type": null,
+        "text": "Guía TLX-984021-CO: En tránsito. Tu envío va en carretera hacia la ciudad de destino. Ubicación de referencia: Paso de Montaña Alto de la Línea - Sentido Bogotá-Ibague-Medellín. Entrega estimada: 3 de noviembre de 2026, 4:00 p. m. Última temperatura reportada: 3,8 °C.",
+        "blocks": [
+          {
+            "type": "TEXT",
+            "text": "Guía TLX-984021-CO: En tránsito. Tu envío va en carretera hacia la ciudad de destino. Ubicación de referencia: Paso de Montaña Alto de la Línea - Sentido Bogotá-Ibague-Medellín. Entrega estimada: 3 de noviembre de 2026, 4:00 p. m. Última temperatura reportada: 3,8 °C."
+          },
+          {
+            "type": "TRACKING_CARD",
+            "numero_guia": "TLX-984021-CO",
+            "estado": {
+              "codigo": "EN_TRANSITO",
+              "etiqueta": "En tránsito",
+              "explicacion": "Tu envío va en carretera hacia la ciudad de destino."
+            },
+            "eta": "2026-11-03T16:00:00-05:00",
+            "ubicacion_referencia": "Paso de Montaña Alto de la Línea - Sentido Bogotá-Ibague-Medellín",
+            "eventos": [
+              {
+                "timestamp": "2026-11-02T18:45:00-05:00",
+                "estado": "EN_BODEGA_ORIGEN",
+                "etiqueta": "En bodega de origen",
+                "ubicacion": "Hub Central Zona Franca Fontibón",
+                "descripcion_cliente": "Consolidación en camión refrigerado."
+              },
+              {
+                "timestamp": "2026-11-03T02:15:00-05:00",
+                "estado": "EN_TRANSITO",
+                "etiqueta": "En tránsito",
+                "ubicacion": "Peaje Chicoral - Tolima",
+                "descripcion_cliente": "Monitoreo GPS activo. Temperatura de termógrafo estable a 3.8°C."
+              },
+              {
+                "timestamp": "2026-11-03T08:30:00-05:00",
+                "estado": "EN_TRANSITO",
+                "etiqueta": "En tránsito",
+                "ubicacion": "Corredor Calarcá - Pereira",
+                "descripcion_cliente": "Vehículo en ruta regular. Arribo estimado a Hub Itagüí a las 12:30 PM."
+              }
+            ],
+            "flags": {
+              "requiere_refrigeracion": true,
+              "mercancia_peligrosa": false
+            }
+          },
+          {
+            "type": "QUICK_REPLIES",
+            "options": [
+              {
+                "id": "cotizar",
+                "title": "Cotizar un envío"
+              },
+              {
+                "id": "asesor",
+                "title": "Hablar con un asesor"
+              }
+            ]
+          }
+        ],
+        "delivery_mode": "SIMULATED",
+        "created_at": "2026-11-03T13:17:29.004216-05:00"
+      }
+    ]
+  }
+}

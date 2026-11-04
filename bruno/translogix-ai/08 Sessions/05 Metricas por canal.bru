@@ -1,0 +1,21 @@
+meta {
+  name: Metricas por canal
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/api/v1/metrics/channels
+  body: none
+  auth: none
+}
+
+script:pre-request {
+  const uuid = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16); });
+  bru.setVar("messageId", uuid());
+}
+
+tests {
+  test("HTTP 200", () => expect(res.status).to.equal(200));
+  test("canales presente", () => expect(res.body?.["canales"]).to.not.equal(undefined));
+}

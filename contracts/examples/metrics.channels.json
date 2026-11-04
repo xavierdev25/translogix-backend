@@ -1,0 +1,28 @@
+{
+  "generado_en": "2026-11-03T12:00:00-05:00",
+  "desde": null,
+  "hasta": null,
+  "canales": [
+    {
+      "channel": "WHATSAPP",
+      "conversaciones": 2,
+      "mensajes_entrantes": 2,
+      "mensajes_salientes": 2,
+      "handoffs": 0
+    },
+    {
+      "channel": "WEB_CHAT",
+      "conversaciones": 12,
+      "mensajes_entrantes": 19,
+      "mensajes_salientes": 19,
+      "handoffs": 4
+    },
+    {
+      "channel": "PBX",
+      "conversaciones": 1,
+      "mensajes_entrantes": 1,
+      "mensajes_salientes": 1,
+      "handoffs": 0
+    }
+  ]
+}

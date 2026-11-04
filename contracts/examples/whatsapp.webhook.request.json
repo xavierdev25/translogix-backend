@@ -1,0 +1,39 @@
+{
+  "object": "whatsapp_business_account",
+  "entry": [
+    {
+      "id": "100000000000000",
+      "changes": [
+        {
+          "field": "messages",
+          "value": {
+            "messaging_product": "whatsapp",
+            "metadata": {
+              "display_phone_number": "570000000000",
+              "phone_number_id": "100000000000001"
+            },
+            "contacts": [
+              {
+                "profile": {
+                  "name": "Cliente Demo"
+                },
+                "wa_id": "573000000000"
+              }
+            ],
+            "messages": [
+              {
+                "from": "573000000000",
+                "id": "wamid.SIMULATED-0001",
+                "timestamp": "1762182000",
+                "type": "text",
+                "text": {
+                  "body": "¿Dónde está mi guía TLX-984021-CO?"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

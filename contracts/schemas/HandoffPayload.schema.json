@@ -1,0 +1,266 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "HandoffPayload.schema.json",
+  "title": "HandoffPayload",
+  "x-contract-version": "1.2.0",
+  "$defs": {
+    "ChannelType": {
+      "enum": [
+        "WHATSAPP",
+        "WEB_CHAT",
+        "PBX"
+      ],
+      "title": "ChannelType",
+      "type": "string"
+    },
+    "ColaDestino": {
+      "enum": [
+        "SERVICIO_CLIENTE",
+        "SUPERVISOR",
+        "JURIDICO_PQRS",
+        "EJECUTIVO_CUENTA",
+        "OPERACIONES"
+      ],
+      "title": "ColaDestino",
+      "type": "string"
+    },
+    "EscalationAction": {
+      "enum": [
+        "ESCALAR_A_HUMANO",
+        "ESCALAR_PRIORIDAD_ALTA",
+        "ESCALAR_A_DEPARTAMENTO_JURIDICO_Y_PQRS",
+        "ESCALAR_A_EJECUTIVO_CUENTA_DEDICADO",
+        "ESCALAR_URGENCIA_OPERACIONES",
+        "OFRECER_HANDOFF"
+      ],
+      "title": "EscalationAction",
+      "type": "string"
+    },
+    "EscalationTrigger": {
+      "additionalProperties": false,
+      "properties": {
+        "id_criterio": {
+          "enum": [
+            "CRIT-001",
+            "CRIT-002",
+            "CRIT-003",
+            "CRIT-004",
+            "CRIT-005",
+            "INFO-INTENTOS"
+          ],
+          "title": "Id Criterio",
+          "type": "string"
+        },
+        "accion": {
+          "$ref": "#/$defs/EscalationAction"
+        },
+        "accion_raw": {
+          "description": "Acción tal como aparece en el JSON de reglas.",
+          "title": "Accion Raw",
+          "type": "string"
+        },
+        "evidencia": {
+          "description": "Qué dato disparó la regla, sin PII.",
+          "maxLength": 1000,
+          "minLength": 1,
+          "title": "Evidencia",
+          "type": "string"
+        },
+        "modo": {
+          "examples": [
+            "claim_context",
+            "incident_context",
+            "literal"
+          ],
+          "title": "Modo",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id_criterio",
+        "accion",
+        "accion_raw",
+        "evidencia",
+        "modo"
+      ],
+      "title": "EscalationTrigger",
+      "type": "object"
+    },
+    "HandoffStatus": {
+      "enum": [
+        "PENDING",
+        "ASSIGNED",
+        "CLOSED"
+      ],
+      "title": "HandoffStatus",
+      "type": "string"
+    },
+    "HistorialItem": {
+      "additionalProperties": false,
+      "properties": {
+        "rol": {
+          "enum": [
+            "USUARIO",
+            "ASISTENTE",
+            "ASESOR",
+            "SISTEMA"
+          ],
+          "title": "Rol",
+          "type": "string"
+        },
+        "texto": {
+          "title": "Texto",
+          "type": "string"
+        },
+        "timestamp": {
+          "format": "date-time",
+          "title": "Timestamp",
+          "type": "string"
+        },
+        "canal": {
+          "$ref": "#/$defs/ChannelType"
+        }
+      },
+      "required": [
+        "rol",
+        "texto",
+        "timestamp",
+        "canal"
+      ],
+      "title": "HistorialItem",
+      "type": "object"
+    },
+    "Prioridad": {
+      "enum": [
+        "NORMAL",
+        "ALTA",
+        "URGENTE"
+      ],
+      "title": "Prioridad",
+      "type": "string"
+    },
+    "Sentiment": {
+      "enum": [
+        "POSITIVO",
+        "NEUTRO",
+        "NEGATIVO",
+        "MUY_NEGATIVO"
+      ],
+      "title": "Sentiment",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "``flujo_transferencia_pwa`` of the rules JSON plus routing extensions.",
+  "properties": {
+    "handoff_id": {
+      "format": "uuid4",
+      "title": "Handoff Id",
+      "type": "string"
+    },
+    "session_id": {
+      "format": "uuid4",
+      "title": "Session Id",
+      "type": "string"
+    },
+    "canal": {
+      "$ref": "#/$defs/ChannelType"
+    },
+    "numero_guia_consultada": {
+      "anyOf": [
+        {
+          "examples": [
+            "TLX-984021-CO"
+          ],
+          "pattern": "^TLX-\\d{6}-CO$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Numero Guia Consultada"
+    },
+    "confidence_score_promedio": {
+      "anyOf": [
+        {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Confidence Score Promedio"
+    },
+    "sentimiento_detectado": {
+      "$ref": "#/$defs/Sentiment"
+    },
+    "intentos_previos": {
+      "description": "= ConversationState.fallback_count.",
+      "minimum": 0,
+      "title": "Intentos Previos",
+      "type": "integer"
+    },
+    "resumen_contexto": {
+      "description": "Generado por IA, con revisión determinística de campos.",
+      "minLength": 1,
+      "title": "Resumen Contexto",
+      "type": "string"
+    },
+    "historial": {
+      "items": {
+        "$ref": "#/$defs/HistorialItem"
+      },
+      "title": "Historial",
+      "type": "array"
+    },
+    "prioridad": {
+      "$ref": "#/$defs/Prioridad"
+    },
+    "cola_destino": {
+      "$ref": "#/$defs/ColaDestino"
+    },
+    "triggers": {
+      "items": {
+        "$ref": "#/$defs/EscalationTrigger"
+      },
+      "minItems": 1,
+      "title": "Triggers",
+      "type": "array"
+    },
+    "tiempo_espera_estimado_segundos": {
+      "description": "Configurable (HANDOFF_WAIT_SECONDS); valor del JSON, no es un SLA.",
+      "minimum": 0,
+      "title": "Tiempo Espera Estimado Segundos",
+      "type": "integer"
+    },
+    "status": {
+      "$ref": "#/$defs/HandoffStatus"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "handoff_id",
+    "session_id",
+    "canal",
+    "numero_guia_consultada",
+    "confidence_score_promedio",
+    "sentimiento_detectado",
+    "intentos_previos",
+    "resumen_contexto",
+    "historial",
+    "prioridad",
+    "cola_destino",
+    "triggers",
+    "tiempo_espera_estimado_segundos",
+    "status",
+    "created_at"
+  ],
+  "type": "object"
+}

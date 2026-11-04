@@ -1,0 +1,18 @@
+{
+  "method": "GET",
+  "path": "/api/v1/tracking/TLX-000000-CO",
+  "headers": {},
+  "body": null,
+  "form": null,
+  "status": 404,
+  "response": {
+    "error": {
+      "code": "GUIA_NO_ENCONTRADA",
+      "message": "No encontramos una guía con ese número. Verifica que esté bien escrita.",
+      "details": {
+        "numero_guia": "TLX-000000-CO"
+      },
+      "request_id": "6ca49e60-08ac-41fc-ad19-c20b304d4d9d"
+    }
+  }
+}

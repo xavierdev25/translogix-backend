@@ -1,0 +1,14 @@
+.venv/
+__pycache__/
+*.py[cod]
+.env
+.env.*
+!.env.example
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+node_modules/
+
+# Runtime data (uploaded attachments) and OS files
+var/
+.DS_Store

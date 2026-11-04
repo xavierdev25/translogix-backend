@@ -1,0 +1,21 @@
+meta {
+  name: Formato normalizable (tlx984021co)
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/v1/tracking/tlx984021co
+  body: none
+  auth: none
+}
+
+script:pre-request {
+  const uuid = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16); });
+  bru.setVar("messageId", uuid());
+}
+
+tests {
+  test("HTTP 200", () => expect(res.status).to.equal(200));
+  test("numero_guia = TLX-984021-CO", () => expect(res.body?.["numero_guia"]).to.eql("TLX-984021-CO"));
+}

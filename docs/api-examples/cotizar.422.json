@@ -1,0 +1,37 @@
+{
+  "method": "POST",
+  "path": "/api/v1/cotizar",
+  "headers": {},
+  "body": {
+    "origen": "Bogotá D.C.",
+    "destino": "Medellín",
+    "alto_cm": 40,
+    "ancho_cm": 50,
+    "largo_cm": 60,
+    "peso_real_kg": 45.5,
+    "valor_declarado_cop": "12500000",
+    "requiere_cadena_frio": false,
+    "mercancia_peligrosa": false
+  },
+  "form": null,
+  "status": 422,
+  "response": {
+    "error": {
+      "code": "VALIDACION",
+      "message": "Revisa los datos enviados: hay campos inválidos o incompletos.",
+      "details": {
+        "campos": [
+          {
+            "loc": [
+              "body",
+              "valor_declarado_cop"
+            ],
+            "msg": "Input should be a valid integer",
+            "type": "int_type"
+          }
+        ]
+      },
+      "request_id": "74214023-abe1-4e9c-99e2-c2460701a238"
+    }
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "numero_guia": "TLX-118493-CO",
+  "estado_actual": {
+    "codigo": "EN_BODEGA_ORIGEN",
+    "etiqueta": "En bodega de origen",
+    "explicacion": "Tu envío está en nuestra bodega de origen, listo para su próximo despacho."
+  },
+  "origen_ciudad": "Villavicencio",
+  "destino_ciudad": "Florencia",
+  "tipo_servicio": "Carga Semimasiva (Zona ZOMAC)",
+  "fecha_despacho": "2026-11-03T08:00:00-05:00",
+  "fecha_estimada_entrega": "2026-11-06T17:00:00-05:00",
+  "ubicacion_referencia": "Sub-Hub Llanos Villavicencio",
+  "eventos": [
+    {
+      "timestamp": "2026-11-03T08:00:00-05:00",
+      "estado": "EN_BODEGA_ORIGEN",
+      "etiqueta": "En bodega de origen",
+      "ubicacion": "Villavicencio, Meta",
+      "descripcion_cliente": "Mercancía consolidada. Programado despacho semanal a Florencia (Zona ZOMAC) para el día jueves."
+    }
+  ],
+  "prueba_entrega": null,
+  "flags": {
+    "requiere_refrigeracion": false,
+    "mercancia_peligrosa": false
+  },
+  "ultima_temperatura_c": null,
+  "fuente": {
+    "sistema": "TMS_SIMULADO",
+    "consultado_en": "2026-11-03T10:00:00-05:00"
+  }
+}

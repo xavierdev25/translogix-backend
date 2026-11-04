@@ -1,0 +1,11 @@
+{
+  "_nota": "PROPUESTA a revisar por el equipo (DEC-R2). Solo 'costa_caribe' viene del PDF del reto (§4.1); el resto es una agrupación provisional para filtrar metadatos.",
+  "zonas": {
+    "Atlántico": "costa_caribe", "Bolívar": "costa_caribe", "Magdalena": "costa_caribe", "Córdoba": "costa_caribe",
+    "Cesar": "costa_caribe", "La Guajira": "costa_caribe",
+    "Nariño": "frontera", "Norte de Santander": "frontera",
+    "Caquetá": "zomac", "Chocó": "zomac",
+    "Cundinamarca": "andina", "Antioquia": "andina", "Valle del Cauca": "pacifico_andina", "Santander": "andina",
+    "Risaralda": "eje_cafetero", "Caldas": "eje_cafetero", "Quindío": "eje_cafetero", "Huila": "andina", "Meta": "orinoquia"
+  }
+}

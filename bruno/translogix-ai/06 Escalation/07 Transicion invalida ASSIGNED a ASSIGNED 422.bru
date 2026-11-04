@@ -1,0 +1,31 @@
+meta {
+  name: Transicion invalida ASSIGNED a ASSIGNED (422)
+  type: http
+  seq: 7
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/handoffs/{{handoffId}}
+  body: json
+  auth: none
+}
+
+headers {
+  X-Admin-Token: {{adminToken}}
+}
+
+body:json {
+  {
+    "status": "ASSIGNED"
+  }
+}
+
+script:pre-request {
+  const uuid = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16); });
+  bru.setVar("messageId", uuid());
+}
+
+tests {
+  test("HTTP 422", () => expect(res.status).to.equal(422));
+  test("error.code = VALIDACION", () => expect(res.body?.["error"]?.["code"]).to.eql("VALIDACION"));
+}

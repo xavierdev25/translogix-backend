@@ -1,0 +1,176 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "EscalationInput.schema.json",
+  "title": "EscalationInput",
+  "x-contract-version": "1.2.0",
+  "$defs": {
+    "Intent": {
+      "enum": [
+        "TRACKING",
+        "COTIZACION",
+        "CONSULTA_DOCUMENTAL",
+        "CARGA_ESPECIAL",
+        "PQRS",
+        "SALUDO",
+        "HABLAR_CON_HUMANO",
+        "DESCONOCIDA"
+      ],
+      "title": "Intent",
+      "type": "string"
+    },
+    "Sentiment": {
+      "enum": [
+        "POSITIVO",
+        "NEUTRO",
+        "NEGATIVO",
+        "MUY_NEGATIVO"
+      ],
+      "title": "Sentiment",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Pure input of the rules engine: everything a rule may look at, nothing else.",
+  "properties": {
+    "intent": {
+      "$ref": "#/$defs/Intent"
+    },
+    "user_text_normalized": {
+      "title": "User Text Normalized",
+      "type": "string"
+    },
+    "confidence_score": {
+      "anyOf": [
+        {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Solo si hubo respuesta RAG en el turno.",
+      "title": "Confidence Score"
+    },
+    "sentiment": {
+      "$ref": "#/$defs/Sentiment"
+    },
+    "valor_declarado_cop": {
+      "anyOf": [
+        {
+          "description": "Pesos colombianos (COP), entero.",
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "De la guía asociada.",
+      "title": "Valor Declarado Cop"
+    },
+    "valor_reclamacion_cop": {
+      "anyOf": [
+        {
+          "description": "Pesos colombianos (COP), entero.",
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Valor Reclamacion Cop"
+    },
+    "envios_mensuales_cuenta": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Envios Mensuales Cuenta"
+    },
+    "tipo_cuenta": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Tipo Cuenta"
+    },
+    "mercancia_peligrosa": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Mercancia Peligrosa"
+    },
+    "requiere_refrigeracion": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Requiere Refrigeracion"
+    },
+    "estado_guia": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Estado Guia"
+    },
+    "intentos_entrega_fallidos": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Intentos Entrega Fallidos"
+    },
+    "incident_reported": {
+      "description": "El usuario reporta un incidente. En CRIT005_MODE=incident_context también cuenta como incidente un estado de novedad de la guía, p. ej. RETENIDO_NOVEDAD (DEC-E3).",
+      "title": "Incident Reported",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "intent",
+    "user_text_normalized",
+    "sentiment",
+    "incident_reported"
+  ],
+  "type": "object"
+}

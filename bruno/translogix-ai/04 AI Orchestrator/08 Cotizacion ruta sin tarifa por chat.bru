@@ -1,0 +1,31 @@
+meta {
+  name: Cotizacion ruta sin tarifa por chat
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{baseUrl}}/api/v1/chat/messages
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "client_id": "{{clientId}}",
+    "message_id": "{{messageId}}",
+    "text": "Quiero cotizar un envío de Barranquilla a Bucaramanga"
+  }
+}
+
+script:pre-request {
+  const uuid = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16); });
+  bru.setVar("messageId", uuid());
+  bru.setVar("clientId", uuid());
+}
+
+tests {
+  test("HTTP 200", () => expect(res.status).to.equal(200));
+  test("reply.meta.intent = COTIZACION", () => expect(res.body?.["reply"]?.["meta"]?.["intent"]).to.eql("COTIZACION"));
+  test("reply.blocks.1.type = QUICK_REPLIES", () => expect(res.body?.["reply"]?.["blocks"][1]?.["type"]).to.eql("QUICK_REPLIES"));
+}

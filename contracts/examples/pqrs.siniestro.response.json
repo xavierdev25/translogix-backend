@@ -1,0 +1,96 @@
+{
+  "ticket_id": "d5e6f7a8-b9c0-4d1e-8f2a-3b4c5d6e7f80",
+  "estado": "ESCALADO",
+  "elegibilidad": {
+    "dentro_de_plazo": true,
+    "regla_aplicada": "AVERIA_NO_APARENTE_3_DIAS_HABILES",
+    "fecha_limite": "2026-11-05",
+    "nota": "días hábiles sin considerar festivos (calendario no configurado)",
+    "fundamento": {
+      "doc_code": "DOC-PQRS-2026-04",
+      "section_path": "3. Tiempos y plazos legales de radicación"
+    }
+  },
+  "checklist": [
+    {
+      "codigo": "GUIA",
+      "obligatorio": true,
+      "recibido": true
+    },
+    {
+      "codigo": "FACTURA_COMERCIAL",
+      "obligatorio": true,
+      "recibido": true
+    },
+    {
+      "codigo": "CARTA_RECLAMACION",
+      "obligatorio": true,
+      "recibido": false
+    },
+    {
+      "codigo": "CERTIFICACION_BANCARIA",
+      "obligatorio": true,
+      "recibido": false
+    },
+    {
+      "codigo": "FOTOS_EMPAQUE",
+      "obligatorio": true,
+      "recibido": false
+    },
+    {
+      "codigo": "FOTOS_DANO",
+      "obligatorio": true,
+      "recibido": false
+    },
+    {
+      "codigo": "CEDULA_O_RUT",
+      "obligatorio": true,
+      "recibido": false
+    },
+    {
+      "codigo": "ACTA_CON_SALVEDAD",
+      "obligatorio": false,
+      "recibido": false
+    }
+  ],
+  "faltantes": [
+    "CARTA_RECLAMACION",
+    "CERTIFICACION_BANCARIA",
+    "FOTOS_EMPAQUE",
+    "FOTOS_DANO",
+    "CEDULA_O_RUT"
+  ],
+  "liquidacion_preliminar": {
+    "base_cop": 4000000,
+    "deducible_pct": 5,
+    "deducible_cop": 200000,
+    "flete_devuelto": "PENDIENTE_REVISION_HUMANA",
+    "estado": "PRELIMINAR_NO_VINCULANTE"
+  },
+  "escalamiento": {
+    "escalate": true,
+    "primary": {
+      "id_criterio": "CRIT-003",
+      "accion": "ESCALAR_A_DEPARTAMENTO_JURIDICO_Y_PQRS",
+      "accion_raw": "ESCALAR_A_DEPARTAMENTO_JURIDICO_Y_PQRS",
+      "evidencia": "valor_declarado_cop > 5000000 en contexto de reclamación",
+      "modo": "claim_context"
+    },
+    "triggers": [
+      {
+        "id_criterio": "CRIT-003",
+        "accion": "ESCALAR_A_DEPARTAMENTO_JURIDICO_Y_PQRS",
+        "accion_raw": "ESCALAR_A_DEPARTAMENTO_JURIDICO_Y_PQRS",
+        "evidencia": "valor_declarado_cop > 5000000 en contexto de reclamación",
+        "modo": "claim_context"
+      }
+    ],
+    "mensaje_cliente": "Dado que el valor reclamado supera el límite de trámite automático en chat ($5,000,000 COP), un gestor senior de PQRS tomará tu caso.",
+    "rules_version": "1.0.2026",
+    "config_snapshot": {
+      "CRIT003_MODE": "claim_context",
+      "CRIT005_MODE": "incident_context",
+      "PRIORITY_ORDER": "CRIT-005>CRIT-003>CRIT-002>CRIT-004>CRIT-001>INFO-INTENTOS"
+    }
+  }
+}

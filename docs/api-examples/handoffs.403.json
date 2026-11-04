@@ -1,0 +1,16 @@
+{
+  "method": "GET",
+  "path": "/api/v1/handoffs",
+  "headers": {},
+  "body": null,
+  "form": null,
+  "status": 403,
+  "response": {
+    "error": {
+      "code": "NO_AUTORIZADO",
+      "message": "No tienes autorización para realizar esta operación.",
+      "details": {},
+      "request_id": "3aec6c6e-3389-4983-aaaf-ed34ef754a1e"
+    }
+  }
+}

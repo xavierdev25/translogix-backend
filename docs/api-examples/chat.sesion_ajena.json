@@ -1,0 +1,23 @@
+{
+  "method": "POST",
+  "path": "/api/v1/chat/messages",
+  "headers": {},
+  "body": {
+    "client_id": "487447ce-ebd4-47e8-8afb-ef92a3669963",
+    "session_id": "e0d4abfc-cb6a-4c30-9f56-2360d6430435",
+    "message_id": "69c1cea8-d9ca-4f5c-ab90-f28db08d35ac",
+    "text": "hola"
+  },
+  "form": null,
+  "status": 404,
+  "response": {
+    "error": {
+      "code": "NO_ENCONTRADO",
+      "message": "No encontramos el recurso solicitado.",
+      "details": {
+        "recurso": "session"
+      },
+      "request_id": "862ac9aa-7b4c-462a-83ed-8ee36601f28f"
+    }
+  }
+}

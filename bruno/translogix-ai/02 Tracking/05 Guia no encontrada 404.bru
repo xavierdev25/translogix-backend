@@ -1,0 +1,21 @@
+meta {
+  name: Guia no encontrada (404)
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/api/v1/tracking/TLX-000000-CO
+  body: none
+  auth: none
+}
+
+script:pre-request {
+  const uuid = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16); });
+  bru.setVar("messageId", uuid());
+}
+
+tests {
+  test("HTTP 404", () => expect(res.status).to.equal(404));
+  test("error.code = GUIA_NO_ENCONTRADA", () => expect(res.body?.["error"]?.["code"]).to.eql("GUIA_NO_ENCONTRADA"));
+}

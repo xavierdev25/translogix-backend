@@ -1,0 +1,25 @@
+meta {
+  name: Historial propio (X-Client-Id)
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/v1/chat/sessions/{{sessionId}}/history
+  body: none
+  auth: none
+}
+
+headers {
+  X-Client-Id: {{clientId}}
+}
+
+script:pre-request {
+  const uuid = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16); });
+  bru.setVar("messageId", uuid());
+}
+
+tests {
+  test("HTTP 200", () => expect(res.status).to.equal(200));
+  test("messages.0.direction = INBOUND", () => expect(res.body?.["messages"][0]?.["direction"]).to.eql("INBOUND"));
+}

@@ -1,0 +1,7 @@
+{
+  "_nota": "Léxico HEURÍSTICO y pequeño (es-CO), versionado. No es un modelo de sentimiento: solo alimenta CRIT-002 junto con las palabras clave del JSON oficial.",
+  "version": "1.0",
+  "muy_negativo": ["pésimo", "pesima", "pesimo", "estafa", "estafadores", "ladrones", "robaron", "incompetentes", "horrible", "indignado", "indignada", "inaceptable", "vergüenza", "verguenza", "denuncia", "demanda", "demandar", "abogado"],
+  "negativo": ["molesto", "molesta", "inconforme", "demora", "demorado", "retraso", "tarde", "mal", "malo", "mala", "queja", "reclamo", "nunca", "decepcionado", "decepcionada", "rota", "roto", "dañado", "dañada", "perdido", "perdida"],
+  "positivo": ["gracias", "excelente", "perfecto", "genial", "amable", "rápido", "rapido", "buen", "bueno"]
+}

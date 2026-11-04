@@ -1,0 +1,76 @@
+{
+  "reply": {
+    "session_id": "3e4f5a6b-7c8d-4e9f-9a0b-1c2d3e4f5a6b",
+    "in_reply_to": "2d1e0f9a-8b7c-4d6e-9f5a-4b3c2d1e0f9a",
+    "reply_id": "4c5d6e7f-8a9b-4c0d-9e1f-3a4b5c6d7e8f",
+    "channel": "WEB_CHAT",
+    "status": "AWAITING_USER",
+    "blocks": [
+      {
+        "type": "TEXT",
+        "text": "Entendemos tu inconformidad. Según el protocolo de PQRS, las novedades no aparentes deben reportarse dentro de los 3 días hábiles siguientes a la entrega; pasado ese plazo opera la presunción de entrega a satisfacción (Art. 1028 del Código de Comercio). Si tienes pruebas adicionales, te invitamos a comunicarte con nuestro equipo legal."
+      },
+      {
+        "type": "CITATIONS",
+        "items": [
+          {
+            "doc_code": "DOC-PQRS-2026-04",
+            "doc_title": "Protocolo general de peticiones, quejas, reclamos y procedimiento de indemnizaciones",
+            "section_path": "3. Tiempos y plazos legales de radicación",
+            "chunk_id": "DOC-PQRS-2026-04:0004",
+            "excerpt": "Si el daño del producto no era visible externamente al momento de la entrega, el cliente dispone de un plazo máximo e improrrogable de tres (3) días hábiles siguientes a la fecha de entrega para radicar la novedad."
+          },
+          {
+            "doc_code": "DOC-PQRS-2026-04",
+            "doc_title": "Protocolo general de peticiones, quejas, reclamos y procedimiento de indemnizaciones",
+            "section_path": "1. Marco legal y regulatorio en Colombia",
+            "chunk_id": "DOC-PQRS-2026-04:0001",
+            "excerpt": "Artículo 1028: Presunción de entrega en buen estado salvo protesta expresa en la guía o acta de entrega."
+          }
+        ]
+      },
+      {
+        "type": "QUICK_REPLIES",
+        "options": [
+          {
+            "id": "equipo_legal",
+            "title": "Contactar al equipo legal"
+          },
+          {
+            "id": "asesor",
+            "title": "Hablar con un asesor"
+          }
+        ]
+      }
+    ],
+    "meta": {
+      "trace_id": "trc-01J9Z75HR5",
+      "intent": "PQRS",
+      "confidence_score": 0.86,
+      "confidence_method": "heuristic_v1",
+      "escalation": {
+        "escalate": false,
+        "primary": null,
+        "triggers": [],
+        "mensaje_cliente": null,
+        "rules_version": "1.0.2026",
+        "config_snapshot": {
+          "CRIT003_MODE": "claim_context",
+          "CRIT005_MODE": "incident_context",
+          "PRIORITY_ORDER": "CRIT-005>CRIT-003>CRIT-002>CRIT-004>CRIT-001>INFO-INTENTOS"
+        }
+      },
+      "services_called": [
+        "rag",
+        "escalation"
+      ],
+      "evidence_ids": [
+        "DOC-PQRS-2026-04:0004",
+        "DOC-PQRS-2026-04:0001"
+      ],
+      "llm_used": true,
+      "delivery_mode": "REAL"
+    },
+    "created_at": "2026-11-03T11:00:04-05:00"
+  }
+}

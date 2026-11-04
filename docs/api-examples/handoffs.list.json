@@ -1,0 +1,144 @@
+{
+  "method": "GET",
+  "path": "/api/v1/handoffs?status=PENDING",
+  "headers": {
+    "X-Admin-Token": "<ADMIN_TOKEN>"
+  },
+  "body": null,
+  "form": null,
+  "status": 200,
+  "response": {
+    "items": [
+      {
+        "handoff_id": "a4ef8b2d-22a2-4ab8-8232-12a9faf1c71e",
+        "session_id": "fa2d460f-9ed4-47ac-9323-0f3df47ea4e7",
+        "canal": "WEB_CHAT",
+        "prioridad": "ALTA",
+        "cola_destino": "JURIDICO_PQRS",
+        "numero_guia_consultada": "TLX-752190-CO",
+        "status": "PENDING",
+        "created_at": "2026-11-03T13:17:37.700994-05:00"
+      },
+      {
+        "handoff_id": "4a9cbcae-2bf4-488f-901c-dfd0eb336279",
+        "session_id": "e691d3a8-9716-4f12-b57b-4eb2f11481a1",
+        "canal": "WEB_CHAT",
+        "prioridad": "ALTA",
+        "cola_destino": "SUPERVISOR",
+        "numero_guia_consultada": null,
+        "status": "PENDING",
+        "created_at": "2026-11-03T13:17:37.687335-05:00"
+      },
+      {
+        "handoff_id": "6c72e632-2ce5-4664-94ec-aac9ba6ba360",
+        "session_id": "8900701e-fe1c-410a-bee9-6a12d3d9f0ab",
+        "canal": "WEB_CHAT",
+        "prioridad": "URGENTE",
+        "cola_destino": "OPERACIONES",
+        "numero_guia_consultada": "TLX-310482-CO",
+        "status": "PENDING",
+        "created_at": "2026-11-03T13:17:37.672181-05:00"
+      },
+      {
+        "handoff_id": "b98c45ed-e813-4131-92ca-4501cdd64df5",
+        "session_id": "8dc5cbb8-705f-453a-aa47-a35fbac92908",
+        "canal": "WEB_CHAT",
+        "prioridad": "NORMAL",
+        "cola_destino": "SERVICIO_CLIENTE",
+        "numero_guia_consultada": null,
+        "status": "PENDING",
+        "created_at": "2026-11-03T13:17:37.655575-05:00"
+      },
+      {
+        "handoff_id": "df884cf5-a5fa-448f-961f-8adcd79f9be5",
+        "session_id": "be9c71d2-5335-4b5c-ba73-f0ab097f236d",
+        "canal": "WEB_CHAT",
+        "prioridad": "ALTA",
+        "cola_destino": "JURIDICO_PQRS",
+        "numero_guia_consultada": "TLX-752190-CO",
+        "status": "PENDING",
+        "created_at": "2026-11-03T12:24:21.390185-05:00"
+      },
+      {
+        "handoff_id": "816e1f13-7744-49d3-87fa-21a00e5cf3ac",
+        "session_id": "ca6134cf-45d6-4c4c-a9b5-6efa91f5fa2f",
+        "canal": "WEB_CHAT",
+        "prioridad": "ALTA",
+        "cola_destino": "SUPERVISOR",
+        "numero_guia_consultada": null,
+        "status": "PENDING",
+        "created_at": "2026-11-03T12:24:21.342472-05:00"
+      },
+      {
+        "handoff_id": "ad43b60b-523a-42fd-8990-9bb8ffd391b7",
+        "session_id": "b2dad8f6-971e-466c-827d-b850affd5bb3",
+        "canal": "WEB_CHAT",
+        "prioridad": "ALTA",
+        "cola_destino": "SUPERVISOR",
+        "numero_guia_consultada": null,
+        "status": "PENDING",
+        "created_at": "2026-11-03T12:24:21.335428-05:00"
+      },
+      {
+        "handoff_id": "f96f93f7-927a-4635-bc9d-0645cddfcda8",
+        "session_id": "fd25ab2e-9eb6-424e-a3b4-573e76c06a7a",
+        "canal": "WEB_CHAT",
+        "prioridad": "NORMAL",
+        "cola_destino": "SERVICIO_CLIENTE",
+        "numero_guia_consultada": null,
+        "status": "PENDING",
+        "created_at": "2026-11-03T12:24:21.310409-05:00"
+      },
+      {
+        "handoff_id": "1ddb6ecb-3c65-4183-a1fb-dbc21b16d54b",
+        "session_id": "c93cbfb6-4230-436b-8752-024896528bbd",
+        "canal": "WEB_CHAT",
+        "prioridad": "ALTA",
+        "cola_destino": "JURIDICO_PQRS",
+        "numero_guia_consultada": "TLX-752190-CO",
+        "status": "PENDING",
+        "created_at": "2026-11-03T12:21:45.243335-05:00"
+      },
+      {
+        "handoff_id": "64180f4d-2c1e-4766-a5c9-b0aed3f8efaa",
+        "session_id": "22b725ee-27ab-4746-afc6-985abcbb672c",
+        "canal": "WEB_CHAT",
+        "prioridad": "ALTA",
+        "cola_destino": "SUPERVISOR",
+        "numero_guia_consultada": null,
+        "status": "PENDING",
+        "created_at": "2026-11-03T12:21:45.221233-05:00"
+      },
+      {
+        "handoff_id": "ea267925-a0de-4634-8092-663b38db262f",
+        "session_id": "b4ffa0b6-e07c-495c-b9e5-cdf85fe0a1ed",
+        "canal": "WEB_CHAT",
+        "prioridad": "ALTA",
+        "cola_destino": "SUPERVISOR",
+        "numero_guia_consultada": null,
+        "status": "PENDING",
+        "created_at": "2026-11-03T12:21:45.212541-05:00"
+      },
+      {
+        "handoff_id": "5fdbbb2e-b4aa-4af9-ad8c-6c88b57a93dc",
+        "session_id": "d8850471-b04c-4a13-b36b-5eba3b728f95",
+        "canal": "WEB_CHAT",
+        "prioridad": "NORMAL",
+        "cola_destino": "SERVICIO_CLIENTE",
+        "numero_guia_consultada": null,
+        "status": "PENDING",
+        "created_at": "2026-11-03T12:21:45.199056-05:00"
+      },
+      {
+        "handoff_id": "3a5929ee-dd9a-4334-a43b-2fc3e07be4aa",
+        "session_id": "de9000a9-99f4-4579-83c8-92c7234227ef",
+        "canal": "WEB_CHAT",
+        "prioridad": "URGENTE",
+        "cola_destino": "OPERACIONES",
+        "numero_guia_consultada": "TLX-310482-CO",
+        "status": "PENDING",
+        "created_at": "2026-11-03T12:21:33.588403-05:00"
+      }
+    ]
+  }
+}

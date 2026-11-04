@@ -1,0 +1,22 @@
+{
+  "channel": "WHATSAPP",
+  "message_id": "wamid.SIMULATED-0001",
+  "external_user_id": "573000000000",
+  "session_id": null,
+  "message_type": "TEXT",
+  "content": {
+    "text": "¿Dónde está mi guía TLX-984021-CO?",
+    "attachments": [],
+    "interactive_reply_id": null,
+    "asr": null,
+    "system_event": null
+  },
+  "timestamp": "2026-11-03T10:00:00-05:00",
+  "metadata": {
+    "provider": "meta_cloud_api",
+    "wa_message_type": "text",
+    "phone_number_id": "100000000000001",
+    "profile_name": "Cliente Demo"
+  },
+  "delivery_mode": "SIMULATED"
+}

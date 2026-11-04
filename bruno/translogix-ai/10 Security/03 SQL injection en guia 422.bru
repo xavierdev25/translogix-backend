@@ -1,0 +1,21 @@
+meta {
+  name: SQL injection en guia (422)
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/v1/tracking/TLX-1'%20OR%20'1'='1
+  body: none
+  auth: none
+}
+
+script:pre-request {
+  const uuid = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16); });
+  bru.setVar("messageId", uuid());
+}
+
+tests {
+  test("HTTP 422", () => expect(res.status).to.equal(422));
+  test("error.code = GUIA_FORMATO_INVALIDO", () => expect(res.body?.["error"]?.["code"]).to.eql("GUIA_FORMATO_INVALIDO"));
+}

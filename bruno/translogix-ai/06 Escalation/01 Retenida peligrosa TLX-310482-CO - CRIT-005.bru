@@ -1,0 +1,36 @@
+meta {
+  name: Retenida peligrosa TLX-310482-CO - CRIT-005
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/chat/messages
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "client_id": "{{clientId}}",
+    "message_id": "{{messageId}}",
+    "text": "TLX-310482-CO"
+  }
+}
+
+script:pre-request {
+  const uuid = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16); });
+  bru.setVar("messageId", uuid());
+  bru.setVar("clientId", uuid());
+}
+
+script:post-response {
+  if (res.body?.["reply"]?.["blocks"][2]?.["handoff_id"]) bru.setVar("handoffId", res.body?.["reply"]?.["blocks"][2]?.["handoff_id"]);
+}
+
+tests {
+  test("HTTP 200", () => expect(res.status).to.equal(200));
+  test("reply.status = ESCALATED", () => expect(res.body?.["reply"]?.["status"]).to.eql("ESCALATED"));
+  test("reply.meta.escalation.primary.id_criterio = CRIT-005", () => expect(res.body?.["reply"]?.["meta"]?.["escalation"]?.["primary"]?.["id_criterio"]).to.eql("CRIT-005"));
+  test("reply.blocks.2.type = HANDOFF_NOTICE", () => expect(res.body?.["reply"]?.["blocks"][2]?.["type"]).to.eql("HANDOFF_NOTICE"));
+}

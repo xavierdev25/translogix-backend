@@ -1,0 +1,20 @@
+{
+  "method": "PATCH",
+  "path": "/api/v1/handoffs/6c72e632-2ce5-4664-94ec-aac9ba6ba360",
+  "headers": {
+    "X-Admin-Token": "<ADMIN_TOKEN>"
+  },
+  "body": {
+    "status": "ASSIGNED"
+  },
+  "form": null,
+  "status": 422,
+  "response": {
+    "error": {
+      "code": "VALIDACION",
+      "message": "Transición no permitida: ASSIGNED → ASSIGNED.",
+      "details": {},
+      "request_id": "a8020938-a887-4d41-8ac8-659921a7fa54"
+    }
+  }
+}

@@ -1,0 +1,31 @@
+meta {
+  name: Saludo
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/chat/messages
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "client_id": "{{clientId}}",
+    "message_id": "{{messageId}}",
+    "text": "Hola"
+  }
+}
+
+script:pre-request {
+  const uuid = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16); });
+  bru.setVar("messageId", uuid());
+  bru.setVar("clientId", uuid());
+}
+
+tests {
+  test("HTTP 200", () => expect(res.status).to.equal(200));
+  test("reply.meta.intent = SALUDO", () => expect(res.body?.["reply"]?.["meta"]?.["intent"]).to.eql("SALUDO"));
+  test("reply.meta.llm_used = False", () => expect(res.body?.["reply"]?.["meta"]?.["llm_used"]).to.eql(false));
+}

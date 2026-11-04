@@ -1,0 +1,419 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "WhatsAppWebhookPayload.schema.json",
+  "title": "WhatsAppWebhookPayload",
+  "x-contract-version": "1.2.0",
+  "$defs": {
+    "WaChange": {
+      "additionalProperties": true,
+      "properties": {
+        "field": {
+          "examples": [
+            "messages"
+          ],
+          "title": "Field",
+          "type": "string"
+        },
+        "value": {
+          "$ref": "#/$defs/WaValue"
+        }
+      },
+      "required": [
+        "field",
+        "value"
+      ],
+      "title": "WaChange",
+      "type": "object"
+    },
+    "WaContact": {
+      "additionalProperties": true,
+      "properties": {
+        "profile": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/WaProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "wa_id": {
+          "title": "Wa Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "wa_id"
+      ],
+      "title": "WaContact",
+      "type": "object"
+    },
+    "WaEntry": {
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "changes": {
+          "items": {
+            "$ref": "#/$defs/WaChange"
+          },
+          "title": "Changes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "changes"
+      ],
+      "title": "WaEntry",
+      "type": "object"
+    },
+    "WaInteractive": {
+      "additionalProperties": true,
+      "properties": {
+        "type": {
+          "examples": [
+            "button_reply",
+            "list_reply"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "button_reply": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/WaInteractiveReply"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "list_reply": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/WaInteractiveReply"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "WaInteractive",
+      "type": "object"
+    },
+    "WaInteractiveReply": {
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        }
+      },
+      "required": [
+        "id",
+        "title"
+      ],
+      "title": "WaInteractiveReply",
+      "type": "object"
+    },
+    "WaMedia": {
+      "additionalProperties": true,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "mime_type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Mime Type"
+        },
+        "sha256": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sha256"
+        },
+        "caption": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Caption"
+        },
+        "filename": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Filename"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "WaMedia",
+      "type": "object"
+    },
+    "WaMessage": {
+      "additionalProperties": true,
+      "properties": {
+        "from": {
+          "description": "wa_id del cliente (PII).",
+          "title": "From",
+          "type": "string"
+        },
+        "id": {
+          "description": "wamid: clave de idempotencia con el canal.",
+          "title": "Id",
+          "type": "string"
+        },
+        "timestamp": {
+          "description": "Segundos Unix, como string.",
+          "title": "Timestamp",
+          "type": "string"
+        },
+        "type": {
+          "examples": [
+            "text",
+            "interactive",
+            "image",
+            "document",
+            "audio"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "text": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/WaText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "interactive": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/WaInteractive"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "image": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/WaMedia"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "document": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/WaMedia"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "audio": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/WaMedia"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "from",
+        "id",
+        "timestamp",
+        "type"
+      ],
+      "title": "WaMessage",
+      "type": "object"
+    },
+    "WaMetadata": {
+      "additionalProperties": true,
+      "properties": {
+        "display_phone_number": {
+          "title": "Display Phone Number",
+          "type": "string"
+        },
+        "phone_number_id": {
+          "title": "Phone Number Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "display_phone_number",
+        "phone_number_id"
+      ],
+      "title": "WaMetadata",
+      "type": "object"
+    },
+    "WaProfile": {
+      "additionalProperties": true,
+      "properties": {
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "PII: no se registra en logs.",
+          "title": "Name"
+        }
+      },
+      "title": "WaProfile",
+      "type": "object"
+    },
+    "WaText": {
+      "additionalProperties": true,
+      "properties": {
+        "body": {
+          "title": "Body",
+          "type": "string"
+        }
+      },
+      "required": [
+        "body"
+      ],
+      "title": "WaText",
+      "type": "object"
+    },
+    "WaValue": {
+      "additionalProperties": true,
+      "properties": {
+        "messaging_product": {
+          "const": "whatsapp",
+          "title": "Messaging Product",
+          "type": "string"
+        },
+        "metadata": {
+          "$ref": "#/$defs/WaMetadata"
+        },
+        "contacts": {
+          "items": {
+            "$ref": "#/$defs/WaContact"
+          },
+          "title": "Contacts",
+          "type": "array"
+        },
+        "messages": {
+          "items": {
+            "$ref": "#/$defs/WaMessage"
+          },
+          "title": "Messages",
+          "type": "array"
+        },
+        "statuses": {
+          "description": "Recibos de entrega; no son mensajes del cliente.",
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Statuses",
+          "type": "array"
+        }
+      },
+      "required": [
+        "messaging_product",
+        "metadata"
+      ],
+      "title": "WaValue",
+      "type": "object"
+    }
+  },
+  "additionalProperties": true,
+  "description": "Body of the Meta Cloud API webhook; the simulation endpoint accepts the same body.\n\nStructure taken from Meta's webhook format; **validate against Meta's current\ndocumentation** before going live. Unknown fields are preserved.",
+  "properties": {
+    "object": {
+      "const": "whatsapp_business_account",
+      "title": "Object",
+      "type": "string"
+    },
+    "entry": {
+      "items": {
+        "$ref": "#/$defs/WaEntry"
+      },
+      "title": "Entry",
+      "type": "array"
+    }
+  },
+  "required": [
+    "object",
+    "entry"
+  ],
+  "type": "object"
+}

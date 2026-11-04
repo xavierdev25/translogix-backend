@@ -1,0 +1,59 @@
+{
+  "reply": {
+    "session_id": "4b5c6d7e-8f9a-4b0c-9d1e-2f3a4b5c6d7e",
+    "in_reply_to": "5c4d3e2f-1a0b-4c9d-8e8f-7a6b5c4d3e2f",
+    "reply_id": "5b6c7d8e-9f0a-4b1c-8d2e-4f5a6b7c8d9e",
+    "channel": "WEB_CHAT",
+    "status": "ESCALATED",
+    "blocks": [
+      {
+        "type": "HANDOFF_NOTICE",
+        "handoff_id": "9c8d7e6f-5a4b-4c3d-9e2f-1a0b9c8d7e6f",
+        "prioridad": "NORMAL",
+        "cola": "SERVICIO_CLIENTE",
+        "mensaje_cliente": "Entiendo tu consulta, pero para asegurarme de darte la información exacta, voy a conectarte de inmediato con un especialista en servicio al cliente.",
+        "tiempo_espera_estimado_segundos": 45
+      }
+    ],
+    "meta": {
+      "trace_id": "trc-01J9Z6W8G6",
+      "intent": "CONSULTA_DOCUMENTAL",
+      "confidence_score": 0.31,
+      "confidence_method": "heuristic_v1",
+      "escalation": {
+        "escalate": true,
+        "primary": {
+          "id_criterio": "CRIT-001",
+          "accion": "ESCALAR_A_HUMANO",
+          "accion_raw": "ESCALAR_A_HUMANO",
+          "evidencia": "confidence_score=0.31 < 0.75; grounded=false",
+          "modo": "literal"
+        },
+        "triggers": [
+          {
+            "id_criterio": "CRIT-001",
+            "accion": "ESCALAR_A_HUMANO",
+            "accion_raw": "ESCALAR_A_HUMANO",
+            "evidencia": "confidence_score=0.31 < 0.75; grounded=false",
+            "modo": "literal"
+          }
+        ],
+        "mensaje_cliente": "Entiendo tu consulta, pero para asegurarme de darte la información exacta, voy a conectarte de inmediato con un especialista en servicio al cliente.",
+        "rules_version": "1.0.2026",
+        "config_snapshot": {
+          "CRIT003_MODE": "claim_context",
+          "CRIT005_MODE": "incident_context",
+          "PRIORITY_ORDER": "CRIT-005>CRIT-003>CRIT-002>CRIT-004>CRIT-001>INFO-INTENTOS"
+        }
+      },
+      "services_called": [
+        "rag",
+        "escalation"
+      ],
+      "evidence_ids": [],
+      "llm_used": false,
+      "delivery_mode": "REAL"
+    },
+    "created_at": "2026-11-03T10:40:02-05:00"
+  }
+}

@@ -1,0 +1,287 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "InboundMessage.schema.json",
+  "title": "InboundMessage",
+  "x-contract-version": "1.2.0",
+  "$defs": {
+    "AsrInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "transcript_confidence": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Transcript Confidence"
+        },
+        "language": {
+          "default": "es-CO",
+          "title": "Language",
+          "type": "string"
+        },
+        "provider": {
+          "examples": [
+            "simulated"
+          ],
+          "title": "Provider",
+          "type": "string"
+        }
+      },
+      "required": [
+        "provider"
+      ],
+      "title": "AsrInfo",
+      "type": "object"
+    },
+    "Attachment": {
+      "additionalProperties": false,
+      "properties": {
+        "attachment_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Attachment Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "IMAGE",
+            "DOCUMENT",
+            "AUDIO"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "mime_type": {
+          "examples": [
+            "application/pdf"
+          ],
+          "pattern": "^[a-z]+/[a-z0-9.+-]+$",
+          "title": "Mime Type",
+          "type": "string"
+        },
+        "size_bytes": {
+          "minimum": 0,
+          "title": "Size Bytes",
+          "type": "integer"
+        },
+        "storage_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Referencia a almacenamiento local; nunca la URL del proveedor.",
+          "title": "Storage Ref"
+        },
+        "declared_doc_code": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DocumentoCodigo"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "attachment_id",
+        "kind",
+        "mime_type",
+        "size_bytes"
+      ],
+      "title": "Attachment",
+      "type": "object"
+    },
+    "ChannelType": {
+      "enum": [
+        "WHATSAPP",
+        "WEB_CHAT",
+        "PBX"
+      ],
+      "title": "ChannelType",
+      "type": "string"
+    },
+    "DeliveryMode": {
+      "enum": [
+        "REAL",
+        "SIMULATED"
+      ],
+      "title": "DeliveryMode",
+      "type": "string"
+    },
+    "DocumentoCodigo": {
+      "description": "Claim checklist codes (DEC-P4).",
+      "enum": [
+        "GUIA",
+        "FACTURA_COMERCIAL",
+        "CARTA_RECLAMACION",
+        "CERTIFICACION_BANCARIA",
+        "FOTOS_EMPAQUE",
+        "FOTOS_DANO",
+        "CEDULA_O_RUT",
+        "ACTA_CON_SALVEDAD"
+      ],
+      "title": "DocumentoCodigo",
+      "type": "string"
+    },
+    "MessageContent": {
+      "additionalProperties": false,
+      "properties": {
+        "text": {
+          "anyOf": [
+            {
+              "maxLength": 4096,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Text"
+        },
+        "attachments": {
+          "items": {
+            "$ref": "#/$defs/Attachment"
+          },
+          "title": "Attachments",
+          "type": "array"
+        },
+        "interactive_reply_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Interactive Reply Id"
+        },
+        "asr": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AsrInfo"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "system_event": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SystemEventCode"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Solo con message_type=SYSTEM_EVENT."
+        }
+      },
+      "title": "MessageContent",
+      "type": "object"
+    },
+    "MessageType": {
+      "enum": [
+        "TEXT",
+        "AUDIO_TRANSCRIPT",
+        "IMAGE",
+        "DOCUMENT",
+        "INTERACTIVE_REPLY",
+        "SYSTEM_EVENT"
+      ],
+      "title": "MessageType",
+      "type": "string"
+    },
+    "SystemEventCode": {
+      "enum": [
+        "SESSION_OPENED",
+        "CALL_STARTED",
+        "CALL_ENDED",
+        "CALL_TRANSFERRED"
+      ],
+      "title": "SystemEventCode",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "channel": {
+      "$ref": "#/$defs/ChannelType"
+    },
+    "message_id": {
+      "description": "Idempotencia: UNIQUE(channel, message_id).",
+      "maxLength": 256,
+      "minLength": 1,
+      "title": "Message Id",
+      "type": "string"
+    },
+    "external_user_id": {
+      "description": "En claro solo en memoria del adaptador; se persiste hasheado.",
+      "maxLength": 256,
+      "minLength": 1,
+      "title": "External User Id",
+      "type": "string"
+    },
+    "session_id": {
+      "anyOf": [
+        {
+          "format": "uuid4",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Session Id"
+    },
+    "message_type": {
+      "$ref": "#/$defs/MessageType"
+    },
+    "content": {
+      "$ref": "#/$defs/MessageContent"
+    },
+    "timestamp": {
+      "format": "date-time",
+      "title": "Timestamp",
+      "type": "string"
+    },
+    "metadata": {
+      "additionalProperties": true,
+      "title": "Metadata",
+      "type": "object"
+    },
+    "delivery_mode": {
+      "$ref": "#/$defs/DeliveryMode"
+    }
+  },
+  "required": [
+    "channel",
+    "message_id",
+    "external_user_id",
+    "message_type",
+    "content",
+    "timestamp",
+    "delivery_mode"
+  ],
+  "type": "object"
+}

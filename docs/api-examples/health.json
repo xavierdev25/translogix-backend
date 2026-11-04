@@ -1,0 +1,11 @@
+{
+  "method": "GET",
+  "path": "/health",
+  "headers": {},
+  "body": null,
+  "form": null,
+  "status": 200,
+  "response": {
+    "status": "ok"
+  }
+}

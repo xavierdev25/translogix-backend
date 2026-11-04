@@ -1,0 +1,27 @@
+{
+  "method": "POST",
+  "path": "/api/v1/channels/pbx/turns",
+  "headers": {},
+  "body": {
+    "call_id": "call-doc2",
+    "caller_id": "+573000000001",
+    "turn_index": 1,
+    "event": "TURN",
+    "transcript": null,
+    "audio_ref": "local:audio-1",
+    "transcript_confidence": 0.86,
+    "dnis": "6015550100",
+    "silence_ms": 800,
+    "barge_in": false
+  },
+  "form": null,
+  "status": 503,
+  "response": {
+    "error": {
+      "code": "NO_CONFIGURADO",
+      "message": "La transcripción de audio (ASR) no está integrada.",
+      "details": {},
+      "request_id": "ce374bce-c55c-49cd-b042-9ebac4a7b85f"
+    }
+  }
+}

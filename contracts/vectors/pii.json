@@ -1,0 +1,107 @@
+{
+  "descripcion": "Clases de dato personal que deben detectarse (lista vacía = texto seguro para el cliente). Base de DEC-S1, del filtro de logs de P02 y del saneador de P04.",
+  "casos": [
+    {
+      "texto": "Asignado a conductor Juan Carlos Páez (Tel: 310-987-6543).",
+      "tipos": [
+        "PERSON_NAME",
+        "PHONE"
+      ]
+    },
+    {
+      "texto": "Consolidación en camión refrigerado Placa WKN-482.",
+      "tipos": [
+        "PLATE"
+      ]
+    },
+    {
+      "texto": "Documento C.C. 16.789.432",
+      "tipos": [
+        "ID_DOCUMENT"
+      ]
+    },
+    {
+      "texto": "NIT 900.123.456-7",
+      "tipos": [
+        "NIT",
+        "PLATE"
+      ]
+    },
+    {
+      "texto": "Firma en https://cdn.translogix.com.co/pod/TLX-752190-CO_pod.png",
+      "tipos": [
+        "URL"
+      ]
+    },
+    {
+      "texto": "Posición 5.06889, -75.51738",
+      "tipos": [
+        "GPS"
+      ]
+    },
+    {
+      "texto": "Entregar en Carrera 15 # 4-22, Apt 502",
+      "tipos": [
+        "ADDRESS"
+      ]
+    },
+    {
+      "texto": "Recoger en Calle 26 # 96J-15, Bodega 4",
+      "tipos": [
+        "ADDRESS"
+      ]
+    },
+    {
+      "texto": "Mercancía recibida. Firmado por Ing. Roberto Bermúdez.",
+      "tipos": [
+        "PERSON_NAME"
+      ]
+    },
+    {
+      "texto": "Escribir a cliente@example.com",
+      "tipos": [
+        "EMAIL"
+      ]
+    },
+    {
+      "texto": "Tu envío va en carretera hacia la ciudad de destino.",
+      "tipos": []
+    },
+    {
+      "texto": "Zona Franca Fontibón, Bogotá D.C.",
+      "tipos": []
+    },
+    {
+      "texto": "En ruta con monitoreo activo; temperatura estable a 3.8 °C.",
+      "tipos": []
+    },
+    {
+      "texto": "Tu guía TLX-984021-CO va en camino.",
+      "tipos": []
+    },
+    {
+      "texto": "Precinto de seguridad #TLX-8841 aplicado.",
+      "tipos": []
+    },
+    {
+      "texto": "Mercancía peligrosa UN 1263, rotulado IMO Clase 3.",
+      "tipos": []
+    },
+    {
+      "texto": "Adjunta copia de la cédula o el RUT.",
+      "tipos": []
+    },
+    {
+      "texto": "Valor reclamado: $4.000.000 COP.",
+      "tipos": []
+    },
+    {
+      "texto": "Recibido por R. B.",
+      "tipos": []
+    },
+    {
+      "texto": "Asignado a un conductor para la ruta de reparto.",
+      "tipos": []
+    }
+  ]
+}

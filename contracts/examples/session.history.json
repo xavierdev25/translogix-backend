@@ -1,0 +1,78 @@
+{
+  "session_id": "c1a2b3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
+  "channel": "WEB_CHAT",
+  "status": "AWAITING_USER",
+  "messages": [
+    {
+      "message_id": "9d8c7b6a-5f4e-4d3c-8b2a-1f0e9d8c7b6a",
+      "direction": "INBOUND",
+      "message_type": "TEXT",
+      "text": "¿Dónde está mi guía TLX-984021-CO?",
+      "blocks": null,
+      "delivery_mode": "REAL",
+      "created_at": "2026-11-03T10:00:00-05:00"
+    },
+    {
+      "message_id": "e7f6a5b4-c3d2-4e1f-9a8b-7c6d5e4f3a2b",
+      "direction": "OUTBOUND",
+      "message_type": null,
+      "text": null,
+      "blocks": [
+        {
+          "type": "TEXT",
+          "text": "Tu guía TLX-984021-CO va en camino a Medellín. La entrega estimada es hoy, 3 de noviembre, a las 4:00 p. m."
+        },
+        {
+          "type": "TRACKING_CARD",
+          "numero_guia": "TLX-984021-CO",
+          "estado": {
+            "codigo": "EN_TRANSITO",
+            "etiqueta": "En tránsito",
+            "explicacion": "Tu envío va en carretera hacia la ciudad de destino."
+          },
+          "eta": "2026-11-03T16:00:00-05:00",
+          "ubicacion_referencia": "Paso de Montaña Alto de la Línea - Sentido Bogotá-Ibague-Medellín",
+          "eventos": [
+            {
+              "timestamp": "2026-11-03T02:15:00-05:00",
+              "estado": "EN_TRANSITO",
+              "etiqueta": "En tránsito",
+              "ubicacion": "Peaje Chicoral - Tolima",
+              "descripcion_cliente": "En ruta con monitoreo activo; temperatura estable a 3.8 °C."
+            },
+            {
+              "timestamp": "2026-11-03T08:30:00-05:00",
+              "estado": "EN_TRANSITO",
+              "etiqueta": "En tránsito",
+              "ubicacion": "Corredor Calarcá - Pereira",
+              "descripcion_cliente": "Vehículo en ruta regular hacia el centro de distribución de destino."
+            }
+          ],
+          "flags": {
+            "requiere_refrigeracion": true,
+            "mercancia_peligrosa": false
+          }
+        },
+        {
+          "type": "QUICK_REPLIES",
+          "options": [
+            {
+              "id": "cotizar",
+              "title": "Cotizar un envío"
+            },
+            {
+              "id": "pqrs",
+              "title": "Radicar una PQRS"
+            },
+            {
+              "id": "asesor",
+              "title": "Hablar con un asesor"
+            }
+          ]
+        }
+      ],
+      "delivery_mode": "REAL",
+      "created_at": "2026-11-03T10:00:02-05:00"
+    }
+  ]
+}

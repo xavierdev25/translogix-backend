@@ -1,0 +1,26 @@
+﻿codigo_trayecto,ciudad_origen,departamento_origen,ciudad_destino,departamento_destino,tipo_cobertura,tarifa_base_kg_real_cop,tarifa_base_kg_volumetrico_cop,factor_divisitivas_volumetrico,flete_minimo_cop,porcentaje_seguro,seguro_minimo_cop,recargo_cadena_frio_pct,recargo_mercancia_peligrosa_cop,tiempo_entrega_estimado_horas,observaciones_ruta
+TLX-BOG-MED-001,Bogotá D.C.,Cundinamarca,Medellín,Antioquia,Urbana Principal,1450,1600,4000,18500,1.0,3500,25.0,45000,24,Ruta de alto flujo por Corredor Bogotá-Medellín. Admite Same Day si se despacha antes de las 09:00 AM.
+TLX-BOG-CLO-002,Bogotá D.C.,Cundinamarca,Cali,Valle del Cauca,Urbana Principal,1500,1650,4000,19000,1.0,3500,25.0,45000,24,Tránsito continuo vía La Linea. Sujeto a restricciones climáticas en paso de montaña.
+TLX-BOG-BAQ-003,Bogotá D.C.,Cundinamarca,Barranquilla,Atlántico,Urbana Principal,1850,2050,4000,22000,1.0,4000,25.0,50000,48,Corredor Ruta del Sol / Troncal del Magdalena. Monitoreo constante de temperatura por clima cálido.
+TLX-BOG-CTG-004,Bogotá D.C.,Cundinamarca,Cartagena,Bolívar,Urbana Principal,1900,2100,4000,23000,1.0,4000,25.0,50000,48,Servicio directo a Zona Franca Mamonal y bodegas urbanas.
+TLX-BOG-BGA-005,Bogotá D.C.,Cundinamarca,Bucaramanga,Santander,Urbana Principal,1400,1550,4000,17500,1.0,3500,25.0,45000,24,Ruta activa por Cañón del Chicamocha / Barbosa. Salidas diarias nocturnas.
+TLX-BOG-PEI-006,Bogotá D.C.,Cundinamarca,Pereira,Risaralda,Urbana Principal,1420,1580,4000,18000,1.0,3500,25.0,45000,24,Eje Cafetero Hub principal. Distribución regional a Manizales y Armenia.
+TLX-BOG-CUC-007,Bogotá D.C.,Cundinamarca,Cúcuta,Norte de Santander,Frontera,2100,2300,4000,25000,1.0,4500,30.0,60000,48,Zona fronteriza. Requiere manifiesto de carga detallado para inspecciones DIAN/Polfa.
+TLX-BOG-PSO-008,Bogotá D.C.,Cundinamarca,Pasto,Nariño,Frontera,2250,2450,4000,26000,1.0,4500,30.0,60000,72,Corredor Sur. Restricciones frecuentes por paso de montaña y novedades viales.
+TLX-BOG-IPI-009,Bogotá D.C.,Cundinamarca,Ipiales,Nariño,Frontera,2400,2600,4000,28000,1.0,5000,30.0,65000,72,Punto fronterizo Rumichaca (Colombia-Ecuador). Exige declaración de tránsito internacional si aplica.
+TLX-BOG-VVC-010,Bogotá D.C.,Cundinamarca,Villavicencio,Meta,Urbana Principal,1350,1500,4000,16500,1.0,3500,25.0,40000,24,Puerta a los Llanos Orientales. Sujeto a cierres preventivos en la vía al Llano.
+TLX-MED-BOG-011,Medellín,Antioquia,Bogotá D.C.,Cundinamarca,Urbana Principal,1450,1600,4000,18500,1.0,3500,25.0,45000,24,Ruta inversa principal. Frecuencia cada 4 horas.
+TLX-MED-CLO-012,Medellín,Antioquia,Cali,Valle del Cauca,Urbana Principal,1550,1700,4000,19500,1.0,3500,25.0,45000,24,Conexión Pacífico-Occidente. Cobertura directa.
+TLX-MED-BAQ-013,Medellín,Antioquia,Barranquilla,Atlántico,Urbana Principal,1750,1950,4000,21000,1.0,4000,25.0,50000,48,Corredor Antioquia - Costa Atlántica vía Caucasia/Planeta Rica.
+TLX-CLO-BOG-014,Cali,Valle del Cauca,Bogotá D.C.,Cundinamarca,Urbana Principal,1500,1650,4000,19000,1.0,3500,25.0,45000,24,Salida Hub Yumbo / Palmira hacia el centro del país.
+TLX-CLO-BUN-015,Cali,Valle del Cauca,Buenaventura,Valle del Cauca,Trayecto Especial,1300,1450,4000,17000,1.0,3500,25.0,55000,24,Corredor Portuario. Manejo de carga de importación/exportación y contenedores sueltos.
+TLX-BAQ-SMR-016,Barranquilla,Atlántico,Santa Marta,Magdalena,Urbana Principal,1100,1250,4000,15000,1.0,3000,20.0,40000,24,Vía Ciénaga / Troncal del Caribe. Servicio Same Day disponible.
+TLX-BAQ-CTG-017,Barranquilla,Atlántico,Cartagena,Bolívar,Urbana Principal,1150,1300,4000,15500,1.0,3000,20.0,40000,24,Vía al Mar / Cordialidad. Conexión interportuaria diaria.
+TLX-BGA-CUC-018,Bucaramanga,Santander,Cúcuta,Norte de Santander,Frontera,1600,1800,4000,20000,1.0,4000,25.0,50000,24,Tránsito por Páramo de Berlín. Exige embalaje térmico para productos sensibles.
+TLX-PEI-MZL-019,Pereira,Risaralda,Manizales,Caldas,Urbana Principal,1050,1200,4000,14000,1.0,3000,20.0,35000,24,Conurbación Eje Cafetero. Entregas express intradía.
+TLX-BOG-NVA-020,Bogotá D.C.,Cundinamarca,Neiva,Huila,Urbana Principal,1500,1680,4000,18500,1.0,3500,25.0,45000,24,Ruta Sur vía Girardot / Espinal. Cobertura completa al Huila.
+TLX-BOG-FLA-021,Bogotá D.C.,Cundinamarca,Florencia,Caquetá,Zona ZOMAC,2350,2550,4000,27000,1.0,4500,30.0,65000,72,Puerta de la Amazonía. Trayecto ZOMAC con frecuencia de despacho 3 veces por semana.
+TLX-BOG-MTR-022,Bogotá D.C.,Cundinamarca,Montería,Córdoba,Urbana Principal,1800,1980,4000,21500,1.0,4000,25.0,50000,48,Conexión agroindustrial del Caribe colombiano.
+TLX-BOG-VAL-023,Bogotá D.C.,Cundinamarca,Valledupar,Cesar,Urbana Principal,1850,2020,4000,22000,1.0,4000,25.0,50000,48,Ruta Bosconia / Valledupar. Enlace con Guajira.
+TLX-BOG-RIO-024,Bogotá D.C.,Cundinamarca,Riohacha,La Guajira,Trayecto Especial,2200,2400,4000,25500,1.0,4500,30.0,60000,72,Extremo norte de Colombia. Exige embalaje resistente al polvo y altas temperaturas.
+TLX-BOG-QUI-025,Bogotá D.C.,Cundinamarca,Quibdó,Chocó,Zona ZOMAC,2650,2850,4000,30000,1.0,5000,35.0,75000,96,Zona de difícil acceso por condición de vías. Despachos programados los días martes y viernes.

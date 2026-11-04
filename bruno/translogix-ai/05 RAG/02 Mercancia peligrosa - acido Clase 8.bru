@@ -1,0 +1,32 @@
+meta {
+  name: Mercancia peligrosa - acido (Clase 8)
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/v1/chat/messages
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "client_id": "{{clientId}}",
+    "message_id": "{{messageId}}",
+    "text": "¿Puedo enviar 5 litros de ácido clorhídrico de Bogotá a Cali?"
+  }
+}
+
+script:pre-request {
+  const uuid = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16); });
+  bru.setVar("messageId", uuid());
+  bru.setVar("clientId", uuid());
+}
+
+tests {
+  test("HTTP 200", () => expect(res.status).to.equal(200));
+  test("reply.meta.intent = CARGA_ESPECIAL", () => expect(res.body?.["reply"]?.["meta"]?.["intent"]).to.eql("CARGA_ESPECIAL"));
+  test("reply.blocks.1.type = CITATIONS", () => expect(res.body?.["reply"]?.["blocks"][1]?.["type"]).to.eql("CITATIONS"));
+  test("reply.meta.confidence_method = heuristic_v1", () => expect(res.body?.["reply"]?.["meta"]?.["confidence_method"]).to.eql("heuristic_v1"));
+}

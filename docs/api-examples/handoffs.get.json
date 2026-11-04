@@ -1,0 +1,42 @@
+{
+  "method": "GET",
+  "path": "/api/v1/handoffs/6c72e632-2ce5-4664-94ec-aac9ba6ba360",
+  "headers": {
+    "X-Admin-Token": "<ADMIN_TOKEN>"
+  },
+  "body": null,
+  "form": null,
+  "status": 200,
+  "response": {
+    "handoff_id": "6c72e632-2ce5-4664-94ec-aac9ba6ba360",
+    "session_id": "8900701e-fe1c-410a-bee9-6a12d3d9f0ab",
+    "canal": "WEB_CHAT",
+    "numero_guia_consultada": "TLX-310482-CO",
+    "confidence_score_promedio": null,
+    "sentimiento_detectado": "NEUTRO",
+    "intentos_previos": 0,
+    "resumen_contexto": "Intención: TRACKING. Canal: WEB_CHAT. Guía: TLX-310482-CO (estado TMS RETENIDO_NOVEDAD). Motivo: CRIT-005 — mercancia_peligrosa=true; estado_guia=RETENIDO_NOVEDAD. Sentimiento: NEUTRO. Intentos previos: 0. Último mensaje del cliente: «TLX-310482-CO».",
+    "historial": [
+      {
+        "rol": "USUARIO",
+        "texto": "TLX-310482-CO",
+        "timestamp": "2026-11-03T13:17:37.667457-05:00",
+        "canal": "WEB_CHAT"
+      }
+    ],
+    "prioridad": "URGENTE",
+    "cola_destino": "OPERACIONES",
+    "triggers": [
+      {
+        "id_criterio": "CRIT-005",
+        "accion": "ESCALAR_URGENCIA_OPERACIONES",
+        "accion_raw": "ESCALAR_Urgencia_OPERACIONES",
+        "evidencia": "mercancia_peligrosa=true; estado_guia=RETENIDO_NOVEDAD",
+        "modo": "incident_context"
+      }
+    ],
+    "tiempo_espera_estimado_segundos": 45,
+    "status": "PENDING",
+    "created_at": "2026-11-03T13:17:37.672181-05:00"
+  }
+}

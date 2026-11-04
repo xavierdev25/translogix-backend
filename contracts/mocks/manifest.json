@@ -1,0 +1,979 @@
+{
+  "contract_version": "1.2.0",
+  "match_semantics": {
+    "path": "valores exactos de parámetros de ruta",
+    "body": "subconjunto exacto del cuerpo JSON de la petición",
+    "text_contains": "el texto del mensaje (`text`; `transcript` en PBX; `messages[].text.body` en WhatsApp) contiene la cadena, sin distinguir mayúsculas",
+    "null": "respuesta por defecto de la operación"
+  },
+  "pendiente_de_servicio_real": "si no es null, la forma es contractual pero ese valor lo produce el servicio real",
+  "operations": [
+    {
+      "operationId": "getTracking",
+      "method": "GET",
+      "path": "/api/v1/tracking/{guia}",
+      "requests": [],
+      "responses": [
+        {
+          "status": 200,
+          "example": "examples/tracking.en-transito.json",
+          "scenario": "S1",
+          "match": {
+            "path": {
+              "guia": "TLX-984021-CO"
+            }
+          },
+          "pendiente_de_servicio_real": null
+        },
+        {
+          "status": 200,
+          "example": "examples/tracking.en-reparto.json",
+          "scenario": "S3",
+          "match": {
+            "path": {
+              "guia": "TLX-551904-CO"
+            }
+          },
+          "pendiente_de_servicio_real": null
+        },
+        {
+          "status": 200,
+          "example": "examples/tracking.retenido.json",
+          "scenario": "S4",
+          "match": {
+            "path": {
+              "guia": "TLX-310482-CO"
+            }
+          },
+          "pendiente_de_servicio_real": null
+        },
+        {
+          "status": 200,
+          "example": "examples/tracking.entregado.json",
+          "scenario": "S5",
+          "match": {
+            "path": {
+              "guia": "TLX-752190-CO"
+            }
+          },
+          "pendiente_de_servicio_real": null
+        },
+        {
+          "status": 200,
+          "example": "examples/tracking.en-bodega-origen.json",
+          "scenario": null,
+          "match": {
+            "path": {
+              "guia": "TLX-118493-CO"
+            }
+          },
+          "pendiente_de_servicio_real": null
+        },
+        {
+          "status": 404,
+          "example": "examples/error.guia-no-encontrada.json",
+          "scenario": "S6",
+          "match": {
+            "path": {
+              "guia": "TLX-000000-CO"
+            }
+          },
+          "pendiente_de_servicio_real": null
+        }
+      ],
+      "errors": [
+        {
+          "status": 404,
+          "code": "GUIA_NO_ENCONTRADA",
+          "example": "examples/error.guia-no-encontrada.json"
+        },
+        {
+          "status": 422,
+          "code": "VALIDACION",
+          "example": "examples/error.validacion.json"
+        },
+        {
+          "status": 422,
+          "code": "GUIA_FORMATO_INVALIDO",
+          "example": "examples/error.guia-formato-invalido.json"
+        },
+        {
+          "status": 500,
+          "code": "ERROR_INTERNO",
+          "example": "examples/error.error-interno.json"
+        }
+      ]
+    },
+    {
+      "operationId": "createQuote",
+      "method": "POST",
+      "path": "/api/v1/cotizar",
+      "requests": [
+        {
+          "example": "examples/cotizar.request.json",
+          "scenario": "S7",
+          "pendiente_de_servicio_real": null
+        },
+        {
+          "example": "examples/cotizar.cadena-frio.request.json",
+          "scenario": "S7",
+          "pendiente_de_servicio_real": null
+        },
+        {
+          "example": "examples/cotizar.flete-minimo.request.json",
+          "scenario": "S9",
+          "pendiente_de_servicio_real": null
+        },
+        {
+          "example": "examples/cotizar.ruta-sin-tarifa.request.json",
+          "scenario": "S8",
+          "pendiente_de_servicio_real": null
+        }
+      ],
+      "responses": [
+        {
+          "status": 200,
+          "example": "examples/cotizar.response.json",
+          "scenario": "S7",
+          "match": {
+            "body": {
+              "destino": "Medellín",
+              "requiere_cadena_frio": false
+            }
+          },
+          "pendiente_de_servicio_real": null
+        },
+        {
+          "status": 200,
+          "example": "examples/cotizar.cadena-frio.response.json",
+          "scenario": "S7",
+          "match": {
+            "body": {
+              "destino": "Medellín",
+              "requiere_cadena_frio": true
+            }
+          },
+          "pendiente_de_servicio_real": null
+        },
+        {
+          "status": 200,
+          "example": "examples/cotizar.flete-minimo.response.json",
+          "scenario": "S9",
+          "match": {
+            "body": {
+              "destino": "Pereira"
+            }
+          },
+          "pendiente_de_servicio_real": null
+        },
+        {
+          "status": 422,
+          "example": "examples/error.ruta-sin-tarifa.json",
+          "scenario": "S8",
+          "match": {
+            "body": {
+              "origen": "Barranquilla",
+              "destino": "Bucaramanga"
+            }
+          },
+          "pendiente_de_servicio_real": null
+        }
+      ],
+      "errors": [
+        {
+          "status": 422,
+          "code": "VALIDACION",
+          "example": "examples/error.validacion.json"
+        },
+        {
+          "status": 422,
+          "code": "RUTA_SIN_TARIFA",
+          "example": "examples/error.ruta-sin-tarifa.json"
+        },
+        {
+          "status": 422,
+          "code": "CIUDAD_NO_RECONOCIDA",
+          "example": "examples/error.ciudad-no-reconocida.json"
+        },
+        {
+          "status": 422,
+          "code": "SERVICIO_NO_DISPONIBLE",
+          "example": "examples/error.servicio-no-disponible.json"
+        },
+        {
+          "status": 422,
+          "code": "EXCEDE_LIMITE_COBERTURA",
+          "example": "examples/error.excede-limite-cobertura.json"
+        },
+        {
+          "status": 500,
+          "code": "ERROR_INTERNO",
+          "example": "examples/error.error-interno.json"
+        }
+      ]
+    },
+    {
+      "operationId": "createPqrsTicket",
+      "method": "POST",
+      "path": "/api/v1/pqrs/crear-ticket",
+      "requests": [
+        {
+          "example": "examples/pqrs.siniestro.request.json",
+          "scenario": "S14",
+          "pendiente_de_servicio_real": null
+        },
+        {
+          "example": "examples/pqrs.peticion.request.json",
+          "scenario": null,
+          "pendiente_de_servicio_real": null
+        }
+      ],
+      "responses": [
+        {
+          "status": 201,
+          "example": "examples/pqrs.siniestro.response.json",
+          "scenario": "S14",
+          "match": {
+            "body": {
+              "tipo": "SINIESTRO"
+            }
+          },
+          "pendiente_de_servicio_real": null
+        },
+        {
+          "status": 201,
+          "example": "examples/pqrs.peticion.response.json",
+          "scenario": null,
+          "match": {
+            "body": {
+              "tipo": "PETICION"
+            }
+          },
+          "pendiente_de_servicio_real": null
+        }
+      ],
+      "errors": [
+        {
+          "status": 404,
+          "code": "GUIA_NO_ENCONTRADA",
+          "example": "examples/error.guia-no-encontrada.json"
+        },
+        {
+          "status": 404,
+          "code": "NO_ENCONTRADO",
+          "example": "examples/error.no-encontrado.json"
+        },
+        {
+          "status": 422,
+          "code": "VALIDACION",
+          "example": "examples/error.validacion.json"
+        },
+        {
+          "status": 500,
+          "code": "ERROR_INTERNO",
+          "example": "examples/error.error-interno.json"
+        }
+      ]
+    },
+    {
+      "operationId": "uploadAttachment",
+      "method": "POST",
+      "path": "/api/v1/attachments",
+      "requests": [],
+      "responses": [
+        {
+          "status": 201,
+          "example": "examples/attachment.upload.response.json",
+          "scenario": null,
+          "match": null,
+          "pendiente_de_servicio_real": null
+        }
+      ],
+      "errors": [
+        {
+          "status": 404,
+          "code": "NO_ENCONTRADO",
+          "example": "examples/error.no-encontrado.json"
+        },
+        {
+          "status": 422,
+          "code": "VALIDACION",
+          "example": "examples/error.validacion.json"
+        },
+        {
+          "status": 500,
+          "code": "ERROR_INTERNO",
+          "example": "examples/error.error-interno.json"
+        }
+      ]
+    },
+    {
+      "operationId": "postChatMessage",
+      "method": "POST",
+      "path": "/api/v1/chat/messages",
+      "requests": [
+        {
+          "example": "examples/chat.tracking.request.json",
+          "scenario": "S1",
+          "pendiente_de_servicio_real": null
+        },
+        {
+          "example": "examples/chat.retenida.request.json",
+          "scenario": "S4",
+          "pendiente_de_servicio_real": null
+        },
+        {
+          "example": "examples/chat.guia-no-encontrada.request.json",
+          "scenario": "S6",
+          "pendiente_de_servicio_real": null
+        },
+        {
+          "example": "examples/chat.cotizacion.request.json",
+          "scenario": "S7",
+          "pendiente_de_servicio_real": null
+        },
+        {
+          "example": "examples/chat.mercancia-peligrosa.request.json",
+          "scenario": "S10",
+          "pendiente_de_servicio_real": null
+        },
+        {
+          "example": "examples/chat.fuera-de-corpus.request.json",
+          "scenario": "S12",
+          "pendiente_de_servicio_real": null
+        },
+        {
+          "example": "examples/chat.amenaza-legal.request.json",
+          "scenario": "S13",
+          "pendiente_de_servicio_real": null
+        },
+        {
+          "example": "examples/chat.en-reparto.request.json",
+          "scenario": "S3",
+          "pendiente_de_servicio_real": null
+        },
+        {
+          "example": "examples/chat.entregado.request.json",
+          "scenario": "S5",
+          "pendiente_de_servicio_real": null
+        },
+        {
+          "example": "examples/chat.ruta-sin-tarifa.request.json",
+          "scenario": "S8",
+          "pendiente_de_servicio_real": null
+        },
+        {
+          "example": "examples/chat.flete-minimo.request.json",
+          "scenario": "S9",
+          "pendiente_de_servicio_real": null
+        },
+        {
+          "example": "examples/chat.caja-rota.request.json",
+          "scenario": "S14",
+          "pendiente_de_servicio_real": null
+        },
+        {
+          "example": "examples/chat.fuera-de-plazo.request.json",
+          "scenario": "S15",
+          "pendiente_de_servicio_real": null
+        }
+      ],
+      "responses": [
+        {
+          "status": 200,
+          "example": "examples/chat.tracking.response.json",
+          "scenario": "S1",
+          "match": {
+            "text_contains": "TLX-984021-CO"
+          },
+          "pendiente_de_servicio_real": null
+        },
+        {
+          "status": 200,
+          "example": "examples/chat.retenida.response.json",
+          "scenario": "S4",
+          "match": {
+            "text_contains": "TLX-310482-CO"
+          },
+          "pendiente_de_servicio_real": null
+        },
+        {
+          "status": 200,
+          "example": "examples/chat.guia-no-encontrada.response.json",
+          "scenario": "S6",
+          "match": {
+            "text_contains": "TLX-000000-CO"
+          },
+          "pendiente_de_servicio_real": null
+        },
+        {
+          "status": 200,
+          "example": "examples/chat.cotizacion.response.json",
+          "scenario": "S7",
+          "match": {
+            "text_contains": "12.500.000"
+          },
+          "pendiente_de_servicio_real": null
+        },
+        {
+          "status": 200,
+          "example": "examples/chat.mercancia-peligrosa.response.json",
+          "scenario": "S10",
+          "match": {
+            "text_contains": "ácido clorhídrico"
+          },
+          "pendiente_de_servicio_real": "confidence_score: lo calcula heuristic_v1 en el servicio real"
+        },
+        {
+          "status": 200,
+          "example": "examples/chat.fuera-de-corpus.response.json",
+          "scenario": "S12",
+          "match": {
+            "text_contains": "Hong Kong"
+          },
+          "pendiente_de_servicio_real": "confidence_score: lo calcula heuristic_v1 en el servicio real"
+        },
+        {
+          "status": 200,
+          "example": "examples/chat.amenaza-legal.response.json",
+          "scenario": "S13",
+          "match": {
+            "text_contains": "demandar"
+          },
+          "pendiente_de_servicio_real": null
+        },
+        {
+          "status": 200,
+          "example": "examples/chat.en-reparto.response.json",
+          "scenario": "S3",
+          "match": {
+            "text_contains": "TLX-551904-CO"
+          },
+          "pendiente_de_servicio_real": null
+        },
+        {
+          "status": 200,
+          "example": "examples/chat.entregado.response.json",
+          "scenario": "S5",
+          "match": {
+            "text_contains": "TLX-752190-CO"
+          },
+          "pendiente_de_servicio_real": null
+        },
+        {
+          "status": 200,
+          "example": "examples/chat.ruta-sin-tarifa.response.json",
+          "scenario": "S8",
+          "match": {
+            "text_contains": "Barranquilla a Bucaramanga"
+          },
+          "pendiente_de_servicio_real": null
+        },
+        {
+          "status": 200,
+          "example": "examples/chat.flete-minimo.response.json",
+          "scenario": "S9",
+          "match": {
+            "text_contains": "Pereira"
+          },
+          "pendiente_de_servicio_real": null
+        },
+        {
+          "status": 200,
+          "example": "examples/chat.caja-rota.response.json",
+          "scenario": "S14",
+          "match": {
+            "text_contains": "caja rota"
+          },
+          "pendiente_de_servicio_real": null
+        },
+        {
+          "status": 200,
+          "example": "examples/chat.fuera-de-plazo.response.json",
+          "scenario": "S15",
+          "match": {
+            "text_contains": "hace un mes"
+          },
+          "pendiente_de_servicio_real": "texto generado y confidence_score: los produce el RAG real"
+        }
+      ],
+      "errors": [
+        {
+          "status": 404,
+          "code": "NO_ENCONTRADO",
+          "example": "examples/error.no-encontrado.json"
+        },
+        {
+          "status": 422,
+          "code": "VALIDACION",
+          "example": "examples/error.validacion.json"
+        },
+        {
+          "status": 429,
+          "code": "LIMITE_DE_TASA",
+          "example": "examples/error.limite-de-tasa.json"
+        },
+        {
+          "status": 500,
+          "code": "ERROR_INTERNO",
+          "example": "examples/error.error-interno.json"
+        }
+      ]
+    },
+    {
+      "operationId": "getSessionHistory",
+      "method": "GET",
+      "path": "/api/v1/chat/sessions/{session_id}/history",
+      "requests": [],
+      "responses": [
+        {
+          "status": 200,
+          "example": "examples/session.history.json",
+          "scenario": "S1",
+          "match": null,
+          "pendiente_de_servicio_real": null
+        }
+      ],
+      "errors": [
+        {
+          "status": 404,
+          "code": "NO_ENCONTRADO",
+          "example": "examples/error.no-encontrado.json"
+        },
+        {
+          "status": 422,
+          "code": "VALIDACION",
+          "example": "examples/error.validacion.json"
+        },
+        {
+          "status": 500,
+          "code": "ERROR_INTERNO",
+          "example": "examples/error.error-interno.json"
+        }
+      ]
+    },
+    {
+      "operationId": "verifyWhatsAppWebhook",
+      "method": "GET",
+      "path": "/api/v1/channels/whatsapp/webhook",
+      "requests": [],
+      "responses": [
+        {
+          "status": 200,
+          "example": "examples/whatsapp.verify.response.json",
+          "scenario": null,
+          "match": null,
+          "pendiente_de_servicio_real": null
+        }
+      ],
+      "errors": [
+        {
+          "status": 403,
+          "code": "NO_AUTORIZADO",
+          "example": "examples/error.no-autorizado.json"
+        },
+        {
+          "status": 422,
+          "code": "VALIDACION",
+          "example": "examples/error.validacion.json"
+        },
+        {
+          "status": 500,
+          "code": "ERROR_INTERNO",
+          "example": "examples/error.error-interno.json"
+        }
+      ]
+    },
+    {
+      "operationId": "receiveWhatsAppWebhook",
+      "method": "POST",
+      "path": "/api/v1/channels/whatsapp/webhook",
+      "requests": [
+        {
+          "example": "examples/whatsapp.webhook.request.json",
+          "scenario": "S2",
+          "pendiente_de_servicio_real": null
+        }
+      ],
+      "responses": [
+        {
+          "status": 200,
+          "example": "examples/whatsapp.webhook.ack.json",
+          "scenario": null,
+          "match": null,
+          "pendiente_de_servicio_real": null
+        }
+      ],
+      "errors": [
+        {
+          "status": 401,
+          "code": "FIRMA_INVALIDA",
+          "example": "examples/error.firma-invalida.json"
+        },
+        {
+          "status": 422,
+          "code": "VALIDACION",
+          "example": "examples/error.validacion.json"
+        },
+        {
+          "status": 500,
+          "code": "ERROR_INTERNO",
+          "example": "examples/error.error-interno.json"
+        }
+      ]
+    },
+    {
+      "operationId": "simulateWhatsApp",
+      "method": "POST",
+      "path": "/api/v1/channels/whatsapp/simulate",
+      "requests": [
+        {
+          "example": "examples/whatsapp.webhook.request.json",
+          "scenario": "S2",
+          "pendiente_de_servicio_real": null
+        },
+        {
+          "example": "examples/whatsapp.webhook.prohibido.request.json",
+          "scenario": "S11",
+          "pendiente_de_servicio_real": null
+        }
+      ],
+      "responses": [
+        {
+          "status": 200,
+          "example": "examples/whatsapp.simulate.response.json",
+          "scenario": "S2",
+          "match": {
+            "text_contains": "TLX-984021-CO"
+          },
+          "pendiente_de_servicio_real": null
+        },
+        {
+          "status": 200,
+          "example": "examples/whatsapp.simulate.prohibido.response.json",
+          "scenario": "S11",
+          "match": {
+            "text_contains": "perro"
+          },
+          "pendiente_de_servicio_real": "texto generado y confidence_score: los produce el RAG real"
+        }
+      ],
+      "errors": [
+        {
+          "status": 422,
+          "code": "VALIDACION",
+          "example": "examples/error.validacion.json"
+        },
+        {
+          "status": 500,
+          "code": "ERROR_INTERNO",
+          "example": "examples/error.error-interno.json"
+        }
+      ]
+    },
+    {
+      "operationId": "postPbxTurn",
+      "method": "POST",
+      "path": "/api/v1/channels/pbx/turns",
+      "requests": [
+        {
+          "example": "examples/pbx.turn.request.json",
+          "scenario": "S16",
+          "pendiente_de_servicio_real": null
+        }
+      ],
+      "responses": [
+        {
+          "status": 200,
+          "example": "examples/pbx.turn.response.json",
+          "scenario": "S16",
+          "match": null,
+          "pendiente_de_servicio_real": null
+        }
+      ],
+      "errors": [
+        {
+          "status": 422,
+          "code": "VALIDACION",
+          "example": "examples/error.validacion.json"
+        },
+        {
+          "status": 500,
+          "code": "ERROR_INTERNO",
+          "example": "examples/error.error-interno.json"
+        },
+        {
+          "status": 503,
+          "code": "NO_CONFIGURADO",
+          "example": "examples/error.no-configurado.json"
+        }
+      ]
+    },
+    {
+      "operationId": "simulatePbx",
+      "method": "POST",
+      "path": "/api/v1/channels/pbx/simulate",
+      "requests": [
+        {
+          "example": "examples/pbx.simulate.request.json",
+          "scenario": "S16",
+          "pendiente_de_servicio_real": null
+        }
+      ],
+      "responses": [
+        {
+          "status": 200,
+          "example": "examples/pbx.turn.response.json",
+          "scenario": "S16",
+          "match": null,
+          "pendiente_de_servicio_real": null
+        }
+      ],
+      "errors": [
+        {
+          "status": 422,
+          "code": "VALIDACION",
+          "example": "examples/error.validacion.json"
+        },
+        {
+          "status": 500,
+          "code": "ERROR_INTERNO",
+          "example": "examples/error.error-interno.json"
+        }
+      ]
+    },
+    {
+      "operationId": "getHandoff",
+      "method": "GET",
+      "path": "/api/v1/handoffs/{handoff_id}",
+      "requests": [],
+      "responses": [
+        {
+          "status": 200,
+          "example": "examples/handoff.operaciones.json",
+          "scenario": "S4",
+          "match": null,
+          "pendiente_de_servicio_real": null
+        }
+      ],
+      "errors": [
+        {
+          "status": 403,
+          "code": "NO_AUTORIZADO",
+          "example": "examples/error.no-autorizado.json"
+        },
+        {
+          "status": 404,
+          "code": "NO_ENCONTRADO",
+          "example": "examples/error.no-encontrado.json"
+        },
+        {
+          "status": 422,
+          "code": "VALIDACION",
+          "example": "examples/error.validacion.json"
+        },
+        {
+          "status": 500,
+          "code": "ERROR_INTERNO",
+          "example": "examples/error.error-interno.json"
+        }
+      ]
+    },
+    {
+      "operationId": "updateHandoffStatus",
+      "method": "PATCH",
+      "path": "/api/v1/handoffs/{handoff_id}",
+      "requests": [
+        {
+          "example": "examples/handoff.status-update.request.json",
+          "scenario": null,
+          "pendiente_de_servicio_real": null
+        }
+      ],
+      "responses": [
+        {
+          "status": 200,
+          "example": "examples/handoff.asignado.json",
+          "scenario": "S4",
+          "match": null,
+          "pendiente_de_servicio_real": null
+        }
+      ],
+      "errors": [
+        {
+          "status": 403,
+          "code": "NO_AUTORIZADO",
+          "example": "examples/error.no-autorizado.json"
+        },
+        {
+          "status": 404,
+          "code": "NO_ENCONTRADO",
+          "example": "examples/error.no-encontrado.json"
+        },
+        {
+          "status": 422,
+          "code": "VALIDACION",
+          "example": "examples/error.validacion.json"
+        },
+        {
+          "status": 500,
+          "code": "ERROR_INTERNO",
+          "example": "examples/error.error-interno.json"
+        }
+      ]
+    },
+    {
+      "operationId": "listHandoffs",
+      "method": "GET",
+      "path": "/api/v1/handoffs",
+      "requests": [],
+      "responses": [
+        {
+          "status": 200,
+          "example": "examples/handoff.list.json",
+          "scenario": null,
+          "match": null,
+          "pendiente_de_servicio_real": null
+        }
+      ],
+      "errors": [
+        {
+          "status": 403,
+          "code": "NO_AUTORIZADO",
+          "example": "examples/error.no-autorizado.json"
+        },
+        {
+          "status": 422,
+          "code": "VALIDACION",
+          "example": "examples/error.validacion.json"
+        },
+        {
+          "status": 500,
+          "code": "ERROR_INTERNO",
+          "example": "examples/error.error-interno.json"
+        }
+      ]
+    },
+    {
+      "operationId": "getChannelMetrics",
+      "method": "GET",
+      "path": "/api/v1/metrics/channels",
+      "requests": [],
+      "responses": [
+        {
+          "status": 200,
+          "example": "examples/metrics.channels.json",
+          "scenario": "S18",
+          "match": null,
+          "pendiente_de_servicio_real": "conteos: salen de la base de datos real"
+        }
+      ],
+      "errors": [
+        {
+          "status": 422,
+          "code": "VALIDACION",
+          "example": "examples/error.validacion.json"
+        },
+        {
+          "status": 500,
+          "code": "ERROR_INTERNO",
+          "example": "examples/error.error-interno.json"
+        }
+      ]
+    },
+    {
+      "operationId": "reindexRag",
+      "method": "POST",
+      "path": "/api/v1/admin/rag/reindex",
+      "requests": [
+        {
+          "example": "examples/reindex.request.json",
+          "scenario": null,
+          "pendiente_de_servicio_real": null
+        }
+      ],
+      "responses": [
+        {
+          "status": 200,
+          "example": "examples/reindex.response.json",
+          "scenario": null,
+          "match": null,
+          "pendiente_de_servicio_real": "conteos y duración: los mide la ingesta real"
+        }
+      ],
+      "errors": [
+        {
+          "status": 403,
+          "code": "NO_AUTORIZADO",
+          "example": "examples/error.no-autorizado.json"
+        },
+        {
+          "status": 422,
+          "code": "VALIDACION",
+          "example": "examples/error.validacion.json"
+        },
+        {
+          "status": 500,
+          "code": "ERROR_INTERNO",
+          "example": "examples/error.error-interno.json"
+        },
+        {
+          "status": 503,
+          "code": "LLM_NO_DISPONIBLE",
+          "example": "examples/error.llm-no-disponible.json"
+        }
+      ]
+    },
+    {
+      "operationId": "getHealth",
+      "method": "GET",
+      "path": "/health",
+      "requests": [],
+      "responses": [
+        {
+          "status": 200,
+          "example": "examples/health.ok.json",
+          "scenario": null,
+          "match": null,
+          "pendiente_de_servicio_real": null
+        }
+      ],
+      "errors": [
+        {
+          "status": 500,
+          "code": "ERROR_INTERNO",
+          "example": "examples/error.error-interno.json"
+        }
+      ]
+    },
+    {
+      "operationId": "getReadiness",
+      "method": "GET",
+      "path": "/ready",
+      "requests": [],
+      "responses": [
+        {
+          "status": 200,
+          "example": "examples/ready.ok.json",
+          "scenario": null,
+          "match": null,
+          "pendiente_de_servicio_real": null
+        },
+        {
+          "status": 503,
+          "example": "examples/ready.sin-ollama.json",
+          "scenario": "S17",
+          "match": null,
+          "pendiente_de_servicio_real": null
+        }
+      ],
+      "errors": [
+        {
+          "status": 500,
+          "code": "ERROR_INTERNO",
+          "example": "examples/error.error-interno.json"
+        }
+      ]
+    }
+  ]
+}

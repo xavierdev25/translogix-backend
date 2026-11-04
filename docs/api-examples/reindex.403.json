@@ -1,0 +1,16 @@
+{
+  "method": "POST",
+  "path": "/api/v1/admin/rag/reindex",
+  "headers": {},
+  "body": {},
+  "form": null,
+  "status": 403,
+  "response": {
+    "error": {
+      "code": "NO_AUTORIZADO",
+      "message": "No tienes autorización para realizar esta operación.",
+      "details": {},
+      "request_id": "7f05ef6a-47ba-4ea4-aada-cf3e734d0e7f"
+    }
+  }
+}

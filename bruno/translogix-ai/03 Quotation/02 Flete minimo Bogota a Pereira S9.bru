@@ -1,0 +1,36 @@
+meta {
+  name: Flete minimo Bogota a Pereira (S9)
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/v1/cotizar
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "origen": "Bogotá D.C.",
+    "destino": "Pereira",
+    "alto_cm": 20,
+    "ancho_cm": 30,
+    "largo_cm": 40,
+    "peso_real_kg": 3.2,
+    "valor_declarado_cop": 450000,
+    "requiere_cadena_frio": false,
+    "mercancia_peligrosa": false
+  }
+}
+
+script:pre-request {
+  const uuid = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16); });
+  bru.setVar("messageId", uuid());
+}
+
+tests {
+  test("HTTP 200", () => expect(res.status).to.equal(200));
+  test("calculo.flete_minimo_aplicado = True", () => expect(res.body?.["calculo"]?.["flete_minimo_aplicado"]).to.eql(true));
+  test("calculo.flete_total_cop = 22500", () => expect(res.body?.["calculo"]?.["flete_total_cop"]).to.eql(22500));
+}

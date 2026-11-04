@@ -1,0 +1,8 @@
+{
+  "error": {
+    "code": "NO_AUTORIZADO",
+    "message": "No tienes autorización para realizar esta operación.",
+    "details": {},
+    "request_id": "0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e"
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "numero_guia": "TLX-551904-CO",
+  "estado_actual": {
+    "codigo": "EN_REPARTO",
+    "etiqueta": "En reparto",
+    "explicacion": "Tu envío está en el vehículo de reparto y llegará hoy a la dirección de entrega."
+  },
+  "origen_ciudad": "Bogotá D.C.",
+  "destino_ciudad": "Pereira",
+  "tipo_servicio": "Paquetería Exprés Última Milla",
+  "fecha_despacho": "2026-11-02T19:00:00-05:00",
+  "fecha_estimada_entrega": "2026-11-03T14:00:00-05:00",
+  "ubicacion_referencia": "Ruta de reparto urbano - Pereira",
+  "eventos": [
+    {
+      "timestamp": "2026-11-02T19:00:00-05:00",
+      "estado": "RECOGIDO_EN_ORIGEN",
+      "etiqueta": "Recogido en origen",
+      "ubicacion": "Bogotá D.C.",
+      "descripcion_cliente": "Tu paquete ingresó a clasificación automatizada."
+    },
+    {
+      "timestamp": "2026-11-03T01:30:00-05:00",
+      "estado": "EN_TRANSITO",
+      "etiqueta": "En tránsito",
+      "ubicacion": "Corredor Bogotá-La Línea",
+      "descripcion_cliente": "Despacho intermunicipal exprés nocturno."
+    },
+    {
+      "timestamp": "2026-11-03T06:45:00-05:00",
+      "estado": "EN_BODEGA_DESTINO",
+      "etiqueta": "En bodega de destino",
+      "ubicacion": "Hub Eje Cafetero Dosquebradas",
+      "descripcion_cliente": "Tu paquete llegó al centro de distribución de destino y se asignó a una ruta urbana."
+    },
+    {
+      "timestamp": "2026-11-03T09:15:00-05:00",
+      "estado": "EN_REPARTO",
+      "etiqueta": "En reparto",
+      "ubicacion": "Pereira, Risaralda",
+      "descripcion_cliente": "Asignado a un conductor para la ruta de reparto."
+    }
+  ],
+  "prueba_entrega": null,
+  "flags": {
+    "requiere_refrigeracion": false,
+    "mercancia_peligrosa": false
+  },
+  "ultima_temperatura_c": null,
+  "fuente": {
+    "sistema": "TMS_SIMULADO",
+    "consultado_en": "2026-11-03T10:00:00-05:00"
+  }
+}

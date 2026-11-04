@@ -1,0 +1,36 @@
+meta {
+  name: PBX turno
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/api/v1/channels/pbx/turns
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "call_id": "call-bruno",
+    "caller_id": "+573000000001",
+    "turn_index": 1,
+    "event": "TURN",
+    "transcript": "T L X nueve ocho cuatro cero dos uno C O, ¿dónde está?",
+    "audio_ref": null,
+    "transcript_confidence": 0.86,
+    "dnis": "6015550100",
+    "silence_ms": 800,
+    "barge_in": false
+  }
+}
+
+script:pre-request {
+  const uuid = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16); });
+  bru.setVar("messageId", uuid());
+}
+
+tests {
+  test("HTTP 200", () => expect(res.status).to.equal(200));
+  test("speech_text presente", () => expect(res.body?.["speech_text"]).to.not.equal(undefined));
+}

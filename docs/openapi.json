@@ -1,0 +1,4206 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "TransLogix AI — API pública del MVP",
+    "description": "Contrato de integración compartido (dueño: P01). Fuente de verdad junto con los\nmodelos Pydantic de `backend/app/contracts/`; este archivo se **genera**, no se edita.\n\nConvenciones:\n\n* Idioma `es-CO`; fechas ISO-8601 con offset, expresadas en `America/Bogota` (`-05:00`).\n* Dinero: entero en COP. Cálculo interno con `Decimal`, redondeo `ROUND_HALF_UP` por línea.\n* IDs: UUID v4 en string, salvo `numero_guia` (`^TLX-\\d{6}-CO$`).\n* `X-Request-ID` opcional en la petición; la respuesta siempre lo devuelve.\n* Todo error usa el sobre `ErrorEnvelope` con un `code` estable (`x-error-codes` por respuesta).\n",
+    "version": "1.2.0"
+  },
+  "paths": {
+    "/api/v1/tracking/{guia}": {
+      "get": {
+        "tags": [
+          "tracking"
+        ],
+        "summary": "Get Tracking",
+        "operationId": "getTracking",
+        "parameters": [
+          {
+            "name": "guia",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 64,
+              "title": "Guia"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrackingResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cotizar": {
+      "post": {
+        "tags": [
+          "cotización"
+        ],
+        "summary": "Create Quote",
+        "operationId": "createQuote",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CotizacionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CotizacionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/pqrs/crear-ticket": {
+      "post": {
+        "tags": [
+          "pqrs"
+        ],
+        "summary": "Create Pqrs Ticket",
+        "operationId": "createPqrsTicket",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PqrsTicketRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PqrsTicketResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/attachments": {
+      "post": {
+        "tags": [
+          "adjuntos"
+        ],
+        "summary": "Upload Attachment",
+        "operationId": "uploadAttachment",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_uploadAttachment"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttachmentUploadResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/chat/messages": {
+      "post": {
+        "tags": [
+          "web chat"
+        ],
+        "summary": "Post Chat Message",
+        "operationId": "postChatMessage",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatMessageRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatMessageResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/chat/sessions/{session_id}/history": {
+      "get": {
+        "tags": [
+          "web chat"
+        ],
+        "summary": "Get Session History",
+        "operationId": "getSessionHistory",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Session Id"
+            }
+          },
+          {
+            "name": "X-Client-Id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Client-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionHistory"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/channels/whatsapp/webhook": {
+      "get": {
+        "tags": [
+          "whatsapp"
+        ],
+        "summary": "Verify Whatsapp Webhook",
+        "operationId": "verifyWhatsAppWebhook",
+        "parameters": [
+          {
+            "name": "hub.mode",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Hub.Mode"
+            }
+          },
+          {
+            "name": "hub.verify_token",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Hub.Verify Token"
+            }
+          },
+          {
+            "name": "hub.challenge",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Hub.Challenge"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "whatsapp"
+        ],
+        "summary": "Receive Whatsapp Webhook",
+        "operationId": "receiveWhatsAppWebhook",
+        "parameters": [
+          {
+            "name": "X-Hub-Signature-256",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "X-Hub-Signature-256"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookAck"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/channels/whatsapp/simulate": {
+      "post": {
+        "tags": [
+          "whatsapp"
+        ],
+        "summary": "Simulate Whatsapp",
+        "operationId": "simulateWhatsApp",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WhatsAppWebhookPayload"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WhatsAppSimulationResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/channels/pbx/turns": {
+      "post": {
+        "tags": [
+          "pbx"
+        ],
+        "summary": "Post Pbx Turn",
+        "operationId": "postPbxTurn",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PbxTurnRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PbxTurnResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/channels/pbx/simulate": {
+      "post": {
+        "tags": [
+          "pbx"
+        ],
+        "summary": "Simulate Pbx",
+        "operationId": "simulatePbx",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PbxSimulateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PbxTurnResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/handoffs/{handoff_id}": {
+      "get": {
+        "tags": [
+          "handoff"
+        ],
+        "summary": "Get Handoff",
+        "operationId": "getHandoff",
+        "security": [
+          {
+            "AdminToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "handoff_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Handoff Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HandoffPayload"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "handoff"
+        ],
+        "summary": "Update Handoff Status",
+        "operationId": "updateHandoffStatus",
+        "security": [
+          {
+            "AdminToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "handoff_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Handoff Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HandoffStatusUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HandoffPayload"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/handoffs": {
+      "get": {
+        "tags": [
+          "handoff"
+        ],
+        "summary": "List Handoffs",
+        "operationId": "listHandoffs",
+        "security": [
+          {
+            "AdminToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/HandoffStatus"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HandoffListResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/metrics/channels": {
+      "get": {
+        "tags": [
+          "operación"
+        ],
+        "summary": "Get Channel Metrics",
+        "operationId": "getChannelMetrics",
+        "parameters": [
+          {
+            "name": "desde",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Desde"
+            }
+          },
+          {
+            "name": "hasta",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Hasta"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChannelMetricsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/rag/reindex": {
+      "post": {
+        "tags": [
+          "operación"
+        ],
+        "summary": "Reindex Rag",
+        "operationId": "reindexRag",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/ReindexRequest"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Body"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReindexResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "AdminToken": []
+          }
+        ]
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "operación"
+        ],
+        "summary": "Get Health",
+        "operationId": "getHealth",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ready": {
+      "get": {
+        "tags": [
+          "operación"
+        ],
+        "summary": "Get Readiness",
+        "operationId": "getReadiness",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadinessResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AttachmentRef": {
+        "properties": {
+          "attachment_id": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Attachment Id"
+          },
+          "declared_doc_code": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DocumentoCodigo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "attachment_id"
+        ],
+        "title": "AttachmentRef",
+        "description": "Attachment already stored by the platform, referenced by id."
+      },
+      "AttachmentUploadResponse": {
+        "properties": {
+          "attachment_id": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Attachment Id",
+            "description": "Id aleatorio."
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "IMAGE",
+              "DOCUMENT"
+            ],
+            "title": "Kind"
+          },
+          "mime_type": {
+            "type": "string",
+            "enum": [
+              "application/pdf",
+              "image/jpeg"
+            ],
+            "title": "Mime Type",
+            "description": "Tipo detectado por contenido."
+          },
+          "size_bytes": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Size Bytes"
+          },
+          "declared_doc_code": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DocumentoCodigo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Sha256"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "attachment_id",
+          "kind",
+          "mime_type",
+          "size_bytes",
+          "declared_doc_code",
+          "sha256"
+        ],
+        "title": "AttachmentUploadResponse"
+      },
+      "Body_uploadAttachment": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File",
+            "description": "PDF o JPG."
+          },
+          "declared_doc_code": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DocumentoCodigo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "session_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_uploadAttachment"
+      },
+      "CalculoFlete": {
+        "properties": {
+          "peso_volumetrico_kg": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Peso Volumetrico Kg"
+          },
+          "peso_facturable_kg": {
+            "type": "number",
+            "exclusiveMinimum": 0.0,
+            "title": "Peso Facturable Kg"
+          },
+          "tarifa_aplicada": {
+            "$ref": "#/components/schemas/TarifaAplicada"
+          },
+          "flete_minimo_cop": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Flete Minimo Cop",
+            "description": "Piso de la ruta (`flete_minimo_cop` del CSV)."
+          },
+          "flete_minimo_aplicado": {
+            "type": "boolean",
+            "title": "Flete Minimo Aplicado",
+            "description": "True si peso facturable x tarifa quedó por debajo del mínimo (DEC-Q2)."
+          },
+          "flete_base_cop": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Flete Base Cop",
+            "description": "máx(flete mínimo, peso facturable x tarifa)."
+          },
+          "seguro_cop": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Seguro Cop",
+            "description": "Pesos colombianos (COP), entero."
+          },
+          "recargos": {
+            "items": {
+              "$ref": "#/components/schemas/Recargo"
+            },
+            "type": "array",
+            "title": "Recargos"
+          },
+          "flete_total_cop": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Flete Total Cop",
+            "description": "Pesos colombianos (COP), entero."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "peso_volumetrico_kg",
+          "peso_facturable_kg",
+          "tarifa_aplicada",
+          "flete_minimo_cop",
+          "flete_minimo_aplicado",
+          "flete_base_cop",
+          "seguro_cop",
+          "recargos",
+          "flete_total_cop"
+        ],
+        "title": "CalculoFlete"
+      },
+      "ChannelCounters": {
+        "properties": {
+          "channel": {
+            "$ref": "#/components/schemas/ChannelType"
+          },
+          "conversaciones": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Conversaciones"
+          },
+          "mensajes_entrantes": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Mensajes Entrantes"
+          },
+          "mensajes_salientes": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Mensajes Salientes"
+          },
+          "handoffs": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Handoffs"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "channel",
+          "conversaciones",
+          "mensajes_entrantes",
+          "mensajes_salientes",
+          "handoffs"
+        ],
+        "title": "ChannelCounters"
+      },
+      "ChannelMetricsResponse": {
+        "properties": {
+          "generado_en": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Generado En"
+          },
+          "desde": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Desde"
+          },
+          "hasta": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hasta"
+          },
+          "canales": {
+            "items": {
+              "$ref": "#/components/schemas/ChannelCounters"
+            },
+            "type": "array",
+            "title": "Canales",
+            "description": "Una fila por canal, incluso en cero."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "generado_en",
+          "desde",
+          "hasta",
+          "canales"
+        ],
+        "title": "ChannelMetricsResponse"
+      },
+      "ChannelOutbound": {
+        "properties": {
+          "channel": {
+            "$ref": "#/components/schemas/ChannelType"
+          },
+          "session_id": {
+            "type": "string",
+            "title": "Session Id"
+          },
+          "reply_id": {
+            "type": "string",
+            "title": "Reply Id"
+          },
+          "delivery_mode": {
+            "$ref": "#/components/schemas/DeliveryMode"
+          },
+          "parts": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Parts",
+            "description": "Cuerpos con la forma del proveedor, en orden de envío."
+          },
+          "plain_text": {
+            "type": "string",
+            "title": "Plain Text",
+            "description": "Versión en texto plano (PBX: texto hablable)."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "channel",
+          "session_id",
+          "reply_id",
+          "delivery_mode",
+          "parts",
+          "plain_text"
+        ],
+        "title": "ChannelOutbound",
+        "description": "What ``render_outbound`` produces: ready for ``deliver``, no network involved.\n\nThe recipient is not included: the adapter resolves it from the value it\nholds in memory, so plain user ids never travel through the core."
+      },
+      "ChannelTurnResult": {
+        "properties": {
+          "in_reply_to": {
+            "type": "string",
+            "title": "In Reply To"
+          },
+          "reply": {
+            "$ref": "#/components/schemas/ConversationReply"
+          },
+          "outbound": {
+            "$ref": "#/components/schemas/ChannelOutbound"
+          },
+          "delivery": {
+            "$ref": "#/components/schemas/DeliveryResult"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "in_reply_to",
+          "reply",
+          "outbound",
+          "delivery"
+        ],
+        "title": "ChannelTurnResult"
+      },
+      "ChannelType": {
+        "type": "string",
+        "enum": [
+          "WHATSAPP",
+          "WEB_CHAT",
+          "PBX"
+        ],
+        "title": "ChannelType"
+      },
+      "ChatMessageRequest": {
+        "properties": {
+          "session_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid4"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          },
+          "client_id": {
+            "type": "string",
+            "format": "uuid4",
+            "title": "Client Id",
+            "description": "UUID estable del navegador (external_user_id)."
+          },
+          "message_id": {
+            "type": "string",
+            "format": "uuid4",
+            "title": "Message Id",
+            "description": "Idempotencia: reenviar el mismo id no reprocesa."
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 4096
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
+          },
+          "attachments": {
+            "items": {
+              "$ref": "#/components/schemas/AttachmentRef"
+            },
+            "type": "array",
+            "title": "Attachments"
+          },
+          "locale": {
+            "type": "string",
+            "title": "Locale",
+            "default": "es-CO"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "client_id",
+          "message_id"
+        ],
+        "title": "ChatMessageRequest"
+      },
+      "ChatMessageResponse": {
+        "properties": {
+          "reply": {
+            "$ref": "#/components/schemas/ConversationReply"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "reply"
+        ],
+        "title": "ChatMessageResponse"
+      },
+      "ChecklistItem": {
+        "properties": {
+          "codigo": {
+            "$ref": "#/components/schemas/DocumentoCodigo"
+          },
+          "obligatorio": {
+            "type": "boolean",
+            "title": "Obligatorio"
+          },
+          "recibido": {
+            "type": "boolean",
+            "title": "Recibido"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "codigo",
+          "obligatorio",
+          "recibido"
+        ],
+        "title": "ChecklistItem"
+      },
+      "ChecklistItemDetallado": {
+        "properties": {
+          "codigo": {
+            "$ref": "#/components/schemas/DocumentoCodigo"
+          },
+          "obligatorio": {
+            "type": "boolean",
+            "title": "Obligatorio"
+          },
+          "recibido": {
+            "type": "boolean",
+            "title": "Recibido"
+          },
+          "descripcion": {
+            "type": "string",
+            "title": "Descripcion"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "codigo",
+          "obligatorio",
+          "recibido",
+          "descripcion"
+        ],
+        "title": "ChecklistItemDetallado"
+      },
+      "CitationItem": {
+        "properties": {
+          "doc_code": {
+            "$ref": "#/components/schemas/DocCode"
+          },
+          "doc_title": {
+            "type": "string",
+            "title": "Doc Title"
+          },
+          "section_path": {
+            "type": "string",
+            "title": "Section Path"
+          },
+          "chunk_id": {
+            "type": "string",
+            "title": "Chunk Id"
+          },
+          "excerpt": {
+            "type": "string",
+            "title": "Excerpt"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "doc_code",
+          "doc_title",
+          "section_path",
+          "chunk_id",
+          "excerpt"
+        ],
+        "title": "CitationItem"
+      },
+      "CitationsBlock": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "CITATIONS",
+            "title": "Type",
+            "default": "CITATIONS"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CitationItem"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Items"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "type",
+          "items"
+        ],
+        "title": "CitationsBlock"
+      },
+      "ColaDestino": {
+        "type": "string",
+        "enum": [
+          "SERVICIO_CLIENTE",
+          "SUPERVISOR",
+          "JURIDICO_PQRS",
+          "EJECUTIVO_CUENTA",
+          "OPERACIONES"
+        ],
+        "title": "ColaDestino"
+      },
+      "ConversationReply": {
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "format": "uuid4",
+            "title": "Session Id"
+          },
+          "in_reply_to": {
+            "type": "string",
+            "title": "In Reply To",
+            "description": "message_id del InboundMessage."
+          },
+          "reply_id": {
+            "type": "string",
+            "format": "uuid4",
+            "title": "Reply Id"
+          },
+          "channel": {
+            "$ref": "#/components/schemas/ChannelType"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ConversationStatus"
+          },
+          "blocks": {
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/TextBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/QuickRepliesBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/TrackingCardBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/QuoteSummaryBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/CitationsBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/RequestAttachmentsBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/PqrsTicketBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/HandoffNoticeBlock"
+                }
+              ],
+              "discriminator": {
+                "propertyName": "type",
+                "mapping": {
+                  "CITATIONS": "#/components/schemas/CitationsBlock",
+                  "HANDOFF_NOTICE": "#/components/schemas/HandoffNoticeBlock",
+                  "PQRS_TICKET": "#/components/schemas/PqrsTicketBlock",
+                  "QUICK_REPLIES": "#/components/schemas/QuickRepliesBlock",
+                  "QUOTE_SUMMARY": "#/components/schemas/QuoteSummaryBlock",
+                  "REQUEST_ATTACHMENTS": "#/components/schemas/RequestAttachmentsBlock",
+                  "TEXT": "#/components/schemas/TextBlock",
+                  "TRACKING_CARD": "#/components/schemas/TrackingCardBlock"
+                }
+              }
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Blocks"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/ReplyMeta"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "session_id",
+          "in_reply_to",
+          "reply_id",
+          "channel",
+          "status",
+          "blocks",
+          "meta",
+          "created_at"
+        ],
+        "title": "ConversationReply"
+      },
+      "ConversationStatus": {
+        "type": "string",
+        "enum": [
+          "ACTIVE",
+          "AWAITING_USER",
+          "IDLE",
+          "ESCALATED",
+          "CLOSED"
+        ],
+        "title": "ConversationStatus"
+      },
+      "CotizacionRequest": {
+        "properties": {
+          "origen": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Origen",
+            "examples": [
+              "Bogotá D.C."
+            ]
+          },
+          "destino": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Destino",
+            "examples": [
+              "Medellín"
+            ]
+          },
+          "alto_cm": {
+            "type": "number",
+            "exclusiveMinimum": 0.0,
+            "title": "Alto Cm"
+          },
+          "ancho_cm": {
+            "type": "number",
+            "exclusiveMinimum": 0.0,
+            "title": "Ancho Cm"
+          },
+          "largo_cm": {
+            "type": "number",
+            "exclusiveMinimum": 0.0,
+            "title": "Largo Cm"
+          },
+          "peso_real_kg": {
+            "type": "number",
+            "exclusiveMinimum": 0.0,
+            "title": "Peso Real Kg"
+          },
+          "valor_declarado_cop": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Valor Declarado Cop",
+            "description": "Pesos colombianos (COP), entero."
+          },
+          "requiere_cadena_frio": {
+            "type": "boolean",
+            "title": "Requiere Cadena Frio",
+            "description": "Extensión del MVP.",
+            "default": false
+          },
+          "mercancia_peligrosa": {
+            "type": "boolean",
+            "title": "Mercancia Peligrosa",
+            "description": "Extensión del MVP.",
+            "default": false
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "origen",
+          "destino",
+          "alto_cm",
+          "ancho_cm",
+          "largo_cm",
+          "peso_real_kg",
+          "valor_declarado_cop"
+        ],
+        "title": "CotizacionRequest"
+      },
+      "CotizacionResponse": {
+        "properties": {
+          "cotizacion_id": {
+            "type": "string",
+            "format": "uuid4",
+            "title": "Cotizacion Id"
+          },
+          "ruta": {
+            "$ref": "#/components/schemas/RutaCotizada"
+          },
+          "calculo": {
+            "$ref": "#/components/schemas/CalculoFlete"
+          },
+          "tiempo_entrega_horas": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Tiempo Entrega Horas"
+          },
+          "advertencias": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Advertencias"
+          },
+          "supuestos": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Supuestos",
+            "examples": [
+              [
+                "formula_version=provisional-v1"
+              ]
+            ]
+          },
+          "formula_version": {
+            "type": "string",
+            "title": "Formula Version",
+            "default": "provisional-v1"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "cotizacion_id",
+          "ruta",
+          "calculo",
+          "tiempo_entrega_horas",
+          "advertencias",
+          "supuestos",
+          "formula_version"
+        ],
+        "title": "CotizacionResponse"
+      },
+      "DeliveryMode": {
+        "type": "string",
+        "enum": [
+          "REAL",
+          "SIMULATED"
+        ],
+        "title": "DeliveryMode"
+      },
+      "DeliveryResult": {
+        "properties": {
+          "delivery_mode": {
+            "$ref": "#/components/schemas/DeliveryMode"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "SENT",
+              "QUEUED",
+              "FAILED",
+              "NOT_ATTEMPTED"
+            ],
+            "title": "Status"
+          },
+          "provider_message_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider Message Id"
+          },
+          "error_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Code"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "delivery_mode",
+          "status",
+          "provider_message_id",
+          "error_code"
+        ],
+        "title": "DeliveryResult"
+      },
+      "DocCode": {
+        "type": "string",
+        "enum": [
+          "DOC-OPS-2026-03",
+          "DOC-PQRS-2026-04",
+          "COBERTURA",
+          "TARIFAS",
+          "REGLAS_ESCALACION"
+        ],
+        "title": "DocCode"
+      },
+      "DocumentoAdjunto": {
+        "properties": {
+          "codigo": {
+            "$ref": "#/components/schemas/DocumentoCodigo"
+          },
+          "attachment_id": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Attachment Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "codigo",
+          "attachment_id"
+        ],
+        "title": "DocumentoAdjunto"
+      },
+      "DocumentoCodigo": {
+        "type": "string",
+        "enum": [
+          "GUIA",
+          "FACTURA_COMERCIAL",
+          "CARTA_RECLAMACION",
+          "CERTIFICACION_BANCARIA",
+          "FOTOS_EMPAQUE",
+          "FOTOS_DANO",
+          "CEDULA_O_RUT",
+          "ACTA_CON_SALVEDAD"
+        ],
+        "title": "DocumentoCodigo",
+        "description": "Claim checklist codes (DEC-P4)."
+      },
+      "Elegibilidad": {
+        "properties": {
+          "dentro_de_plazo": {
+            "type": "boolean",
+            "title": "Dentro De Plazo"
+          },
+          "regla_aplicada": {
+            "type": "string",
+            "pattern": "^[A-Z0-9_]+$",
+            "title": "Regla Aplicada",
+            "examples": [
+              "AVERIA_NO_APARENTE_3_DIAS_HABILES"
+            ]
+          },
+          "fecha_limite": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fecha Limite"
+          },
+          "nota": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nota"
+          },
+          "fundamento": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FundamentoNormativo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "dentro_de_plazo",
+          "regla_aplicada",
+          "fecha_limite",
+          "nota",
+          "fundamento"
+        ],
+        "title": "Elegibilidad"
+      },
+      "EscalationAction": {
+        "type": "string",
+        "enum": [
+          "ESCALAR_A_HUMANO",
+          "ESCALAR_PRIORIDAD_ALTA",
+          "ESCALAR_A_DEPARTAMENTO_JURIDICO_Y_PQRS",
+          "ESCALAR_A_EJECUTIVO_CUENTA_DEDICADO",
+          "ESCALAR_URGENCIA_OPERACIONES",
+          "OFRECER_HANDOFF"
+        ],
+        "title": "EscalationAction"
+      },
+      "EscalationDecision": {
+        "properties": {
+          "escalate": {
+            "type": "boolean",
+            "title": "Escalate"
+          },
+          "primary": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EscalationTrigger"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "triggers": {
+            "items": {
+              "$ref": "#/components/schemas/EscalationTrigger"
+            },
+            "type": "array",
+            "title": "Triggers"
+          },
+          "mensaje_cliente": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mensaje Cliente",
+            "description": "Texto del JSON para el criterio primario."
+          },
+          "rules_version": {
+            "type": "string",
+            "title": "Rules Version",
+            "default": "1.0.2026"
+          },
+          "config_snapshot": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Config Snapshot",
+            "examples": [
+              {
+                "CRIT003_MODE": "claim_context",
+                "CRIT005_MODE": "incident_context"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "escalate",
+          "primary",
+          "triggers",
+          "mensaje_cliente",
+          "rules_version",
+          "config_snapshot"
+        ],
+        "title": "EscalationDecision"
+      },
+      "EscalationTrigger": {
+        "properties": {
+          "id_criterio": {
+            "type": "string",
+            "enum": [
+              "CRIT-001",
+              "CRIT-002",
+              "CRIT-003",
+              "CRIT-004",
+              "CRIT-005",
+              "INFO-INTENTOS"
+            ],
+            "title": "Id Criterio"
+          },
+          "accion": {
+            "$ref": "#/components/schemas/EscalationAction"
+          },
+          "accion_raw": {
+            "type": "string",
+            "title": "Accion Raw",
+            "description": "Acción tal como aparece en el JSON de reglas."
+          },
+          "evidencia": {
+            "type": "string",
+            "maxLength": 1000,
+            "minLength": 1,
+            "title": "Evidencia",
+            "description": "Qué dato disparó la regla, sin PII."
+          },
+          "modo": {
+            "type": "string",
+            "title": "Modo",
+            "examples": [
+              "claim_context",
+              "incident_context",
+              "literal"
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id_criterio",
+          "accion",
+          "accion_raw",
+          "evidencia",
+          "modo"
+        ],
+        "title": "EscalationTrigger"
+      },
+      "EstadoTicket": {
+        "type": "string",
+        "enum": [
+          "BORRADOR",
+          "RADICADO",
+          "FUERA_DE_PLAZO",
+          "ESCALADO"
+        ],
+        "title": "EstadoTicket"
+      },
+      "EstadoVista": {
+        "properties": {
+          "codigo": {
+            "type": "string",
+            "pattern": "^[A-Z][A-Z0-9_]*$",
+            "title": "Codigo",
+            "examples": [
+              "EN_TRANSITO"
+            ]
+          },
+          "etiqueta": {
+            "type": "string",
+            "maxLength": 1000,
+            "minLength": 1,
+            "title": "Etiqueta",
+            "description": "Texto visible al cliente; no puede contener datos personales (DEC-S1)."
+          },
+          "explicacion": {
+            "type": "string",
+            "maxLength": 1000,
+            "minLength": 1,
+            "title": "Explicacion",
+            "description": "Texto visible al cliente; no puede contener datos personales (DEC-S1)."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "codigo",
+          "etiqueta",
+          "explicacion"
+        ],
+        "title": "EstadoVista"
+      },
+      "EventoVista": {
+        "properties": {
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Timestamp"
+          },
+          "estado": {
+            "type": "string",
+            "pattern": "^[A-Z][A-Z0-9_]*$",
+            "title": "Estado"
+          },
+          "etiqueta": {
+            "type": "string",
+            "maxLength": 1000,
+            "minLength": 1,
+            "title": "Etiqueta",
+            "description": "Texto visible al cliente; no puede contener datos personales (DEC-S1)."
+          },
+          "ubicacion": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1000,
+                "minLength": 1,
+                "description": "Texto visible al cliente; no puede contener datos personales (DEC-S1)."
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ubicacion"
+          },
+          "descripcion_cliente": {
+            "type": "string",
+            "maxLength": 1000,
+            "minLength": 1,
+            "title": "Descripcion Cliente",
+            "description": "Texto visible al cliente; no puede contener datos personales (DEC-S1)."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "timestamp",
+          "estado",
+          "etiqueta",
+          "ubicacion",
+          "descripcion_cliente"
+        ],
+        "title": "EventoVista"
+      },
+      "FuenteConsulta": {
+        "properties": {
+          "sistema": {
+            "type": "string",
+            "enum": [
+              "TMS_SIMULADO",
+              "TMS"
+            ],
+            "title": "Sistema"
+          },
+          "consultado_en": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Consultado En"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "sistema",
+          "consultado_en"
+        ],
+        "title": "FuenteConsulta"
+      },
+      "FundamentoNormativo": {
+        "properties": {
+          "doc_code": {
+            "$ref": "#/components/schemas/DocCode"
+          },
+          "section_path": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Section Path",
+            "examples": [
+              "3. Tiempos y plazos legales de radicación"
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "doc_code",
+          "section_path"
+        ],
+        "title": "FundamentoNormativo",
+        "description": "Where the applied rule comes from (DEC-P2: cite, never add rights of our own)."
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "HandoffListResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/HandoffSummary"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "title": "HandoffListResponse"
+      },
+      "HandoffNoticeBlock": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "HANDOFF_NOTICE",
+            "title": "Type",
+            "default": "HANDOFF_NOTICE"
+          },
+          "handoff_id": {
+            "type": "string",
+            "format": "uuid4",
+            "title": "Handoff Id"
+          },
+          "prioridad": {
+            "$ref": "#/components/schemas/Prioridad"
+          },
+          "cola": {
+            "$ref": "#/components/schemas/ColaDestino"
+          },
+          "mensaje_cliente": {
+            "type": "string",
+            "title": "Mensaje Cliente"
+          },
+          "tiempo_espera_estimado_segundos": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Tiempo Espera Estimado Segundos"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "type",
+          "handoff_id",
+          "prioridad",
+          "cola",
+          "mensaje_cliente",
+          "tiempo_espera_estimado_segundos"
+        ],
+        "title": "HandoffNoticeBlock"
+      },
+      "HandoffPayload": {
+        "properties": {
+          "handoff_id": {
+            "type": "string",
+            "format": "uuid4",
+            "title": "Handoff Id"
+          },
+          "session_id": {
+            "type": "string",
+            "format": "uuid4",
+            "title": "Session Id"
+          },
+          "canal": {
+            "$ref": "#/components/schemas/ChannelType"
+          },
+          "numero_guia_consultada": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^TLX-\\d{6}-CO$",
+                "examples": [
+                  "TLX-984021-CO"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Numero Guia Consultada"
+          },
+          "confidence_score_promedio": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidence Score Promedio"
+          },
+          "sentimiento_detectado": {
+            "$ref": "#/components/schemas/Sentiment"
+          },
+          "intentos_previos": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Intentos Previos",
+            "description": "= ConversationState.fallback_count."
+          },
+          "resumen_contexto": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Resumen Contexto",
+            "description": "Generado por IA, con revisión determinística de campos."
+          },
+          "historial": {
+            "items": {
+              "$ref": "#/components/schemas/HistorialItem"
+            },
+            "type": "array",
+            "title": "Historial"
+          },
+          "prioridad": {
+            "$ref": "#/components/schemas/Prioridad"
+          },
+          "cola_destino": {
+            "$ref": "#/components/schemas/ColaDestino"
+          },
+          "triggers": {
+            "items": {
+              "$ref": "#/components/schemas/EscalationTrigger"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Triggers"
+          },
+          "tiempo_espera_estimado_segundos": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Tiempo Espera Estimado Segundos",
+            "description": "Configurable (HANDOFF_WAIT_SECONDS); valor del JSON, no es un SLA."
+          },
+          "status": {
+            "$ref": "#/components/schemas/HandoffStatus"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "handoff_id",
+          "session_id",
+          "canal",
+          "numero_guia_consultada",
+          "confidence_score_promedio",
+          "sentimiento_detectado",
+          "intentos_previos",
+          "resumen_contexto",
+          "historial",
+          "prioridad",
+          "cola_destino",
+          "triggers",
+          "tiempo_espera_estimado_segundos",
+          "status",
+          "created_at"
+        ],
+        "title": "HandoffPayload",
+        "description": "``flujo_transferencia_pwa`` of the rules JSON plus routing extensions."
+      },
+      "HandoffStatus": {
+        "type": "string",
+        "enum": [
+          "PENDING",
+          "ASSIGNED",
+          "CLOSED"
+        ],
+        "title": "HandoffStatus"
+      },
+      "HandoffStatusUpdate": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ASSIGNED",
+              "CLOSED"
+            ],
+            "title": "Status"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "title": "HandoffStatusUpdate",
+        "description": "Advisor inbox action (``PATCH /api/v1/handoffs/{id}``, P1): PENDING → ASSIGNED → CLOSED."
+      },
+      "HandoffSummary": {
+        "properties": {
+          "handoff_id": {
+            "type": "string",
+            "format": "uuid4",
+            "title": "Handoff Id"
+          },
+          "session_id": {
+            "type": "string",
+            "format": "uuid4",
+            "title": "Session Id"
+          },
+          "canal": {
+            "$ref": "#/components/schemas/ChannelType"
+          },
+          "prioridad": {
+            "$ref": "#/components/schemas/Prioridad"
+          },
+          "cola_destino": {
+            "$ref": "#/components/schemas/ColaDestino"
+          },
+          "numero_guia_consultada": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^TLX-\\d{6}-CO$",
+                "examples": [
+                  "TLX-984021-CO"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Numero Guia Consultada"
+          },
+          "status": {
+            "$ref": "#/components/schemas/HandoffStatus"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "handoff_id",
+          "session_id",
+          "canal",
+          "prioridad",
+          "cola_destino",
+          "numero_guia_consultada",
+          "status",
+          "created_at"
+        ],
+        "title": "HandoffSummary",
+        "description": "Row of the advisor inbox (``GET /api/v1/handoffs``)."
+      },
+      "HealthResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "const": "ok",
+            "title": "Status",
+            "default": "ok"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "title": "HealthResponse"
+      },
+      "HistorialItem": {
+        "properties": {
+          "rol": {
+            "type": "string",
+            "enum": [
+              "USUARIO",
+              "ASISTENTE",
+              "ASESOR",
+              "SISTEMA"
+            ],
+            "title": "Rol"
+          },
+          "texto": {
+            "type": "string",
+            "title": "Texto"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Timestamp"
+          },
+          "canal": {
+            "$ref": "#/components/schemas/ChannelType"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "rol",
+          "texto",
+          "timestamp",
+          "canal"
+        ],
+        "title": "HistorialItem"
+      },
+      "HistoryEntry": {
+        "properties": {
+          "message_id": {
+            "type": "string",
+            "title": "Message Id"
+          },
+          "direction": {
+            "$ref": "#/components/schemas/MessageDirection"
+          },
+          "message_type": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MessageType"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Solo mensajes entrantes."
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
+          },
+          "blocks": {
+            "anyOf": [
+              {
+                "items": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/TextBlock"
+                    },
+                    {
+                      "$ref": "#/components/schemas/QuickRepliesBlock"
+                    },
+                    {
+                      "$ref": "#/components/schemas/TrackingCardBlock"
+                    },
+                    {
+                      "$ref": "#/components/schemas/QuoteSummaryBlock"
+                    },
+                    {
+                      "$ref": "#/components/schemas/CitationsBlock"
+                    },
+                    {
+                      "$ref": "#/components/schemas/RequestAttachmentsBlock"
+                    },
+                    {
+                      "$ref": "#/components/schemas/PqrsTicketBlock"
+                    },
+                    {
+                      "$ref": "#/components/schemas/HandoffNoticeBlock"
+                    }
+                  ],
+                  "discriminator": {
+                    "propertyName": "type",
+                    "mapping": {
+                      "CITATIONS": "#/components/schemas/CitationsBlock",
+                      "HANDOFF_NOTICE": "#/components/schemas/HandoffNoticeBlock",
+                      "PQRS_TICKET": "#/components/schemas/PqrsTicketBlock",
+                      "QUICK_REPLIES": "#/components/schemas/QuickRepliesBlock",
+                      "QUOTE_SUMMARY": "#/components/schemas/QuoteSummaryBlock",
+                      "REQUEST_ATTACHMENTS": "#/components/schemas/RequestAttachmentsBlock",
+                      "TEXT": "#/components/schemas/TextBlock",
+                      "TRACKING_CARD": "#/components/schemas/TrackingCardBlock"
+                    }
+                  }
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Blocks",
+            "description": "Solo respuestas (OUTBOUND)."
+          },
+          "delivery_mode": {
+            "$ref": "#/components/schemas/DeliveryMode"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "message_id",
+          "direction",
+          "message_type",
+          "text",
+          "blocks",
+          "delivery_mode",
+          "created_at"
+        ],
+        "title": "HistoryEntry"
+      },
+      "Intent": {
+        "type": "string",
+        "enum": [
+          "TRACKING",
+          "COTIZACION",
+          "CONSULTA_DOCUMENTAL",
+          "CARGA_ESPECIAL",
+          "PQRS",
+          "SALUDO",
+          "HABLAR_CON_HUMANO",
+          "DESCONOCIDA"
+        ],
+        "title": "Intent"
+      },
+      "LiquidacionPreliminar": {
+        "properties": {
+          "base_cop": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Base Cop",
+            "description": "Pesos colombianos (COP), entero."
+          },
+          "deducible_pct": {
+            "type": "integer",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Deducible Pct"
+          },
+          "deducible_cop": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Deducible Cop",
+            "description": "Pesos colombianos (COP), entero."
+          },
+          "flete_devuelto": {
+            "type": "string",
+            "const": "PENDIENTE_REVISION_HUMANA",
+            "title": "Flete Devuelto",
+            "default": "PENDIENTE_REVISION_HUMANA"
+          },
+          "estado": {
+            "type": "string",
+            "const": "PRELIMINAR_NO_VINCULANTE",
+            "title": "Estado",
+            "default": "PRELIMINAR_NO_VINCULANTE"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "base_cop",
+          "deducible_pct",
+          "deducible_cop",
+          "flete_devuelto",
+          "estado"
+        ],
+        "title": "LiquidacionPreliminar"
+      },
+      "MessageDirection": {
+        "type": "string",
+        "enum": [
+          "INBOUND",
+          "OUTBOUND"
+        ],
+        "title": "MessageDirection"
+      },
+      "MessageType": {
+        "type": "string",
+        "enum": [
+          "TEXT",
+          "AUDIO_TRANSCRIPT",
+          "IMAGE",
+          "DOCUMENT",
+          "INTERACTIVE_REPLY",
+          "SYSTEM_EVENT"
+        ],
+        "title": "MessageType"
+      },
+      "PbxSimulateRequest": {
+        "properties": {
+          "call_id": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Call Id"
+          },
+          "transcript": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Transcript"
+          },
+          "turn_index": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Turn Index",
+            "default": 0
+          },
+          "caller_id": {
+            "type": "string",
+            "maxLength": 32,
+            "title": "Caller Id",
+            "default": "simulated-caller"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "call_id",
+          "transcript"
+        ],
+        "title": "PbxSimulateRequest"
+      },
+      "PbxTurnRequest": {
+        "properties": {
+          "call_id": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Call Id"
+          },
+          "caller_id": {
+            "type": "string",
+            "maxLength": 32,
+            "minLength": 1,
+            "title": "Caller Id",
+            "description": "ANI en claro; se hashea."
+          },
+          "turn_index": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Turn Index"
+          },
+          "event": {
+            "type": "string",
+            "enum": [
+              "CALL_STARTED",
+              "TURN",
+              "CALL_ENDED"
+            ],
+            "title": "Event",
+            "default": "TURN"
+          },
+          "transcript": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Transcript"
+          },
+          "audio_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Audio Ref"
+          },
+          "transcript_confidence": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Transcript Confidence"
+          },
+          "dnis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dnis"
+          },
+          "silence_ms": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Silence Ms"
+          },
+          "barge_in": {
+            "type": "boolean",
+            "title": "Barge In",
+            "default": false
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "call_id",
+          "caller_id",
+          "turn_index"
+        ],
+        "title": "PbxTurnRequest",
+        "description": "One call turn. ``message_id`` is derived as ``<call_id>:<turn_index>`` (DEC-C4)."
+      },
+      "PbxTurnResponse": {
+        "properties": {
+          "reply": {
+            "$ref": "#/components/schemas/ConversationReply"
+          },
+          "speech_text": {
+            "type": "string",
+            "title": "Speech Text",
+            "description": "Texto hablable, sin Markdown, emojis ni URLs; ≤ ~40 palabras."
+          },
+          "transfer": {
+            "type": "boolean",
+            "title": "Transfer",
+            "description": "True si el turno termina en transferencia a asesor."
+          },
+          "delivery": {
+            "$ref": "#/components/schemas/DeliveryResult"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "reply",
+          "speech_text",
+          "transfer",
+          "delivery"
+        ],
+        "title": "PbxTurnResponse"
+      },
+      "PqrsTicketBlock": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "PQRS_TICKET",
+            "title": "Type",
+            "default": "PQRS_TICKET"
+          },
+          "ticket_id": {
+            "type": "string",
+            "format": "uuid4",
+            "title": "Ticket Id"
+          },
+          "estado": {
+            "$ref": "#/components/schemas/EstadoTicket"
+          },
+          "faltantes": {
+            "items": {
+              "$ref": "#/components/schemas/DocumentoCodigo"
+            },
+            "type": "array",
+            "title": "Faltantes"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "type",
+          "ticket_id",
+          "estado",
+          "faltantes"
+        ],
+        "title": "PqrsTicketBlock"
+      },
+      "PqrsTicketRequest": {
+        "properties": {
+          "session_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid4"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          },
+          "tipo": {
+            "$ref": "#/components/schemas/PqrsTipo"
+          },
+          "numero_guia": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^TLX-\\d{6}-CO$",
+                "examples": [
+                  "TLX-984021-CO"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Numero Guia"
+          },
+          "tipo_novedad": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TipoNovedad"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "descripcion": {
+            "type": "string",
+            "maxLength": 4000,
+            "minLength": 1,
+            "title": "Descripcion"
+          },
+          "valor_reclamado_cop": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0,
+                "description": "Pesos colombianos (COP), entero."
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valor Reclamado Cop"
+          },
+          "documentos": {
+            "items": {
+              "$ref": "#/components/schemas/DocumentoAdjunto"
+            },
+            "type": "array",
+            "title": "Documentos"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "tipo",
+          "descripcion"
+        ],
+        "title": "PqrsTicketRequest"
+      },
+      "PqrsTicketResponse": {
+        "properties": {
+          "ticket_id": {
+            "type": "string",
+            "format": "uuid4",
+            "title": "Ticket Id"
+          },
+          "estado": {
+            "$ref": "#/components/schemas/EstadoTicket"
+          },
+          "elegibilidad": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Elegibilidad"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "checklist": {
+            "items": {
+              "$ref": "#/components/schemas/ChecklistItem"
+            },
+            "type": "array",
+            "title": "Checklist"
+          },
+          "faltantes": {
+            "items": {
+              "$ref": "#/components/schemas/DocumentoCodigo"
+            },
+            "type": "array",
+            "title": "Faltantes"
+          },
+          "liquidacion_preliminar": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LiquidacionPreliminar"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "escalamiento": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EscalationDecision"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "ticket_id",
+          "estado",
+          "elegibilidad",
+          "checklist",
+          "faltantes",
+          "liquidacion_preliminar",
+          "escalamiento"
+        ],
+        "title": "PqrsTicketResponse"
+      },
+      "PqrsTipo": {
+        "type": "string",
+        "enum": [
+          "PETICION",
+          "QUEJA",
+          "RECLAMO",
+          "SINIESTRO"
+        ],
+        "title": "PqrsTipo"
+      },
+      "Prioridad": {
+        "type": "string",
+        "enum": [
+          "NORMAL",
+          "ALTA",
+          "URGENTE"
+        ],
+        "title": "Prioridad"
+      },
+      "PruebaEntregaVista": {
+        "properties": {
+          "recibido_por_iniciales": {
+            "type": "string",
+            "pattern": "^(?:[A-ZÁÉÍÓÚÑ]\\. ?){1,4}$",
+            "title": "Recibido Por Iniciales",
+            "description": "Solo iniciales; nunca nombre completo, cédula ni URL de firma.",
+            "examples": [
+              "R. B."
+            ]
+          },
+          "fecha_hora_entrega": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Fecha Hora Entrega"
+          },
+          "observaciones": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1000,
+                "minLength": 1,
+                "description": "Texto visible al cliente; no puede contener datos personales (DEC-S1)."
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Observaciones"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "recibido_por_iniciales",
+          "fecha_hora_entrega",
+          "observaciones"
+        ],
+        "title": "PruebaEntregaVista"
+      },
+      "QuickRepliesBlock": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "QUICK_REPLIES",
+            "title": "Type",
+            "default": "QUICK_REPLIES"
+          },
+          "options": {
+            "items": {
+              "$ref": "#/components/schemas/QuickReplyOption"
+            },
+            "type": "array",
+            "maxItems": 3,
+            "minItems": 1,
+            "title": "Options"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "type",
+          "options"
+        ],
+        "title": "QuickRepliesBlock"
+      },
+      "QuickReplyOption": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Title"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "title"
+        ],
+        "title": "QuickReplyOption"
+      },
+      "QuoteSummaryBlock": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "QUOTE_SUMMARY",
+            "title": "Type",
+            "default": "QUOTE_SUMMARY"
+          },
+          "cotizacion_id": {
+            "type": "string",
+            "format": "uuid4",
+            "title": "Cotizacion Id"
+          },
+          "codigo_trayecto": {
+            "type": "string",
+            "title": "Codigo Trayecto"
+          },
+          "origen": {
+            "type": "string",
+            "title": "Origen"
+          },
+          "destino": {
+            "type": "string",
+            "title": "Destino"
+          },
+          "peso_facturable_kg": {
+            "type": "number",
+            "exclusiveMinimum": 0.0,
+            "title": "Peso Facturable Kg"
+          },
+          "flete_total_cop": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Flete Total Cop",
+            "description": "Pesos colombianos (COP), entero."
+          },
+          "tiempo_entrega_horas": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Tiempo Entrega Horas"
+          },
+          "formula_version": {
+            "type": "string",
+            "title": "Formula Version"
+          },
+          "advertencias": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Advertencias"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "type",
+          "cotizacion_id",
+          "codigo_trayecto",
+          "origen",
+          "destino",
+          "peso_facturable_kg",
+          "flete_total_cop",
+          "tiempo_entrega_horas",
+          "formula_version",
+          "advertencias"
+        ],
+        "title": "QuoteSummaryBlock"
+      },
+      "ReadinessChecks": {
+        "properties": {
+          "database": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "fail"
+            ],
+            "title": "Database"
+          },
+          "ollama": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "fail",
+              "disabled"
+            ],
+            "title": "Ollama"
+          },
+          "rag_index": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "empty",
+              "fail"
+            ],
+            "title": "Rag Index"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "database",
+          "ollama",
+          "rag_index"
+        ],
+        "title": "ReadinessChecks"
+      },
+      "ReadinessResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ready",
+              "not_ready"
+            ],
+            "title": "Status"
+          },
+          "checks": {
+            "$ref": "#/components/schemas/ReadinessChecks"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "status",
+          "checks"
+        ],
+        "title": "ReadinessResponse"
+      },
+      "Recargo": {
+        "properties": {
+          "codigo": {
+            "$ref": "#/components/schemas/RecargoCodigo"
+          },
+          "descripcion": {
+            "type": "string",
+            "title": "Descripcion"
+          },
+          "valor_cop": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Valor Cop",
+            "description": "Pesos colombianos (COP), entero."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "codigo",
+          "descripcion",
+          "valor_cop"
+        ],
+        "title": "Recargo"
+      },
+      "RecargoCodigo": {
+        "type": "string",
+        "enum": [
+          "CADENA_FRIO",
+          "MERCANCIA_PELIGROSA"
+        ],
+        "title": "RecargoCodigo"
+      },
+      "ReindexRequest": {
+        "properties": {
+          "doc_codes": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/DocCode"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Doc Codes",
+            "description": "null = todos."
+          },
+          "force": {
+            "type": "boolean",
+            "title": "Force",
+            "description": "Reindexar aunque el contenido no cambie.",
+            "default": false
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "ReindexRequest"
+      },
+      "ReindexResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "const": "COMPLETED",
+            "title": "Status",
+            "default": "COMPLETED"
+          },
+          "documentos": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Documentos"
+          },
+          "chunks": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Chunks"
+          },
+          "omitidos_sin_cambios": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Omitidos Sin Cambios"
+          },
+          "duracion_ms": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Duracion Ms"
+          },
+          "embed_model": {
+            "type": "string",
+            "title": "Embed Model"
+          },
+          "embed_dim": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Embed Dim"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "status",
+          "documentos",
+          "chunks",
+          "omitidos_sin_cambios",
+          "duracion_ms",
+          "embed_model",
+          "embed_dim"
+        ],
+        "title": "ReindexResponse"
+      },
+      "ReplyMeta": {
+        "properties": {
+          "trace_id": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Trace Id"
+          },
+          "intent": {
+            "$ref": "#/components/schemas/Intent"
+          },
+          "confidence_score": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidence Score",
+            "description": "Solo RAG; null en tracking/cotización."
+          },
+          "confidence_method": {
+            "anyOf": [
+              {
+                "type": "string",
+                "const": "heuristic_v1"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidence Method"
+          },
+          "escalation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EscalationDecision"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "services_called": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceName"
+            },
+            "type": "array",
+            "title": "Services Called"
+          },
+          "evidence_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Evidence Ids",
+            "description": "chunk_id / guía / cotizacion_id usados."
+          },
+          "llm_used": {
+            "type": "boolean",
+            "title": "Llm Used"
+          },
+          "delivery_mode": {
+            "$ref": "#/components/schemas/DeliveryMode"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "trace_id",
+          "intent",
+          "confidence_score",
+          "confidence_method",
+          "escalation",
+          "services_called",
+          "evidence_ids",
+          "llm_used",
+          "delivery_mode"
+        ],
+        "title": "ReplyMeta"
+      },
+      "RequestAttachmentsBlock": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "REQUEST_ATTACHMENTS",
+            "title": "Type",
+            "default": "REQUEST_ATTACHMENTS"
+          },
+          "checklist": {
+            "items": {
+              "$ref": "#/components/schemas/ChecklistItemDetallado"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Checklist"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "type",
+          "checklist"
+        ],
+        "title": "RequestAttachmentsBlock"
+      },
+      "RutaCotizada": {
+        "properties": {
+          "codigo_trayecto": {
+            "type": "string",
+            "pattern": "^TLX-[A-Z]{3}-[A-Z]{3}-\\d{3}$",
+            "title": "Codigo Trayecto"
+          },
+          "origen": {
+            "type": "string",
+            "title": "Origen"
+          },
+          "destino": {
+            "type": "string",
+            "title": "Destino"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "codigo_trayecto",
+          "origen",
+          "destino"
+        ],
+        "title": "RutaCotizada"
+      },
+      "Sentiment": {
+        "type": "string",
+        "enum": [
+          "POSITIVO",
+          "NEUTRO",
+          "NEGATIVO",
+          "MUY_NEGATIVO"
+        ],
+        "title": "Sentiment"
+      },
+      "ServiceName": {
+        "type": "string",
+        "enum": [
+          "tms",
+          "quotation",
+          "rag",
+          "escalation",
+          "pqrs"
+        ],
+        "title": "ServiceName"
+      },
+      "SessionHistory": {
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "format": "uuid4",
+            "title": "Session Id"
+          },
+          "channel": {
+            "$ref": "#/components/schemas/ChannelType"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ConversationStatus"
+          },
+          "messages": {
+            "items": {
+              "$ref": "#/components/schemas/HistoryEntry"
+            },
+            "type": "array",
+            "title": "Messages",
+            "description": "En orden cronológico."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "session_id",
+          "channel",
+          "status",
+          "messages"
+        ],
+        "title": "SessionHistory"
+      },
+      "TarifaAplicada": {
+        "properties": {
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "REAL",
+              "VOLUMETRICO"
+            ],
+            "title": "Tipo"
+          },
+          "cop_por_kg": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Cop Por Kg",
+            "description": "Pesos colombianos (COP), entero."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "tipo",
+          "cop_por_kg"
+        ],
+        "title": "TarifaAplicada"
+      },
+      "TextBlock": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "TEXT",
+            "title": "Type",
+            "default": "TEXT"
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Text"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "type",
+          "text"
+        ],
+        "title": "TextBlock"
+      },
+      "TipoNovedad": {
+        "type": "string",
+        "enum": [
+          "AVERIA_APARENTE",
+          "AVERIA_NO_APARENTE",
+          "PERDIDA_TOTAL",
+          "SAQUEO",
+          "OTRO"
+        ],
+        "title": "TipoNovedad"
+      },
+      "TrackingCardBlock": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "TRACKING_CARD",
+            "title": "Type",
+            "default": "TRACKING_CARD"
+          },
+          "numero_guia": {
+            "type": "string",
+            "pattern": "^TLX-\\d{6}-CO$",
+            "title": "Numero Guia",
+            "examples": [
+              "TLX-984021-CO"
+            ]
+          },
+          "estado": {
+            "$ref": "#/components/schemas/EstadoVista"
+          },
+          "eta": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Eta"
+          },
+          "ubicacion_referencia": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1000,
+                "minLength": 1,
+                "description": "Texto visible al cliente; no puede contener datos personales (DEC-S1)."
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ubicacion Referencia"
+          },
+          "eventos": {
+            "items": {
+              "$ref": "#/components/schemas/EventoVista"
+            },
+            "type": "array",
+            "title": "Eventos"
+          },
+          "flags": {
+            "$ref": "#/components/schemas/TrackingFlags"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "type",
+          "numero_guia",
+          "estado",
+          "eta",
+          "ubicacion_referencia",
+          "eventos",
+          "flags"
+        ],
+        "title": "TrackingCardBlock"
+      },
+      "TrackingFlags": {
+        "properties": {
+          "requiere_refrigeracion": {
+            "type": "boolean",
+            "title": "Requiere Refrigeracion"
+          },
+          "mercancia_peligrosa": {
+            "type": "boolean",
+            "title": "Mercancia Peligrosa"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "requiere_refrigeracion",
+          "mercancia_peligrosa"
+        ],
+        "title": "TrackingFlags"
+      },
+      "TrackingResponse": {
+        "properties": {
+          "numero_guia": {
+            "type": "string",
+            "pattern": "^TLX-\\d{6}-CO$",
+            "title": "Numero Guia",
+            "examples": [
+              "TLX-984021-CO"
+            ]
+          },
+          "estado_actual": {
+            "$ref": "#/components/schemas/EstadoVista"
+          },
+          "origen_ciudad": {
+            "type": "string",
+            "title": "Origen Ciudad"
+          },
+          "destino_ciudad": {
+            "type": "string",
+            "title": "Destino Ciudad"
+          },
+          "tipo_servicio": {
+            "type": "string",
+            "title": "Tipo Servicio"
+          },
+          "fecha_despacho": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fecha Despacho"
+          },
+          "fecha_estimada_entrega": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fecha Estimada Entrega"
+          },
+          "ubicacion_referencia": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1000,
+                "minLength": 1,
+                "description": "Texto visible al cliente; no puede contener datos personales (DEC-S1)."
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ubicacion Referencia"
+          },
+          "eventos": {
+            "items": {
+              "$ref": "#/components/schemas/EventoVista"
+            },
+            "type": "array",
+            "title": "Eventos",
+            "description": "En orden cronológico."
+          },
+          "prueba_entrega": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PruebaEntregaVista"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "flags": {
+            "$ref": "#/components/schemas/TrackingFlags"
+          },
+          "ultima_temperatura_c": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ultima Temperatura C",
+            "description": "Solo si el TMS la reporta en los eventos."
+          },
+          "fuente": {
+            "$ref": "#/components/schemas/FuenteConsulta"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "numero_guia",
+          "estado_actual",
+          "origen_ciudad",
+          "destino_ciudad",
+          "tipo_servicio",
+          "fecha_despacho",
+          "fecha_estimada_entrega",
+          "ubicacion_referencia",
+          "eventos",
+          "prueba_entrega",
+          "flags",
+          "ultima_temperatura_c",
+          "fuente"
+        ],
+        "title": "TrackingResponse"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "WaChange": {
+        "properties": {
+          "field": {
+            "type": "string",
+            "title": "Field",
+            "examples": [
+              "messages"
+            ]
+          },
+          "value": {
+            "$ref": "#/components/schemas/WaValue"
+          }
+        },
+        "additionalProperties": true,
+        "type": "object",
+        "required": [
+          "field",
+          "value"
+        ],
+        "title": "WaChange"
+      },
+      "WaContact": {
+        "properties": {
+          "profile": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/WaProfile"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "wa_id": {
+            "type": "string",
+            "title": "Wa Id"
+          }
+        },
+        "additionalProperties": true,
+        "type": "object",
+        "required": [
+          "wa_id"
+        ],
+        "title": "WaContact"
+      },
+      "WaEntry": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "changes": {
+            "items": {
+              "$ref": "#/components/schemas/WaChange"
+            },
+            "type": "array",
+            "title": "Changes"
+          }
+        },
+        "additionalProperties": true,
+        "type": "object",
+        "required": [
+          "id",
+          "changes"
+        ],
+        "title": "WaEntry"
+      },
+      "WaInteractive": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "title": "Type",
+            "examples": [
+              "button_reply",
+              "list_reply"
+            ]
+          },
+          "button_reply": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/WaInteractiveReply"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "list_reply": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/WaInteractiveReply"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": true,
+        "type": "object",
+        "required": [
+          "type"
+        ],
+        "title": "WaInteractive"
+      },
+      "WaInteractiveReply": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          }
+        },
+        "additionalProperties": true,
+        "type": "object",
+        "required": [
+          "id",
+          "title"
+        ],
+        "title": "WaInteractiveReply"
+      },
+      "WaMedia": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "mime_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mime Type"
+          },
+          "sha256": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sha256"
+          },
+          "caption": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Caption"
+          },
+          "filename": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Filename"
+          }
+        },
+        "additionalProperties": true,
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "title": "WaMedia"
+      },
+      "WaMessage": {
+        "properties": {
+          "from": {
+            "type": "string",
+            "title": "From",
+            "description": "wa_id del cliente (PII)."
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "wamid: clave de idempotencia con el canal."
+          },
+          "timestamp": {
+            "type": "string",
+            "title": "Timestamp",
+            "description": "Segundos Unix, como string."
+          },
+          "type": {
+            "type": "string",
+            "title": "Type",
+            "examples": [
+              "text",
+              "interactive",
+              "image",
+              "document",
+              "audio"
+            ]
+          },
+          "text": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/WaText"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "interactive": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/WaInteractive"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "image": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/WaMedia"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "document": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/WaMedia"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "audio": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/WaMedia"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": true,
+        "type": "object",
+        "required": [
+          "from",
+          "id",
+          "timestamp",
+          "type"
+        ],
+        "title": "WaMessage"
+      },
+      "WaMetadata": {
+        "properties": {
+          "display_phone_number": {
+            "type": "string",
+            "title": "Display Phone Number"
+          },
+          "phone_number_id": {
+            "type": "string",
+            "title": "Phone Number Id"
+          }
+        },
+        "additionalProperties": true,
+        "type": "object",
+        "required": [
+          "display_phone_number",
+          "phone_number_id"
+        ],
+        "title": "WaMetadata"
+      },
+      "WaProfile": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name",
+            "description": "PII: no se registra en logs."
+          }
+        },
+        "additionalProperties": true,
+        "type": "object",
+        "title": "WaProfile"
+      },
+      "WaText": {
+        "properties": {
+          "body": {
+            "type": "string",
+            "title": "Body"
+          }
+        },
+        "additionalProperties": true,
+        "type": "object",
+        "required": [
+          "body"
+        ],
+        "title": "WaText"
+      },
+      "WaValue": {
+        "properties": {
+          "messaging_product": {
+            "type": "string",
+            "const": "whatsapp",
+            "title": "Messaging Product"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/WaMetadata"
+          },
+          "contacts": {
+            "items": {
+              "$ref": "#/components/schemas/WaContact"
+            },
+            "type": "array",
+            "title": "Contacts"
+          },
+          "messages": {
+            "items": {
+              "$ref": "#/components/schemas/WaMessage"
+            },
+            "type": "array",
+            "title": "Messages"
+          },
+          "statuses": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Statuses",
+            "description": "Recibos de entrega; no son mensajes del cliente."
+          }
+        },
+        "additionalProperties": true,
+        "type": "object",
+        "required": [
+          "messaging_product",
+          "metadata"
+        ],
+        "title": "WaValue"
+      },
+      "WebhookAck": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "const": "RECEIVED",
+            "title": "Status",
+            "default": "RECEIVED"
+          },
+          "messages": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Messages",
+            "description": "Mensajes del payload aceptados."
+          },
+          "duplicates": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Duplicates",
+            "description": "Ignorados por idempotencia."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "status",
+          "messages",
+          "duplicates"
+        ],
+        "title": "WebhookAck",
+        "description": "Fast acknowledgement for Meta; processing happens after parsing."
+      },
+      "WhatsAppSimulationResult": {
+        "properties": {
+          "delivery_mode": {
+            "type": "string",
+            "const": "SIMULATED",
+            "title": "Delivery Mode",
+            "default": "SIMULATED"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/ChannelTurnResult"
+            },
+            "type": "array",
+            "title": "Results"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "delivery_mode",
+          "results"
+        ],
+        "title": "WhatsAppSimulationResult"
+      },
+      "WhatsAppWebhookPayload": {
+        "properties": {
+          "object": {
+            "type": "string",
+            "const": "whatsapp_business_account",
+            "title": "Object"
+          },
+          "entry": {
+            "items": {
+              "$ref": "#/components/schemas/WaEntry"
+            },
+            "type": "array",
+            "title": "Entry"
+          }
+        },
+        "additionalProperties": true,
+        "type": "object",
+        "required": [
+          "object",
+          "entry"
+        ],
+        "title": "WhatsAppWebhookPayload",
+        "description": "Body of the Meta Cloud API webhook; the simulation endpoint accepts the same body.\n\nStructure taken from Meta's webhook format; **validate against Meta's current\ndocumentation** before going live. Unknown fields are preserved."
+      }
+    },
+    "securitySchemes": {
+      "AdminToken": {
+        "type": "apiKey",
+        "description": "Token de administración definido en `ADMIN_TOKEN` (entorno).",
+        "in": "header",
+        "name": "X-Admin-Token"
+      }
+    }
+  }
+}

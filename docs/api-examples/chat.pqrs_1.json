@@ -1,0 +1,108 @@
+{
+  "method": "POST",
+  "path": "/api/v1/chat/messages",
+  "headers": {},
+  "body": {
+    "client_id": "cf7372c1-5c19-482b-a151-deee69c95d0d",
+    "message_id": "a93f7f65-ce9b-4784-b982-155cff7759c5",
+    "text": "TLX-752190-CO"
+  },
+  "form": null,
+  "status": 200,
+  "response": {
+    "reply": {
+      "session_id": "fa2d460f-9ed4-47ac-9323-0f3df47ea4e7",
+      "in_reply_to": "a93f7f65-ce9b-4784-b982-155cff7759c5",
+      "reply_id": "9b7270f3-fa04-4408-b877-f40dc8ecc0c4",
+      "channel": "WEB_CHAT",
+      "status": "AWAITING_USER",
+      "blocks": [
+        {
+          "type": "TEXT",
+          "text": "Guía TLX-752190-CO: Entregado. Tu envío fue entregado en el destino. Entregada el 2 de noviembre de 2026 a las 11:45 a. m. Recibió: R. B. Observaciones: «Carga intacta, sin averías.»"
+        },
+        {
+          "type": "TRACKING_CARD",
+          "numero_guia": "TLX-752190-CO",
+          "estado": {
+            "codigo": "ENTREGADO",
+            "etiqueta": "Entregado",
+            "explicacion": "Tu envío fue entregado en el destino."
+          },
+          "eta": "2026-11-02T12:00:00-05:00",
+          "ubicacion_referencia": "Bodega Destino Yumbo - Entregado",
+          "eventos": [
+            {
+              "timestamp": "2026-11-01T14:20:00-05:00",
+              "estado": "EN_TRANSITO",
+              "etiqueta": "En tránsito",
+              "ubicacion": "Hub Eje Cafetero Dosquebradas",
+              "descripcion_cliente": "Paso por báscula de control: Peso verificado 3,200 kg conformes."
+            },
+            {
+              "timestamp": "2026-11-02T07:30:00-05:00",
+              "estado": "EN_REPARTO",
+              "etiqueta": "En reparto",
+              "ubicacion": "Hub Regional Yumbo - Valle",
+              "descripcion_cliente": "Vehículo en ruta de distribución final."
+            },
+            {
+              "timestamp": "2026-11-02T11:45:00-05:00",
+              "estado": "ENTREGADO",
+              "etiqueta": "Entregado",
+              "ubicacion": "Bodega Cliente Yumbo",
+              "descripcion_cliente": "Mercancía recibida a satisfacción."
+            }
+          ],
+          "flags": {
+            "requiere_refrigeracion": false,
+            "mercancia_peligrosa": false
+          }
+        },
+        {
+          "type": "QUICK_REPLIES",
+          "options": [
+            {
+              "id": "novedad",
+              "title": "Reportar una novedad"
+            },
+            {
+              "id": "asesor",
+              "title": "Hablar con un asesor"
+            }
+          ]
+        }
+      ],
+      "meta": {
+        "trace_id": "a6b2e781-9d13-4854-aafc-21943c77b251",
+        "intent": "TRACKING",
+        "confidence_score": null,
+        "confidence_method": null,
+        "escalation": {
+          "escalate": false,
+          "primary": null,
+          "triggers": [],
+          "mensaje_cliente": null,
+          "rules_version": "1.0.2026",
+          "config_snapshot": {
+            "CRIT003_MODE": "claim_context",
+            "CRIT005_MODE": "incident_context",
+            "CONFIDENCE_THRESHOLD": "0.75",
+            "PRIORITY_ORDER": "CRIT-005>CRIT-003>CRIT-002>CRIT-004>CRIT-001>INFO-INTENTOS",
+            "omitidas": "CRIT-001:sin_respuesta_rag,CRIT-003:fuera_de_contexto_de_reclamo,INFO-INTENTOS:sin_dato"
+          }
+        },
+        "services_called": [
+          "tms",
+          "escalation"
+        ],
+        "evidence_ids": [
+          "TLX-752190-CO"
+        ],
+        "llm_used": false,
+        "delivery_mode": "SIMULATED"
+      },
+      "created_at": "2026-11-03T13:17:37.691376-05:00"
+    }
+  }
+}

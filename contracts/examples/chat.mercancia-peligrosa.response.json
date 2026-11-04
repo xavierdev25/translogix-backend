@@ -1,0 +1,76 @@
+{
+  "reply": {
+    "session_id": "7e8f9a0b-1c2d-4e3f-8a4b-5c6d7e8f9a0b",
+    "in_reply_to": "4b3c2d1e-0f9a-4b8c-9d7e-6f5a4b3c2d1e",
+    "reply_id": "4a5b6c7d-8e9f-4a0b-9c1d-3e4f5a6b7c8d",
+    "channel": "WEB_CHAT",
+    "status": "AWAITING_USER",
+    "blocks": [
+      {
+        "type": "TEXT",
+        "text": "Sí, con condiciones. El ácido clorhídrico es una sustancia corrosiva (Clase 8): en paquetería se acepta en envases de máximo 5 litros, con sobre-empaque en caja de cartón corrugado de doble pared (7 capas). Debes entregar la Hoja de Datos de Seguridad (MSDS) en español, con 16 secciones, y la Tarjeta de Emergencia NTC 4532."
+      },
+      {
+        "type": "CITATIONS",
+        "items": [
+          {
+            "doc_code": "DOC-OPS-2026-03",
+            "doc_title": "Manual operativo de mercancías peligrosas, estándares de embalaje y restricciones de carga",
+            "section_path": "2. Clasificación de mercancías peligrosas > Clase 8: Sustancias Corrosivas",
+            "chunk_id": "DOC-OPS-2026-03:0009",
+            "excerpt": "Líquidos corrosivos en envases no superiores a 5 litros en paquetería, con sobre-empaque en cajas de cartón corrugado de doble pared (7 capas)."
+          },
+          {
+            "doc_code": "DOC-OPS-2026-03",
+            "doc_title": "Manual operativo de mercancías peligrosas, estándares de embalaje y restricciones de carga",
+            "section_path": "3. Documentación obligatoria para el transporte de carga especial",
+            "chunk_id": "DOC-OPS-2026-03:0011",
+            "excerpt": "Debe cumplir con el Sistema Globalmente Armonizado (SGA / GHS) en 16 secciones. Debe estar redactada totalmente en idioma español."
+          }
+        ]
+      },
+      {
+        "type": "QUICK_REPLIES",
+        "options": [
+          {
+            "id": "cotizar",
+            "title": "Cotizar un envío"
+          },
+          {
+            "id": "asesor",
+            "title": "Hablar con un asesor"
+          }
+        ]
+      }
+    ],
+    "meta": {
+      "trace_id": "trc-01J9Z6V7F5",
+      "intent": "CARGA_ESPECIAL",
+      "confidence_score": 0.84,
+      "confidence_method": "heuristic_v1",
+      "escalation": {
+        "escalate": false,
+        "primary": null,
+        "triggers": [],
+        "mensaje_cliente": null,
+        "rules_version": "1.0.2026",
+        "config_snapshot": {
+          "CRIT003_MODE": "claim_context",
+          "CRIT005_MODE": "incident_context",
+          "PRIORITY_ORDER": "CRIT-005>CRIT-003>CRIT-002>CRIT-004>CRIT-001>INFO-INTENTOS"
+        }
+      },
+      "services_called": [
+        "rag",
+        "escalation"
+      ],
+      "evidence_ids": [
+        "DOC-OPS-2026-03:0009",
+        "DOC-OPS-2026-03:0011"
+      ],
+      "llm_used": true,
+      "delivery_mode": "REAL"
+    },
+    "created_at": "2026-11-03T10:30:04-05:00"
+  }
+}

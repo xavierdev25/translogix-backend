@@ -1,0 +1,69 @@
+{
+  "method": "GET",
+  "path": "/api/v1/tracking/TLX-984021-CO",
+  "headers": {},
+  "body": null,
+  "form": null,
+  "status": 200,
+  "response": {
+    "numero_guia": "TLX-984021-CO",
+    "estado_actual": {
+      "codigo": "EN_TRANSITO",
+      "etiqueta": "En tránsito",
+      "explicacion": "Tu envío va en carretera hacia la ciudad de destino."
+    },
+    "origen_ciudad": "Bogotá D.C.",
+    "destino_ciudad": "Medellín",
+    "tipo_servicio": "Transporte Cadena de Frío (2°C a 8°C)",
+    "fecha_despacho": "2026-11-02T14:30:00-05:00",
+    "fecha_estimada_entrega": "2026-11-03T16:00:00-05:00",
+    "ubicacion_referencia": "Paso de Montaña Alto de la Línea - Sentido Bogotá-Ibague-Medellín",
+    "eventos": [
+      {
+        "timestamp": "2026-11-02T11:15:00-05:00",
+        "estado": "SOLICITUD_GENERADA",
+        "etiqueta": "Solicitud generada",
+        "ubicacion": "Portal Web Clientes TransLogix",
+        "descripcion_cliente": "Orden de despacho creada y guía generada exitosamente."
+      },
+      {
+        "timestamp": "2026-11-02T14:30:00-05:00",
+        "estado": "RECOGIDO_EN_ORIGEN",
+        "etiqueta": "Recogido en origen",
+        "ubicacion": "Zona Franca Fontibón, Bogotá D.C",
+        "descripcion_cliente": "Carga inspeccionada, temperatura validada en 4.2°C y precinto de seguridad #TLX-8841 aplicado."
+      },
+      {
+        "timestamp": "2026-11-02T18:45:00-05:00",
+        "estado": "EN_BODEGA_ORIGEN",
+        "etiqueta": "En bodega de origen",
+        "ubicacion": "Hub Central Zona Franca Fontibón",
+        "descripcion_cliente": "Consolidación en camión refrigerado."
+      },
+      {
+        "timestamp": "2026-11-03T02:15:00-05:00",
+        "estado": "EN_TRANSITO",
+        "etiqueta": "En tránsito",
+        "ubicacion": "Peaje Chicoral - Tolima",
+        "descripcion_cliente": "Monitoreo GPS activo. Temperatura de termógrafo estable a 3.8°C."
+      },
+      {
+        "timestamp": "2026-11-03T08:30:00-05:00",
+        "estado": "EN_TRANSITO",
+        "etiqueta": "En tránsito",
+        "ubicacion": "Corredor Calarcá - Pereira",
+        "descripcion_cliente": "Vehículo en ruta regular. Arribo estimado a Hub Itagüí a las 12:30 PM."
+      }
+    ],
+    "prueba_entrega": null,
+    "flags": {
+      "requiere_refrigeracion": true,
+      "mercancia_peligrosa": false
+    },
+    "ultima_temperatura_c": 3.8,
+    "fuente": {
+      "sistema": "TMS_SIMULADO",
+      "consultado_en": "2026-11-03T13:17:28.959737-05:00"
+    }
+  }
+}

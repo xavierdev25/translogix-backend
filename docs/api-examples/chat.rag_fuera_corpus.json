@@ -1,0 +1,73 @@
+{
+  "method": "POST",
+  "path": "/api/v1/chat/messages",
+  "headers": {},
+  "body": {
+    "client_id": "71a6b772-151a-4793-b95f-4c25ed67810c",
+    "message_id": "888af262-6256-4a96-b637-04a71d4b5653",
+    "text": "¿Cuánto cuesta un contenedor de 40' a Hong Kong?"
+  },
+  "form": null,
+  "status": 200,
+  "response": {
+    "reply": {
+      "session_id": "8dc5cbb8-705f-453a-aa47-a35fbac92908",
+      "in_reply_to": "888af262-6256-4a96-b637-04a71d4b5653",
+      "reply_id": "a83ed4d5-f12d-45a9-a95a-742bd2dfebdb",
+      "channel": "WEB_CHAT",
+      "status": "ESCALATED",
+      "blocks": [
+        {
+          "type": "HANDOFF_NOTICE",
+          "handoff_id": "b98c45ed-e813-4131-92ca-4501cdd64df5",
+          "prioridad": "NORMAL",
+          "cola": "SERVICIO_CLIENTE",
+          "mensaje_cliente": "Entiendo tu consulta, pero para asegurarme de darte la información exacta, voy a conectarte de inmediato con un especialista en servicio al cliente.",
+          "tiempo_espera_estimado_segundos": 45
+        }
+      ],
+      "meta": {
+        "trace_id": "375801a8-39fc-4144-a156-acb3119447cb",
+        "intent": "CONSULTA_DOCUMENTAL",
+        "confidence_score": 0.3375,
+        "confidence_method": "heuristic_v1",
+        "escalation": {
+          "escalate": true,
+          "primary": {
+            "id_criterio": "CRIT-001",
+            "accion": "ESCALAR_A_HUMANO",
+            "accion_raw": "ESCALAR_A_HUMANO",
+            "evidencia": "confidence_score=0.34 < 0.75",
+            "modo": "literal"
+          },
+          "triggers": [
+            {
+              "id_criterio": "CRIT-001",
+              "accion": "ESCALAR_A_HUMANO",
+              "accion_raw": "ESCALAR_A_HUMANO",
+              "evidencia": "confidence_score=0.34 < 0.75",
+              "modo": "literal"
+            }
+          ],
+          "mensaje_cliente": "Entiendo tu consulta, pero para asegurarme de darte la información exacta, voy a conectarte de inmediato con un especialista en servicio al cliente.",
+          "rules_version": "1.0.2026",
+          "config_snapshot": {
+            "CRIT003_MODE": "claim_context",
+            "CRIT005_MODE": "incident_context",
+            "CONFIDENCE_THRESHOLD": "0.75",
+            "PRIORITY_ORDER": "CRIT-005>CRIT-003>CRIT-002>CRIT-004>CRIT-001>INFO-INTENTOS",
+            "omitidas": "CRIT-003:sin_valores,CRIT-004:sin_datos_cuenta,CRIT-005:sin_datos_de_carga,INFO-INTENTOS:sin_dato"
+          }
+        },
+        "services_called": [
+          "rag",
+          "escalation"
+        ],
+        "evidence_ids": [],
+        "llm_used": true,
+        "delivery_mode": "SIMULATED"
+      },
+      "created_at": "2026-11-03T13:17:35.800325-05:00"
+    }
+  }
+}
