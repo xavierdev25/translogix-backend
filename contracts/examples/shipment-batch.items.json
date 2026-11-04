@@ -1,0 +1,33 @@
+{
+  "items": [
+    {
+      "linea": 2,
+      "referencia_cliente": "PEDIDO-1002",
+      "status": "REJECTED",
+      "numero_guia": null,
+      "flete_total_cop": null,
+      "formula_version": null,
+      "errores": [
+        {
+          "code": "TARIFA_NO_DISPONIBLE",
+          "field": "destino"
+        }
+      ]
+    },
+    {
+      "linea": 3,
+      "referencia_cliente": "PEDIDO-1001",
+      "status": "REJECTED",
+      "numero_guia": null,
+      "flete_total_cop": null,
+      "formula_version": null,
+      "errores": [
+        {
+          "code": "REFERENCIA_DUPLICADA",
+          "field": "referencia_cliente"
+        }
+      ]
+    }
+  ],
+  "next_cursor": null
+}

@@ -12,7 +12,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Body, FastAPI, File, Form, Header, Path, Query, Security, UploadFile
 from fastapi.responses import PlainTextResponse
-from fastapi.security import APIKeyHeader
+from fastapi.security import APIKeyHeader, HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import AwareDatetime
 
 from app.contracts.attachments import AttachmentUploadResponse
@@ -38,6 +38,15 @@ from app.contracts.ops import (
 )
 from app.contracts.pqrs import DocumentoCodigo, PqrsTicketRequest, PqrsTicketResponse
 from app.contracts.quotation import CotizacionRequest, CotizacionResponse
+from app.contracts.shipment_batches import (
+    IDEMPOTENCY_KEY_HEADER,
+    ITEMS_PAGE_MAX,
+    BatchItemStatus,
+    ShipmentBatchItemsPage,
+    ShipmentBatchRequest,
+    ShipmentBatchResponse,
+    ShipmentBatchSummary,
+)
 from app.contracts.tracking import TrackingResponse
 
 API_PREFIX = "/api/v1"
@@ -84,6 +93,13 @@ admin_token = APIKeyHeader(
 )
 AdminTokenDep = Annotated[str | None, Security(admin_token)]
 
+api_key = HTTPBearer(
+    scheme_name="ApiKey",
+    description="API key de un cliente empresarial: `Authorization: Bearer <api_key>`.",
+    auto_error=False,
+)
+ApiKeyDep = Annotated[HTTPAuthorizationCredentials | None, Security(api_key)]
+
 tracking = APIRouter(tags=["tracking"])
 quotation = APIRouter(tags=["cotización"])
 pqrs = APIRouter(tags=["pqrs"])
@@ -93,6 +109,7 @@ whatsapp = APIRouter(prefix="/channels/whatsapp", tags=["whatsapp"])
 pbx = APIRouter(prefix="/channels/pbx", tags=["pbx"])
 handoffs = APIRouter(prefix="/handoffs", tags=["handoff"])
 ops = APIRouter(tags=["operación"])
+shipment_batches = APIRouter(prefix="/shipment-batches", tags=["envíos masivos"])
 
 
 @tracking.get(
@@ -282,6 +299,76 @@ async def list_handoffs(
     _spec_only()
 
 
+_BATCH_AUTH_ERRORS = (ErrorCode.NO_AUTENTICADO, ErrorCode.NO_AUTORIZADO)
+
+
+@shipment_batches.post(
+    "",
+    status_code=201,
+    summary="Crea un lote de envíos (procesamiento parcial e idempotente)",
+    description=(
+        "Scope `batches:create`. Cada envío se procesa en su propia transacción: los válidos "
+        "obtienen guía interna, los inválidos se rechazan con errores por ítem. Misma "
+        "`referencia_lote` y mismo contenido → 200 con el lote existente; contenido distinto "
+        "→ 409. 202 si el mismo lote se está procesando en otra solicitud."
+    ),
+    responses={
+        200: {"model": ShipmentBatchResponse, "description": "Repetición idempotente"},
+        202: {"model": ShipmentBatchResponse, "description": "El lote sigue en proceso"},
+    },
+    **_route(
+        "createShipmentBatch",
+        priority="P0",
+        errors=(
+            *_BATCH_AUTH_ERRORS,
+            ErrorCode.IDEMPOTENCIA_CONFLICTO,
+            ErrorCode.LOTE_DEMASIADO_GRANDE,
+            ErrorCode.LIMITE_DE_TASA,
+        ),
+    ),
+)
+async def create_shipment_batch(
+    body: ShipmentBatchRequest,
+    credentials: ApiKeyDep,
+    idempotency_key: Annotated[
+        str | None, Header(alias=IDEMPOTENCY_KEY_HEADER, max_length=64)
+    ] = None,
+) -> ShipmentBatchResponse:
+    _spec_only()
+
+
+@shipment_batches.get(
+    "/{batch_id}",
+    summary="Estado y contadores de un lote (solo el cliente propietario)",
+    description="Scope `batches:read`. Un lote de otro cliente responde 404.",
+    **_route(
+        "getShipmentBatch", priority="P0", errors=(*_BATCH_AUTH_ERRORS, ErrorCode.NO_ENCONTRADO)
+    ),
+)
+async def get_shipment_batch(batch_id: UUID, credentials: ApiKeyDep) -> ShipmentBatchSummary:
+    _spec_only()
+
+
+@shipment_batches.get(
+    "/{batch_id}/items",
+    summary="Resultados por ítem de un lote, paginados por línea",
+    description="Scope `batches:read`. Orden estable por `linea`; `cursor` es opaco.",
+    **_route(
+        "listShipmentBatchItems",
+        priority="P0",
+        errors=(*_BATCH_AUTH_ERRORS, ErrorCode.NO_ENCONTRADO),
+    ),
+)
+async def list_shipment_batch_items(
+    batch_id: UUID,
+    credentials: ApiKeyDep,
+    status: Annotated[BatchItemStatus | None, Query()] = None,
+    cursor: Annotated[str | None, Query(max_length=64)] = None,
+    limit: Annotated[int, Query(ge=1, le=ITEMS_PAGE_MAX)] = 50,
+) -> ShipmentBatchItemsPage:
+    _spec_only()
+
+
 @ops.get(
     "/metrics/channels",
     summary="Conversaciones y mensajes por canal",
@@ -332,7 +419,8 @@ async def get_readiness() -> ReadinessResponse:
 def build_contract_app() -> FastAPI:
     app = FastAPI(title=TITLE, version=CONTRACT_VERSION, description=DESCRIPTION)
     api = APIRouter(prefix=API_PREFIX)
-    for router in (tracking, quotation, pqrs, attachments, chat, whatsapp, pbx, handoffs, ops):
+    routers = (tracking, quotation, pqrs, attachments, chat, whatsapp, pbx, handoffs)
+    for router in (*routers, shipment_batches, ops):
         api.include_router(router)
     app.include_router(api)
     app.include_router(root)

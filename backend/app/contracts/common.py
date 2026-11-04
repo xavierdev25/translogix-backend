@@ -28,7 +28,7 @@ from app.contracts.normalizers import NUMERO_GUIA_PATTERN
 from app.contracts.pii import find_pii
 from app.contracts.timezone import to_bogota
 
-CONTRACT_VERSION = "1.2.0"
+CONTRACT_VERSION = "1.3.0"
 REQUEST_ID_HEADER = "X-Request-ID"
 REQUEST_ID_PATTERN = r"^[A-Za-z0-9._-]{1,128}$"
 LOCALE = "es-CO"
@@ -99,6 +99,14 @@ class ErrorCode(StrEnum):
     # by the admin and webhook-verification endpoints.
     NO_CONFIGURADO = "NO_CONFIGURADO"
     NO_AUTORIZADO = "NO_AUTORIZADO"
+    # Added in 1.3.0: bulk shipments for enterprise clients (B2B API).
+    NO_AUTENTICADO = "NO_AUTENTICADO"
+    IDEMPOTENCIA_CONFLICTO = "IDEMPOTENCIA_CONFLICTO"
+    LOTE_DEMASIADO_GRANDE = "LOTE_DEMASIADO_GRANDE"
+    REFERENCIA_DUPLICADA = "REFERENCIA_DUPLICADA"
+    CIUDAD_NO_CUBIERTA = "CIUDAD_NO_CUBIERTA"
+    TARIFA_NO_DISPONIBLE = "TARIFA_NO_DISPONIBLE"
+    ARCHIVO_INVALIDO = "ARCHIVO_INVALIDO"  # reserved for the CSV/Excel upload (P1)
 
 
 # One HTTP status per code, so every service answers the same failure the same way.
@@ -119,6 +127,14 @@ ERROR_HTTP_STATUS: Mapping[ErrorCode, int] = MappingProxyType(
         ErrorCode.ERROR_INTERNO: 500,
         ErrorCode.NO_CONFIGURADO: 503,
         ErrorCode.NO_AUTORIZADO: 403,
+        ErrorCode.NO_AUTENTICADO: 401,
+        ErrorCode.IDEMPOTENCIA_CONFLICTO: 409,
+        ErrorCode.LOTE_DEMASIADO_GRANDE: 413,
+        # Item-level codes: they travel inside a batch result, not as an HTTP response.
+        ErrorCode.REFERENCIA_DUPLICADA: 422,
+        ErrorCode.CIUDAD_NO_CUBIERTA: 422,
+        ErrorCode.TARIFA_NO_DISPONIBLE: 422,
+        ErrorCode.ARCHIVO_INVALIDO: 422,
     }
 )
 
@@ -157,6 +173,17 @@ DEFAULT_ERROR_MESSAGES: Mapping[ErrorCode, str] = MappingProxyType(
         ErrorCode.ERROR_INTERNO: "Ocurrió un error inesperado. Intenta de nuevo más tarde.",
         ErrorCode.NO_CONFIGURADO: "Esta función no está configurada en este entorno.",
         ErrorCode.NO_AUTORIZADO: "No tienes autorización para realizar esta operación.",
+        ErrorCode.NO_AUTENTICADO: "Falta la credencial de acceso o no es válida.",
+        ErrorCode.IDEMPOTENCIA_CONFLICTO: (
+            "Ya existe un lote con esa referencia y un contenido diferente."
+        ),
+        ErrorCode.LOTE_DEMASIADO_GRANDE: (
+            "El lote supera el número máximo de envíos o el tamaño permitido."
+        ),
+        ErrorCode.REFERENCIA_DUPLICADA: "La referencia del envío ya fue utilizada.",
+        ErrorCode.CIUDAD_NO_CUBIERTA: "No tenemos cobertura operativa en esa ciudad.",
+        ErrorCode.TARIFA_NO_DISPONIBLE: "No hay una tarifa disponible para esa ruta.",
+        ErrorCode.ARCHIVO_INVALIDO: "El archivo no tiene un formato válido.",
     }
 )
 

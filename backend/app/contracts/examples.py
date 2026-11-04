@@ -46,6 +46,12 @@ from app.contracts.ports import AuditEvent
 from app.contracts.pqrs import PqrsTicketRequest, PqrsTicketResponse
 from app.contracts.quotation import CotizacionRequest, CotizacionResponse
 from app.contracts.rag import ChunkMetadata, RagAnswer
+from app.contracts.shipment_batches import (
+    ShipmentBatchItemsPage,
+    ShipmentBatchRequest,
+    ShipmentBatchResponse,
+    ShipmentBatchSummary,
+)
 from app.contracts.tracking import TrackingResponse
 from app.contracts.ws import WsHandoffStatusEvent
 
@@ -482,6 +488,32 @@ EXAMPLES: tuple[Example, ...] = (
         (res("updateHandoffStatus", scenario="S4"),),
     ),
     Example("handoff.list", "Bandeja de asesor", HandoffListResponse, (res("listHandoffs"),)),
+    Example(
+        "shipment-batch.request",
+        "Lote con un envío válido, una ruta sin tarifa y una referencia repetida",
+        ShipmentBatchRequest,
+        (req("createShipmentBatch"),),
+    ),
+    Example(
+        "shipment-batch.response",
+        "Procesamiento parcial: 1 creado, 2 rechazados",
+        ShipmentBatchResponse,
+        (res("createShipmentBatch", 201),),
+        pending="lote_id, numero_guia y marcas de tiempo: los genera el servicio real",
+    ),
+    Example(
+        "shipment-batch.summary",
+        "Estado y contadores del lote",
+        ShipmentBatchSummary,
+        (res("getShipmentBatch"),),
+        pending="lote_id y marcas de tiempo: los genera el servicio real",
+    ),
+    Example(
+        "shipment-batch.items",
+        "Ítems rechazados del lote (status=REJECTED)",
+        ShipmentBatchItemsPage,
+        (res("listShipmentBatchItems"),),
+    ),
     Example(
         "metrics.channels",
         "Conteos por canal (ilustrativos)",

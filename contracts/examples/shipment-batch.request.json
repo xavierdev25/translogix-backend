@@ -1,0 +1,56 @@
+{
+  "referencia_lote": "LOTE-CLIENTE-0001",
+  "envios": [
+    {
+      "referencia_cliente": "PEDIDO-1001",
+      "origen": "Bogotá D.C.",
+      "destino": "Medellín",
+      "alto_cm": 20,
+      "ancho_cm": 30,
+      "largo_cm": 40,
+      "peso_real_kg": 5.5,
+      "valor_declarado_cop": 250000,
+      "requiere_cadena_frio": false,
+      "mercancia_peligrosa": false,
+      "destinatario": {
+        "nombre": "Destinatario Demo",
+        "telefono": "3000000000",
+        "direccion": "Calle 10 # 20-30"
+      }
+    },
+    {
+      "referencia_cliente": "PEDIDO-1002",
+      "origen": "Bogotá D.C.",
+      "destino": "Envigado",
+      "alto_cm": 20,
+      "ancho_cm": 30,
+      "largo_cm": 40,
+      "peso_real_kg": 5.5,
+      "valor_declarado_cop": 250000,
+      "requiere_cadena_frio": false,
+      "mercancia_peligrosa": false,
+      "destinatario": {
+        "nombre": "Destinatario Demo",
+        "telefono": "3000000000",
+        "direccion": "Calle 10 # 20-30"
+      }
+    },
+    {
+      "referencia_cliente": "PEDIDO-1001",
+      "origen": "Bogotá D.C.",
+      "destino": "Medellín",
+      "alto_cm": 20,
+      "ancho_cm": 30,
+      "largo_cm": 40,
+      "peso_real_kg": 5.5,
+      "valor_declarado_cop": 250000,
+      "requiere_cadena_frio": false,
+      "mercancia_peligrosa": false,
+      "destinatario": {
+        "nombre": "Destinatario Demo",
+        "telefono": "3000000000",
+        "direccion": "Calle 10 # 20-30"
+      }
+    }
+  ]
+}

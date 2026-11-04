@@ -1,0 +1,10 @@
+{
+  "error": {
+    "code": "REFERENCIA_DUPLICADA",
+    "message": "La referencia del envío ya fue utilizada.",
+    "details": {
+      "field": "referencia_cliente"
+    },
+    "request_id": "0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e"
+  }
+}

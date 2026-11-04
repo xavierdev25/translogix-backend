@@ -97,3 +97,23 @@ P00 debe copiarlas a `docs/decisions.md` cuando lo cree.
 - **Sin dueño aún:** DEC-C3 (plazo de saqueo), DEC-R2 (zonas), DEC-CH2 (TTL de sesión).
 - **P06 y P08:** sus prompts no venían en el Prompt Pack recibido; si `RagPort`, `SpecialCargoPort` o
   `ConversationService` no les sirven, lo piden en `docs/contract-change-requests.md`.
+
+## 5. Envíos masivos B2B (1.3.0)
+
+Fuente: especificación técnica P0 del módulo de envíos masivos (decisiones aprobadas en su §2). Lo que
+su §14 deja abierto se implementó con el valor más conservador y queda **PROVISIONAL**.
+
+| Id | Decisión | Fuente | Estado |
+|----|----------|--------|--------|
+| DEC-SHP1 | La guía es un identificador **interno** con el formato canónico `TLX-dddddd-CO`, tomado de la secuencia PostgreSQL `shipment_guide_seq` en el rango 200000–299999. Ese rango no se cruza con las guías del dataset simulado; se aceptan huecos. Capacidad: 100.000 guías; ampliarla exige decidir un formato nuevo. No es una guía de transportista ni confirma nada en un TMS externo. | Spec §2, §4.7. | PROVISIONAL |
+| DEC-SHP2 | Idempotencia por `(cliente, referencia_lote)` con `UNIQUE` en PostgreSQL más el SHA-256 del contenido canónico: mismo hash → 200 con el lote guardado; hash distinto → 409 `IDEMPOTENCIA_CONFLICTO`. El header `Idempotency-Key` es opcional y, si llega, debe ser idéntico a `referencia_lote` (si no, 422). Así hay un único identificador. | Spec §5.1, §6.2. | CONFIRMADA |
+| DEC-SHP3 | `referencia_cliente` es única **para siempre** por cliente (`UNIQUE`). Dentro de un lote se rechazan las repeticiones posteriores a la primera línea, aunque la primera sea inválida; las demás líneas siguen. | Spec §4.5, §6.3; §14 abierto. | PROVISIONAL |
+| DEC-SHP4 | Los errores de esquema responden 422 `VALIDACION`, la convención de toda la API, y no 400 como el borrador. Un ítem inválido no invalida el lote: se rechaza solo con `code` y `field`, nunca con el valor enviado. | Contrato vigente; spec §6.4, §9. | INFERIDA |
+| DEC-SHP5 | Estado inicial del envío: `REGISTRADO`. Qué es "confirmado para despacho" lo decide el negocio. | Spec §14. | PROVISIONAL |
+| DEC-SHP6 | El precio sale de `QuotationService` (`provisional-v1`, sin duplicar fórmulas) y se congela en el envío: `cotizacion_id`, `formula_version`, `tarifa_version` (`sha256` de la matriz CSV) y `cotizado_en`. Una ruta sin tarifa se rechaza con `TARIFA_NO_DISPONIBLE`. Sigue pendiente si `provisional-v1` sirve para envíos comerciales. | Spec §7, §14. | PROVISIONAL |
+| DEC-SHP7 | Ciudad desconocida → `CIUDAD_NO_RECONOCIDA`. Ciudad reconocida sin cobertura → `CIUDAD_NO_CUBIERTA`; con los datos actuales no ocurre, porque todas las ciudades de la matriz están en el directorio. Peso o volumen por encima del máximo: se mantiene DEC-Q4 (advertir, no bloquear). Cadena de frío: se valida el servicio refrigerado del destino. Mercancía peligrosa: no se valida la clase, porque no hay política determinista documentada. | Spec §8, §14. | PROVISIONAL |
+| DEC-SHP8 | En P0, `GET /api/v1/tracking/{guia}` **no** expone las guías internas. Las guías son secuenciales y el tracking es público, así que podrían enumerarse. Exponerlas requiere decidir un control de acceso. | Spec §7 (TmsPort). | PROVISIONAL |
+| DEC-SHP9 | Destinatario obligatorio: `nombre`, `telefono` (7–15 dígitos) y `direccion`; documento y correo, opcionales. Se guarda solo en `shipment_recipients` y ninguna respuesta lo devuelve. Cifrado, retención y eliminación deben aprobarse antes de producción. | Spec §4.6, §14. | PROVISIONAL |
+| DEC-SHP10 | Reanudación sin worker: lease `locked_until` (`BATCH_LEASE_SECONDS`) renovado en cada ítem. Una repetición idéntica con el lease vencido reanuda los ítems `PENDING`; con el lease vivo responde 202. El lote no guarda el contenido enviado (tiene PII), así que reanudar exige reenviar el mismo cuerpo. | Spec §6.5. | CONFIRMADA |
+| DEC-SHP11 | API key `tlx_<prefijo>_<secreto>`, mostrada una sola vez y guardada como SHA-256 (256 bits de entropía). Una key desconocida, malformada o revocada responde siempre 401, sin distinguir el caso; un cliente inactivo o una key sin el scope requerido, 403. El alta de clientes y keys se hace por CLI (`python -m app.clients.cli`), sin endpoints nuevos. | Spec §4.2, §5.4, §6.1. | CONFIRMADA |
+

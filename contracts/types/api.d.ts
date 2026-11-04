@@ -240,6 +240,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/shipment-batches": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Crea un lote de envíos (procesamiento parcial e idempotente)
+         * @description Scope `batches:create`. Cada envío se procesa en su propia transacción: los válidos obtienen guía interna, los inválidos se rechazan con errores por ítem. Misma `referencia_lote` y mismo contenido → 200 con el lote existente; contenido distinto → 409. 202 si el mismo lote se está procesando en otra solicitud.
+         */
+        post: operations["createShipmentBatch"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/shipment-batches/{batch_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Estado y contadores de un lote (solo el cliente propietario)
+         * @description Scope `batches:read`. Un lote de otro cliente responde 404.
+         */
+        get: operations["getShipmentBatch"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/shipment-batches/{batch_id}/items": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Resultados por ítem de un lote, paginados por línea
+         * @description Scope `batches:read`. Orden estable por `linea`; `cursor` es opaco.
+         */
+        get: operations["listShipmentBatchItems"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/metrics/channels": {
         parameters: {
             query?: never;
@@ -345,6 +405,16 @@ export interface components {
             /** Sha256 */
             sha256: string;
         };
+        /**
+         * BatchItemStatus
+         * @enum {string}
+         */
+        BatchItemStatus: "PENDING" | "CREATED" | "REJECTED";
+        /**
+         * BatchStatus
+         * @enum {string}
+         */
+        BatchStatus: "RECEIVED" | "PROCESSING" | "COMPLETED" | "COMPLETED_WITH_ERRORS";
         /** Body_uploadAttachment */
         Body_uploadAttachment: {
             /**
@@ -651,6 +721,27 @@ export interface components {
             error_code: string | null;
         };
         /**
+         * Destinatario
+         * @description Datos personales del destinatario (PII): se guardan aparte y nunca se devuelven.
+         */
+        Destinatario: {
+            /** Nombre */
+            nombre: string;
+            /** Telefono */
+            telefono: string;
+            /** Direccion */
+            direccion: string;
+            /**
+             * Tipo Documento
+             * @example CC
+             */
+            tipo_documento?: string | null;
+            /** Numero Documento */
+            numero_documento?: string | null;
+            /** Email */
+            email?: string | null;
+        };
+        /**
          * DocCode
          * @enum {string}
          */
@@ -682,6 +773,58 @@ export interface components {
             nota: string | null;
             fundamento: components["schemas"]["FundamentoNormativo"] | null;
         };
+        /**
+         * EnvioLoteItem
+         * @description Un envío del lote: los campos de cotización canónicos más referencia y destinatario.
+         */
+        EnvioLoteItem: {
+            /**
+             * Origen
+             * @example Bogotá D.C.
+             */
+            origen: string;
+            /**
+             * Destino
+             * @example Medellín
+             */
+            destino: string;
+            /** Alto Cm */
+            alto_cm: number;
+            /** Ancho Cm */
+            ancho_cm: number;
+            /** Largo Cm */
+            largo_cm: number;
+            /** Peso Real Kg */
+            peso_real_kg: number;
+            /**
+             * Valor Declarado Cop
+             * @description Pesos colombianos (COP), entero.
+             */
+            valor_declarado_cop: number;
+            /**
+             * Requiere Cadena Frio
+             * @description Extensión del MVP.
+             * @default false
+             */
+            requiere_cadena_frio: boolean;
+            /**
+             * Mercancia Peligrosa
+             * @description Extensión del MVP.
+             * @default false
+             */
+            mercancia_peligrosa: boolean;
+            /**
+             * Referencia Cliente
+             * @description Única por cliente empresarial, de forma permanente (DEC-SHP3).
+             */
+            referencia_cliente: string;
+            destinatario: components["schemas"]["Destinatario"];
+        };
+        /**
+         * ErrorCode
+         * @enum {string}
+         */
+        ErrorCode: "VALIDACION" | "GUIA_FORMATO_INVALIDO" | "GUIA_NO_ENCONTRADA" | "RUTA_SIN_TARIFA" | "CIUDAD_NO_RECONOCIDA" | "SERVICIO_NO_DISPONIBLE" | "EXCEDE_LIMITE_COBERTURA" | "LLM_NO_DISPONIBLE" | "RAG_SIN_EVIDENCIA" | "FIRMA_INVALIDA" | "LIMITE_DE_TASA" | "NO_ENCONTRADO" | "ERROR_INTERNO" | "NO_CONFIGURADO" | "NO_AUTORIZADO" | "NO_AUTENTICADO" | "IDEMPOTENCIA_CONFLICTO" | "LOTE_DEMASIADO_GRANDE" | "REFERENCIA_DUPLICADA" | "CIUDAD_NO_CUBIERTA" | "TARIFA_NO_DISPONIBLE" | "ARCHIVO_INVALIDO";
         /**
          * EscalationAction
          * @enum {string}
@@ -978,6 +1121,18 @@ export interface components {
          * @enum {string}
          */
         Intent: "TRACKING" | "COTIZACION" | "CONSULTA_DOCUMENTAL" | "CARGA_ESPECIAL" | "PQRS" | "SALUDO" | "HABLAR_CON_HUMANO" | "DESCONOCIDA";
+        /**
+         * ItemError
+         * @description Error de un ítem: código y campo, nunca el valor enviado.
+         */
+        ItemError: {
+            code: components["schemas"]["ErrorCode"];
+            /**
+             * Field
+             * @example destino
+             */
+            field: string | null;
+        };
         /** LiquidacionPreliminar */
         LiquidacionPreliminar: {
             /**
@@ -1351,6 +1506,121 @@ export interface components {
              */
             messages: components["schemas"]["HistoryEntry"][];
         };
+        /** ShipmentBatchItemResult */
+        ShipmentBatchItemResult: {
+            /**
+             * Linea
+             * @description Posición del envío en `envios`, desde 1.
+             */
+            linea: number;
+            /**
+             * Referencia Cliente
+             * @description null si el ítem no la traía válida.
+             */
+            referencia_cliente: string | null;
+            status: components["schemas"]["BatchItemStatus"];
+            /**
+             * Numero Guia
+             * @description Guía interna; solo si status=CREATED.
+             */
+            numero_guia: string | null;
+            /**
+             * Flete Total Cop
+             * @description Snapshot de la cotización aplicada.
+             */
+            flete_total_cop: number | null;
+            /**
+             * Formula Version
+             * @description `provisional-v1`: no es una tarifa comercial oficial.
+             */
+            formula_version: string | null;
+            /** Errores */
+            errores: components["schemas"]["ItemError"][];
+        };
+        /** ShipmentBatchItemsPage */
+        ShipmentBatchItemsPage: {
+            /** Items */
+            items: components["schemas"]["ShipmentBatchItemResult"][];
+            /**
+             * Next Cursor
+             * @description Opaco; null cuando no hay más resultados.
+             */
+            next_cursor: string | null;
+        };
+        /** ShipmentBatchRequest */
+        ShipmentBatchRequest: {
+            /**
+             * Referencia Lote
+             * @description Clave de idempotencia del lote por cliente. Si se envía el header `Idempotency-Key`, debe ser idéntico (DEC-SHP2).
+             */
+            referencia_lote: string;
+            /**
+             * Envios
+             * @description Cada envío se valida por separado: uno inválido se rechaza sin afectar a los demás. El máximo por lote lo fija `BATCH_MAX_ITEMS`.
+             */
+            envios: components["schemas"]["EnvioLoteItem"][];
+        };
+        /** ShipmentBatchResponse */
+        ShipmentBatchResponse: {
+            /**
+             * Lote Id
+             * Format: uuid4
+             */
+            lote_id: string;
+            /** Referencia Lote */
+            referencia_lote: string;
+            status: components["schemas"]["BatchStatus"];
+            /** Total */
+            total: number;
+            /** Aceptados */
+            aceptados: number;
+            /** Rechazados */
+            rechazados: number;
+            /** Pendientes */
+            pendientes: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Started At */
+            started_at: string | null;
+            /** Completed At */
+            completed_at: string | null;
+            /**
+             * Resultados
+             * @description Ordenados por `linea`.
+             */
+            resultados: components["schemas"]["ShipmentBatchItemResult"][];
+        };
+        /** ShipmentBatchSummary */
+        ShipmentBatchSummary: {
+            /**
+             * Lote Id
+             * Format: uuid4
+             */
+            lote_id: string;
+            /** Referencia Lote */
+            referencia_lote: string;
+            status: components["schemas"]["BatchStatus"];
+            /** Total */
+            total: number;
+            /** Aceptados */
+            aceptados: number;
+            /** Rechazados */
+            rechazados: number;
+            /** Pendientes */
+            pendientes: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Started At */
+            started_at: string | null;
+            /** Completed At */
+            completed_at: string | null;
+        };
         /** TarifaAplicada */
         TarifaAplicada: {
             /**
@@ -1656,11 +1926,6 @@ export interface components {
             /** Request Id */
             request_id: string;
         };
-        /**
-         * ErrorCode
-         * @enum {string}
-         */
-        ErrorCode: "VALIDACION" | "GUIA_FORMATO_INVALIDO" | "GUIA_NO_ENCONTRADA" | "RUTA_SIN_TARIFA" | "CIUDAD_NO_RECONOCIDA" | "SERVICIO_NO_DISPONIBLE" | "EXCEDE_LIMITE_COBERTURA" | "LLM_NO_DISPONIBLE" | "RAG_SIN_EVIDENCIA" | "FIRMA_INVALIDA" | "LIMITE_DE_TASA" | "NO_ENCONTRADO" | "ERROR_INTERNO" | "NO_CONFIGURADO" | "NO_AUTORIZADO";
         /**
          * ErrorEnvelope
          * @description The single error shape returned by every endpoint.
@@ -2866,6 +3131,281 @@ export interface operations {
             };
             /** @description Códigos: NO_AUTORIZADO */
             403: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: VALIDACION */
+            422: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: ERROR_INTERNO */
+            500: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    createShipmentBatch: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Identificador de correlación; se genera si falta. */
+                "X-Request-ID"?: components["parameters"]["XRequestId"];
+                "Idempotency-Key"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ShipmentBatchRequest"];
+            };
+        };
+        responses: {
+            /** @description Repetición idempotente */
+            200: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShipmentBatchResponse"];
+                };
+            };
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShipmentBatchResponse"];
+                };
+            };
+            /** @description El lote sigue en proceso */
+            202: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShipmentBatchResponse"];
+                };
+            };
+            /** @description Códigos: NO_AUTENTICADO */
+            401: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: NO_AUTORIZADO */
+            403: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: IDEMPOTENCIA_CONFLICTO */
+            409: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: LOTE_DEMASIADO_GRANDE */
+            413: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: VALIDACION */
+            422: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: LIMITE_DE_TASA */
+            429: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: ERROR_INTERNO */
+            500: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    getShipmentBatch: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Identificador de correlación; se genera si falta. */
+                "X-Request-ID"?: components["parameters"]["XRequestId"];
+            };
+            path: {
+                batch_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShipmentBatchSummary"];
+                };
+            };
+            /** @description Códigos: NO_AUTENTICADO */
+            401: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: NO_AUTORIZADO */
+            403: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: NO_ENCONTRADO */
+            404: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: VALIDACION */
+            422: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: ERROR_INTERNO */
+            500: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    listShipmentBatchItems: {
+        parameters: {
+            query?: {
+                status?: components["schemas"]["BatchItemStatus"] | null;
+                cursor?: string | null;
+                limit?: number;
+            };
+            header?: {
+                /** @description Identificador de correlación; se genera si falta. */
+                "X-Request-ID"?: components["parameters"]["XRequestId"];
+            };
+            path: {
+                batch_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShipmentBatchItemsPage"];
+                };
+            };
+            /** @description Códigos: NO_AUTENTICADO */
+            401: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: NO_AUTORIZADO */
+            403: {
+                headers: {
+                    "X-Request-ID": components["headers"]["XRequestId"];
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Códigos: NO_ENCONTRADO */
+            404: {
                 headers: {
                     "X-Request-ID": components["headers"]["XRequestId"];
                     [name: string]: unknown;

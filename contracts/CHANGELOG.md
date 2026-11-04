@@ -11,6 +11,19 @@ partir de la Puerta A** (contrato congelado):
 Antes de la Puerta A las versiones pueden incluir ajustes no aditivos (nadie consume todavía).
 Los demás agentes proponen cambios en [`docs/contract-change-requests.md`](../docs/contract-change-requests.md).
 
+## 1.3.0 — 2026-11-04 · envíos masivos B2B (P0)
+
+Cambio **aditivo** (MINOR): nada existente cambia de forma ni de comportamiento.
+Decisiones en [`DECISIONS.md`](DECISIONS.md) §5 (DEC-SHP1 a DEC-SHP11).
+
+| Cambio | Motivo |
+|--------|--------|
+| `POST /api/v1/shipment-batches`, `GET /api/v1/shipment-batches/{batch_id}` y `GET /api/v1/shipment-batches/{batch_id}/items` (P0), con esquema de seguridad `ApiKey` (`Authorization: Bearer`). | Especificación P0 de envíos masivos §5. |
+| `shipment_batches.py`: `ShipmentBatchRequest`, `EnvioLoteItem` (hereda los campos canónicos de `CotizacionRequest`), `Destinatario`, `ItemError`, `ShipmentBatchItemResult`, `ShipmentBatchSummary`, `ShipmentBatchResponse`, `ShipmentBatchItemsPage`, `ApiScope`, `BatchStatus` y `BatchItemStatus`. | Spec §5; sin duplicar modelos existentes. |
+| `ErrorCode`: `NO_AUTENTICADO` (401), `IDEMPOTENCIA_CONFLICTO` (409), `LOTE_DEMASIADO_GRANDE` (413), `REFERENCIA_DUPLICADA`, `CIUDAD_NO_CUBIERTA`, `TARIFA_NO_DISPONIBLE` y `ARCHIVO_INVALIDO` (reservado). Cada uno con su ejemplo `error.*.json`. | Spec §9. |
+| `EnvVar`: `BATCH_MAX_ITEMS`, `BATCH_MAX_BODY_BYTES`, `BATCH_RATE_LIMIT_PER_MINUTE` y `BATCH_LEASE_SECONDS`. | Límites de lote y reanudación (spec §6.5 y §8). |
+| 4 ejemplos nuevos (`shipment-batch.*`): petición con un envío válido, una ruta sin tarifa y una referencia repetida; respuesta 201; resumen; página de ítems. | Mocks y validación del YAML. |
+
 ## 1.2.0 — 2026-11-03 · candidata a Puerta A (`contracts-v1`)
 
 Alineación con el prompt oficial de P01 y con lo que exigen P02–P09 del Prompt Pack.

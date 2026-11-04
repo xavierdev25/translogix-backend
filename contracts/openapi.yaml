@@ -22,7 +22,7 @@ info:
     * Todo error usa el sobre `ErrorEnvelope` con un `code` estable (`x-error-codes` por respuesta).
 
     '
-  version: 1.2.0
+  version: 1.3.0
 paths:
   /api/v1/tracking/{guia}:
     get:
@@ -3373,6 +3373,620 @@ paths:
             X-Request-ID:
               $ref: '#/components/headers/XRequestId'
       x-priority: P1
+  /api/v1/shipment-batches:
+    post:
+      tags:
+      - envíos masivos
+      summary: Crea un lote de envíos (procesamiento parcial e idempotente)
+      description: 'Scope `batches:create`. Cada envío se procesa en su propia transacción: los válidos
+        obtienen guía interna, los inválidos se rechazan con errores por ítem. Misma `referencia_lote`
+        y mismo contenido → 200 con el lote existente; contenido distinto → 409. 202 si el mismo lote
+        se está procesando en otra solicitud.'
+      operationId: createShipmentBatch
+      security:
+      - ApiKey: []
+      parameters:
+      - $ref: '#/components/parameters/XRequestId'
+      - name: Idempotency-Key
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+            maxLength: 64
+          - type: 'null'
+          title: Idempotency-Key
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ShipmentBatchRequest'
+            examples:
+              shipment-batch.request:
+                summary: Lote con un envío válido, una ruta sin tarifa y una referencia repetida
+                value:
+                  referencia_lote: LOTE-CLIENTE-0001
+                  envios:
+                  - referencia_cliente: PEDIDO-1001
+                    origen: Bogotá D.C.
+                    destino: Medellín
+                    alto_cm: 20
+                    ancho_cm: 30
+                    largo_cm: 40
+                    peso_real_kg: 5.5
+                    valor_declarado_cop: 250000
+                    requiere_cadena_frio: false
+                    mercancia_peligrosa: false
+                    destinatario:
+                      nombre: Destinatario Demo
+                      telefono: '3000000000'
+                      direccion: 'Calle 10 # 20-30'
+                  - referencia_cliente: PEDIDO-1002
+                    origen: Bogotá D.C.
+                    destino: Envigado
+                    alto_cm: 20
+                    ancho_cm: 30
+                    largo_cm: 40
+                    peso_real_kg: 5.5
+                    valor_declarado_cop: 250000
+                    requiere_cadena_frio: false
+                    mercancia_peligrosa: false
+                    destinatario:
+                      nombre: Destinatario Demo
+                      telefono: '3000000000'
+                      direccion: 'Calle 10 # 20-30'
+                  - referencia_cliente: PEDIDO-1001
+                    origen: Bogotá D.C.
+                    destino: Medellín
+                    alto_cm: 20
+                    ancho_cm: 30
+                    largo_cm: 40
+                    peso_real_kg: 5.5
+                    valor_declarado_cop: 250000
+                    requiere_cadena_frio: false
+                    mercancia_peligrosa: false
+                    destinatario:
+                      nombre: Destinatario Demo
+                      telefono: '3000000000'
+                      direccion: 'Calle 10 # 20-30'
+      responses:
+        '200':
+          description: Repetición idempotente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShipmentBatchResponse'
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShipmentBatchResponse'
+              examples:
+                shipment-batch.response:
+                  summary: 'Procesamiento parcial: 1 creado, 2 rechazados'
+                  value:
+                    lote_id: 5f1c2b7e-3d4a-4e8b-9c0d-1a2b3c4d5e6f
+                    referencia_lote: LOTE-CLIENTE-0001
+                    status: COMPLETED_WITH_ERRORS
+                    total: 3
+                    aceptados: 1
+                    rechazados: 2
+                    pendientes: 0
+                    created_at: '2026-11-04T09:15:00-05:00'
+                    started_at: '2026-11-04T09:15:00-05:00'
+                    completed_at: '2026-11-04T09:15:01-05:00'
+                    resultados:
+                    - linea: 1
+                      referencia_cliente: PEDIDO-1001
+                      status: CREATED
+                      numero_guia: TLX-200001-CO
+                      flete_total_cop: 21000
+                      formula_version: provisional-v1
+                      errores: []
+                    - linea: 2
+                      referencia_cliente: PEDIDO-1002
+                      status: REJECTED
+                      numero_guia: null
+                      flete_total_cop: null
+                      formula_version: null
+                      errores:
+                      - code: TARIFA_NO_DISPONIBLE
+                        field: destino
+                    - linea: 3
+                      referencia_cliente: PEDIDO-1001
+                      status: REJECTED
+                      numero_guia: null
+                      flete_total_cop: null
+                      formula_version: null
+                      errores:
+                      - code: REFERENCIA_DUPLICADA
+                        field: referencia_cliente
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '202':
+          description: El lote sigue en proceso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShipmentBatchResponse'
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '401':
+          description: 'Códigos: NO_AUTENTICADO'
+          x-error-codes:
+          - NO_AUTENTICADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                NO_AUTENTICADO:
+                  value:
+                    error:
+                      code: NO_AUTENTICADO
+                      message: Falta la credencial de acceso o no es válida.
+                      details: {}
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '403':
+          description: 'Códigos: NO_AUTORIZADO'
+          x-error-codes:
+          - NO_AUTORIZADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                NO_AUTORIZADO:
+                  value:
+                    error:
+                      code: NO_AUTORIZADO
+                      message: No tienes autorización para realizar esta operación.
+                      details: {}
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '409':
+          description: 'Códigos: IDEMPOTENCIA_CONFLICTO'
+          x-error-codes:
+          - IDEMPOTENCIA_CONFLICTO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                IDEMPOTENCIA_CONFLICTO:
+                  value:
+                    error:
+                      code: IDEMPOTENCIA_CONFLICTO
+                      message: Ya existe un lote con esa referencia y un contenido diferente.
+                      details:
+                        referencia_lote: LOTE-CLIENTE-0001
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '413':
+          description: 'Códigos: LOTE_DEMASIADO_GRANDE'
+          x-error-codes:
+          - LOTE_DEMASIADO_GRANDE
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                LOTE_DEMASIADO_GRANDE:
+                  value:
+                    error:
+                      code: LOTE_DEMASIADO_GRANDE
+                      message: El lote supera el número máximo de envíos o el tamaño permitido.
+                      details:
+                        max_items: 500
+                        max_bytes: 2097152
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '422':
+          description: 'Códigos: VALIDACION'
+          x-error-codes:
+          - VALIDACION
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                VALIDACION:
+                  value:
+                    error:
+                      code: VALIDACION
+                      message: 'Revisa los datos enviados: hay campos inválidos o incompletos.'
+                      details:
+                        campos:
+                        - loc:
+                          - body
+                          - alto_cm
+                          msg: Input should be greater than 0
+                          type: greater_than
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '429':
+          description: 'Códigos: LIMITE_DE_TASA'
+          x-error-codes:
+          - LIMITE_DE_TASA
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                LIMITE_DE_TASA:
+                  value:
+                    error:
+                      code: LIMITE_DE_TASA
+                      message: Recibimos demasiadas solicitudes seguidas. Espera un momento e intenta
+                        de nuevo.
+                      details:
+                        reintentar_en_segundos: 30
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '500':
+          description: 'Códigos: ERROR_INTERNO'
+          x-error-codes:
+          - ERROR_INTERNO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                ERROR_INTERNO:
+                  value:
+                    error:
+                      code: ERROR_INTERNO
+                      message: Ocurrió un error inesperado. Intenta de nuevo más tarde.
+                      details: {}
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+      x-priority: P0
+  /api/v1/shipment-batches/{batch_id}:
+    get:
+      tags:
+      - envíos masivos
+      summary: Estado y contadores de un lote (solo el cliente propietario)
+      description: Scope `batches:read`. Un lote de otro cliente responde 404.
+      operationId: getShipmentBatch
+      security:
+      - ApiKey: []
+      parameters:
+      - $ref: '#/components/parameters/XRequestId'
+      - name: batch_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Batch Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShipmentBatchSummary'
+              examples:
+                shipment-batch.summary:
+                  summary: Estado y contadores del lote
+                  value:
+                    lote_id: 5f1c2b7e-3d4a-4e8b-9c0d-1a2b3c4d5e6f
+                    referencia_lote: LOTE-CLIENTE-0001
+                    status: COMPLETED_WITH_ERRORS
+                    total: 3
+                    aceptados: 1
+                    rechazados: 2
+                    pendientes: 0
+                    created_at: '2026-11-04T09:15:00-05:00'
+                    started_at: '2026-11-04T09:15:00-05:00'
+                    completed_at: '2026-11-04T09:15:01-05:00'
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '401':
+          description: 'Códigos: NO_AUTENTICADO'
+          x-error-codes:
+          - NO_AUTENTICADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                NO_AUTENTICADO:
+                  value:
+                    error:
+                      code: NO_AUTENTICADO
+                      message: Falta la credencial de acceso o no es válida.
+                      details: {}
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '403':
+          description: 'Códigos: NO_AUTORIZADO'
+          x-error-codes:
+          - NO_AUTORIZADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                NO_AUTORIZADO:
+                  value:
+                    error:
+                      code: NO_AUTORIZADO
+                      message: No tienes autorización para realizar esta operación.
+                      details: {}
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '404':
+          description: 'Códigos: NO_ENCONTRADO'
+          x-error-codes:
+          - NO_ENCONTRADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                NO_ENCONTRADO:
+                  value:
+                    error:
+                      code: NO_ENCONTRADO
+                      message: No encontramos el recurso solicitado.
+                      details: {}
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '422':
+          description: 'Códigos: VALIDACION'
+          x-error-codes:
+          - VALIDACION
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                VALIDACION:
+                  value:
+                    error:
+                      code: VALIDACION
+                      message: 'Revisa los datos enviados: hay campos inválidos o incompletos.'
+                      details:
+                        campos:
+                        - loc:
+                          - body
+                          - alto_cm
+                          msg: Input should be greater than 0
+                          type: greater_than
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '500':
+          description: 'Códigos: ERROR_INTERNO'
+          x-error-codes:
+          - ERROR_INTERNO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                ERROR_INTERNO:
+                  value:
+                    error:
+                      code: ERROR_INTERNO
+                      message: Ocurrió un error inesperado. Intenta de nuevo más tarde.
+                      details: {}
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+      x-priority: P0
+  /api/v1/shipment-batches/{batch_id}/items:
+    get:
+      tags:
+      - envíos masivos
+      summary: Resultados por ítem de un lote, paginados por línea
+      description: Scope `batches:read`. Orden estable por `linea`; `cursor` es opaco.
+      operationId: listShipmentBatchItems
+      security:
+      - ApiKey: []
+      parameters:
+      - $ref: '#/components/parameters/XRequestId'
+      - name: batch_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Batch Id
+      - name: status
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - $ref: '#/components/schemas/BatchItemStatus'
+          - type: 'null'
+          title: Status
+      - name: cursor
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+            maxLength: 64
+          - type: 'null'
+          title: Cursor
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 200
+          minimum: 1
+          default: 50
+          title: Limit
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShipmentBatchItemsPage'
+              examples:
+                shipment-batch.items:
+                  summary: Ítems rechazados del lote (status=REJECTED)
+                  value:
+                    items:
+                    - linea: 2
+                      referencia_cliente: PEDIDO-1002
+                      status: REJECTED
+                      numero_guia: null
+                      flete_total_cop: null
+                      formula_version: null
+                      errores:
+                      - code: TARIFA_NO_DISPONIBLE
+                        field: destino
+                    - linea: 3
+                      referencia_cliente: PEDIDO-1001
+                      status: REJECTED
+                      numero_guia: null
+                      flete_total_cop: null
+                      formula_version: null
+                      errores:
+                      - code: REFERENCIA_DUPLICADA
+                        field: referencia_cliente
+                    next_cursor: null
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '401':
+          description: 'Códigos: NO_AUTENTICADO'
+          x-error-codes:
+          - NO_AUTENTICADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                NO_AUTENTICADO:
+                  value:
+                    error:
+                      code: NO_AUTENTICADO
+                      message: Falta la credencial de acceso o no es válida.
+                      details: {}
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '403':
+          description: 'Códigos: NO_AUTORIZADO'
+          x-error-codes:
+          - NO_AUTORIZADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                NO_AUTORIZADO:
+                  value:
+                    error:
+                      code: NO_AUTORIZADO
+                      message: No tienes autorización para realizar esta operación.
+                      details: {}
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '404':
+          description: 'Códigos: NO_ENCONTRADO'
+          x-error-codes:
+          - NO_ENCONTRADO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                NO_ENCONTRADO:
+                  value:
+                    error:
+                      code: NO_ENCONTRADO
+                      message: No encontramos el recurso solicitado.
+                      details: {}
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '422':
+          description: 'Códigos: VALIDACION'
+          x-error-codes:
+          - VALIDACION
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                VALIDACION:
+                  value:
+                    error:
+                      code: VALIDACION
+                      message: 'Revisa los datos enviados: hay campos inválidos o incompletos.'
+                      details:
+                        campos:
+                        - loc:
+                          - body
+                          - alto_cm
+                          msg: Input should be greater than 0
+                          type: greater_than
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+        '500':
+          description: 'Códigos: ERROR_INTERNO'
+          x-error-codes:
+          - ERROR_INTERNO
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                ERROR_INTERNO:
+                  value:
+                    error:
+                      code: ERROR_INTERNO
+                      message: Ocurrió un error inesperado. Intenta de nuevo más tarde.
+                      details: {}
+                      request_id: 0b6f3c1e-8a4d-4f2b-9e7a-5c3d2b1a0f9e
+          headers:
+            X-Request-ID:
+              $ref: '#/components/headers/XRequestId'
+      x-priority: P0
   /api/v1/metrics/channels:
     get:
       tags:
@@ -3776,6 +4390,21 @@ components:
       - declared_doc_code
       - sha256
       title: AttachmentUploadResponse
+    BatchItemStatus:
+      type: string
+      enum:
+      - PENDING
+      - CREATED
+      - REJECTED
+      title: BatchItemStatus
+    BatchStatus:
+      type: string
+      enum:
+      - RECEIVED
+      - PROCESSING
+      - COMPLETED
+      - COMPLETED_WITH_ERRORS
+      title: BatchStatus
     Body_uploadAttachment:
       properties:
         file:
@@ -4322,6 +4951,51 @@ components:
       - provider_message_id
       - error_code
       title: DeliveryResult
+    Destinatario:
+      properties:
+        nombre:
+          type: string
+          maxLength: 120
+          minLength: 1
+          title: Nombre
+        telefono:
+          type: string
+          pattern: ^\+?\d{7,15}$
+          title: Telefono
+        direccion:
+          type: string
+          maxLength: 200
+          minLength: 1
+          title: Direccion
+        tipo_documento:
+          anyOf:
+          - type: string
+            maxLength: 10
+          - type: 'null'
+          title: Tipo Documento
+          examples:
+          - CC
+        numero_documento:
+          anyOf:
+          - type: string
+            maxLength: 20
+          - type: 'null'
+          title: Numero Documento
+        email:
+          anyOf:
+          - type: string
+            maxLength: 120
+            pattern: ^[^@\s]+@[^@\s]+\.[^@\s]+$
+          - type: 'null'
+          title: Email
+      additionalProperties: false
+      type: object
+      required:
+      - nombre
+      - telefono
+      - direccion
+      title: Destinatario
+      description: 'Datos personales del destinatario (PII): se guardan aparte y nunca se devuelven.'
     DocCode:
       type: string
       enum:
@@ -4394,6 +5068,100 @@ components:
       - nota
       - fundamento
       title: Elegibilidad
+    EnvioLoteItem:
+      properties:
+        origen:
+          type: string
+          maxLength: 80
+          minLength: 1
+          title: Origen
+          examples:
+          - Bogotá D.C.
+        destino:
+          type: string
+          maxLength: 80
+          minLength: 1
+          title: Destino
+          examples:
+          - Medellín
+        alto_cm:
+          type: number
+          exclusiveMinimum: 0.0
+          title: Alto Cm
+        ancho_cm:
+          type: number
+          exclusiveMinimum: 0.0
+          title: Ancho Cm
+        largo_cm:
+          type: number
+          exclusiveMinimum: 0.0
+          title: Largo Cm
+        peso_real_kg:
+          type: number
+          exclusiveMinimum: 0.0
+          title: Peso Real Kg
+        valor_declarado_cop:
+          type: integer
+          minimum: 0.0
+          title: Valor Declarado Cop
+          description: Pesos colombianos (COP), entero.
+        requiere_cadena_frio:
+          type: boolean
+          title: Requiere Cadena Frio
+          description: Extensión del MVP.
+          default: false
+        mercancia_peligrosa:
+          type: boolean
+          title: Mercancia Peligrosa
+          description: Extensión del MVP.
+          default: false
+        referencia_cliente:
+          type: string
+          pattern: ^[A-Za-z0-9][A-Za-z0-9._:/#-]{0,63}$
+          title: Referencia Cliente
+          description: Única por cliente empresarial, de forma permanente (DEC-SHP3).
+        destinatario:
+          $ref: '#/components/schemas/Destinatario'
+      additionalProperties: false
+      type: object
+      required:
+      - origen
+      - destino
+      - alto_cm
+      - ancho_cm
+      - largo_cm
+      - peso_real_kg
+      - valor_declarado_cop
+      - referencia_cliente
+      - destinatario
+      title: EnvioLoteItem
+      description: 'Un envío del lote: los campos de cotización canónicos más referencia y destinatario.'
+    ErrorCode:
+      type: string
+      enum:
+      - VALIDACION
+      - GUIA_FORMATO_INVALIDO
+      - GUIA_NO_ENCONTRADA
+      - RUTA_SIN_TARIFA
+      - CIUDAD_NO_RECONOCIDA
+      - SERVICIO_NO_DISPONIBLE
+      - EXCEDE_LIMITE_COBERTURA
+      - LLM_NO_DISPONIBLE
+      - RAG_SIN_EVIDENCIA
+      - FIRMA_INVALIDA
+      - LIMITE_DE_TASA
+      - NO_ENCONTRADO
+      - ERROR_INTERNO
+      - NO_CONFIGURADO
+      - NO_AUTORIZADO
+      - NO_AUTENTICADO
+      - IDEMPOTENCIA_CONFLICTO
+      - LOTE_DEMASIADO_GRANDE
+      - REFERENCIA_DUPLICADA
+      - CIUDAD_NO_CUBIERTA
+      - TARIFA_NO_DISPONIBLE
+      - ARCHIVO_INVALIDO
+      title: ErrorCode
     EscalationAction:
       type: string
       enum:
@@ -4900,6 +5668,24 @@ components:
       - HABLAR_CON_HUMANO
       - DESCONOCIDA
       title: Intent
+    ItemError:
+      properties:
+        code:
+          $ref: '#/components/schemas/ErrorCode'
+        field:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Field
+          examples:
+          - destino
+      additionalProperties: false
+      type: object
+      required:
+      - code
+      - field
+      title: ItemError
+      description: 'Error de un ítem: código y campo, nunca el valor enviado.'
     LiquidacionPreliminar:
       properties:
         base_cop:
@@ -5579,6 +6365,222 @@ components:
       - status
       - messages
       title: SessionHistory
+    ShipmentBatchItemResult:
+      properties:
+        linea:
+          type: integer
+          minimum: 1.0
+          title: Linea
+          description: Posición del envío en `envios`, desde 1.
+        referencia_cliente:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Referencia Cliente
+          description: null si el ítem no la traía válida.
+        status:
+          $ref: '#/components/schemas/BatchItemStatus'
+        numero_guia:
+          anyOf:
+          - type: string
+            pattern: ^TLX-\d{6}-CO$
+            examples:
+            - TLX-984021-CO
+          - type: 'null'
+          title: Numero Guia
+          description: Guía interna; solo si status=CREATED.
+        flete_total_cop:
+          anyOf:
+          - type: integer
+            minimum: 0.0
+            description: Pesos colombianos (COP), entero.
+          - type: 'null'
+          title: Flete Total Cop
+          description: Snapshot de la cotización aplicada.
+        formula_version:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Formula Version
+          description: '`provisional-v1`: no es una tarifa comercial oficial.'
+        errores:
+          items:
+            $ref: '#/components/schemas/ItemError'
+          type: array
+          title: Errores
+      additionalProperties: false
+      type: object
+      required:
+      - linea
+      - referencia_cliente
+      - status
+      - numero_guia
+      - flete_total_cop
+      - formula_version
+      - errores
+      title: ShipmentBatchItemResult
+    ShipmentBatchItemsPage:
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/ShipmentBatchItemResult'
+          type: array
+          title: Items
+        next_cursor:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Next Cursor
+          description: Opaco; null cuando no hay más resultados.
+      additionalProperties: false
+      type: object
+      required:
+      - items
+      - next_cursor
+      title: ShipmentBatchItemsPage
+    ShipmentBatchRequest:
+      properties:
+        referencia_lote:
+          type: string
+          pattern: ^[A-Za-z0-9][A-Za-z0-9._:/#-]{0,63}$
+          title: Referencia Lote
+          description: Clave de idempotencia del lote por cliente. Si se envía el header `Idempotency-Key`,
+            debe ser idéntico (DEC-SHP2).
+        envios:
+          items:
+            $ref: '#/components/schemas/EnvioLoteItem'
+          type: array
+          minItems: 1
+          title: Envios
+          description: 'Cada envío se valida por separado: uno inválido se rechaza sin afectar a los demás.
+            El máximo por lote lo fija `BATCH_MAX_ITEMS`.'
+      additionalProperties: false
+      type: object
+      required:
+      - referencia_lote
+      - envios
+      title: ShipmentBatchRequest
+    ShipmentBatchResponse:
+      properties:
+        lote_id:
+          type: string
+          format: uuid4
+          title: Lote Id
+        referencia_lote:
+          type: string
+          title: Referencia Lote
+        status:
+          $ref: '#/components/schemas/BatchStatus'
+        total:
+          type: integer
+          minimum: 0.0
+          title: Total
+        aceptados:
+          type: integer
+          minimum: 0.0
+          title: Aceptados
+        rechazados:
+          type: integer
+          minimum: 0.0
+          title: Rechazados
+        pendientes:
+          type: integer
+          minimum: 0.0
+          title: Pendientes
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+        started_at:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Started At
+        completed_at:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Completed At
+        resultados:
+          items:
+            $ref: '#/components/schemas/ShipmentBatchItemResult'
+          type: array
+          title: Resultados
+          description: Ordenados por `linea`.
+      additionalProperties: false
+      type: object
+      required:
+      - lote_id
+      - referencia_lote
+      - status
+      - total
+      - aceptados
+      - rechazados
+      - pendientes
+      - created_at
+      - started_at
+      - completed_at
+      - resultados
+      title: ShipmentBatchResponse
+    ShipmentBatchSummary:
+      properties:
+        lote_id:
+          type: string
+          format: uuid4
+          title: Lote Id
+        referencia_lote:
+          type: string
+          title: Referencia Lote
+        status:
+          $ref: '#/components/schemas/BatchStatus'
+        total:
+          type: integer
+          minimum: 0.0
+          title: Total
+        aceptados:
+          type: integer
+          minimum: 0.0
+          title: Aceptados
+        rechazados:
+          type: integer
+          minimum: 0.0
+          title: Rechazados
+        pendientes:
+          type: integer
+          minimum: 0.0
+          title: Pendientes
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+        started_at:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Started At
+        completed_at:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Completed At
+      additionalProperties: false
+      type: object
+      required:
+      - lote_id
+      - referencia_lote
+      - status
+      - total
+      - aceptados
+      - rechazados
+      - pendientes
+      - created_at
+      - started_at
+      - completed_at
+      title: ShipmentBatchSummary
     TarifaAplicada:
       properties:
         tipo:
@@ -6084,25 +7086,6 @@ components:
       - request_id
       title: ErrorBody
       type: object
-    ErrorCode:
-      enum:
-      - VALIDACION
-      - GUIA_FORMATO_INVALIDO
-      - GUIA_NO_ENCONTRADA
-      - RUTA_SIN_TARIFA
-      - CIUDAD_NO_RECONOCIDA
-      - SERVICIO_NO_DISPONIBLE
-      - EXCEDE_LIMITE_COBERTURA
-      - LLM_NO_DISPONIBLE
-      - RAG_SIN_EVIDENCIA
-      - FIRMA_INVALIDA
-      - LIMITE_DE_TASA
-      - NO_ENCONTRADO
-      - ERROR_INTERNO
-      - NO_CONFIGURADO
-      - NO_AUTORIZADO
-      title: ErrorCode
-      type: string
     ErrorEnvelope:
       additionalProperties: false
       description: The single error shape returned by every endpoint.
@@ -6768,6 +7751,10 @@ components:
       description: Token de administración definido en `ADMIN_TOKEN` (entorno).
       in: header
       name: X-Admin-Token
+    ApiKey:
+      type: http
+      description: 'API key de un cliente empresarial: `Authorization: Bearer <api_key>`.'
+      scheme: bearer
   parameters:
     XRequestId:
       name: X-Request-ID

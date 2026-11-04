@@ -1,5 +1,5 @@
 {
-  "contract_version": "1.2.0",
+  "contract_version": "1.3.0",
   "match_semantics": {
     "path": "valores exactos de parámetros de ruta",
     "body": "subconjunto exacto del cuerpo JSON de la petición",
@@ -841,6 +841,148 @@
           "status": 403,
           "code": "NO_AUTORIZADO",
           "example": "examples/error.no-autorizado.json"
+        },
+        {
+          "status": 422,
+          "code": "VALIDACION",
+          "example": "examples/error.validacion.json"
+        },
+        {
+          "status": 500,
+          "code": "ERROR_INTERNO",
+          "example": "examples/error.error-interno.json"
+        }
+      ]
+    },
+    {
+      "operationId": "createShipmentBatch",
+      "method": "POST",
+      "path": "/api/v1/shipment-batches",
+      "requests": [
+        {
+          "example": "examples/shipment-batch.request.json",
+          "scenario": null,
+          "pendiente_de_servicio_real": null
+        }
+      ],
+      "responses": [
+        {
+          "status": 201,
+          "example": "examples/shipment-batch.response.json",
+          "scenario": null,
+          "match": null,
+          "pendiente_de_servicio_real": "lote_id, numero_guia y marcas de tiempo: los genera el servicio real"
+        }
+      ],
+      "errors": [
+        {
+          "status": 401,
+          "code": "NO_AUTENTICADO",
+          "example": "examples/error.no-autenticado.json"
+        },
+        {
+          "status": 403,
+          "code": "NO_AUTORIZADO",
+          "example": "examples/error.no-autorizado.json"
+        },
+        {
+          "status": 409,
+          "code": "IDEMPOTENCIA_CONFLICTO",
+          "example": "examples/error.idempotencia-conflicto.json"
+        },
+        {
+          "status": 413,
+          "code": "LOTE_DEMASIADO_GRANDE",
+          "example": "examples/error.lote-demasiado-grande.json"
+        },
+        {
+          "status": 422,
+          "code": "VALIDACION",
+          "example": "examples/error.validacion.json"
+        },
+        {
+          "status": 429,
+          "code": "LIMITE_DE_TASA",
+          "example": "examples/error.limite-de-tasa.json"
+        },
+        {
+          "status": 500,
+          "code": "ERROR_INTERNO",
+          "example": "examples/error.error-interno.json"
+        }
+      ]
+    },
+    {
+      "operationId": "getShipmentBatch",
+      "method": "GET",
+      "path": "/api/v1/shipment-batches/{batch_id}",
+      "requests": [],
+      "responses": [
+        {
+          "status": 200,
+          "example": "examples/shipment-batch.summary.json",
+          "scenario": null,
+          "match": null,
+          "pendiente_de_servicio_real": "lote_id y marcas de tiempo: los genera el servicio real"
+        }
+      ],
+      "errors": [
+        {
+          "status": 401,
+          "code": "NO_AUTENTICADO",
+          "example": "examples/error.no-autenticado.json"
+        },
+        {
+          "status": 403,
+          "code": "NO_AUTORIZADO",
+          "example": "examples/error.no-autorizado.json"
+        },
+        {
+          "status": 404,
+          "code": "NO_ENCONTRADO",
+          "example": "examples/error.no-encontrado.json"
+        },
+        {
+          "status": 422,
+          "code": "VALIDACION",
+          "example": "examples/error.validacion.json"
+        },
+        {
+          "status": 500,
+          "code": "ERROR_INTERNO",
+          "example": "examples/error.error-interno.json"
+        }
+      ]
+    },
+    {
+      "operationId": "listShipmentBatchItems",
+      "method": "GET",
+      "path": "/api/v1/shipment-batches/{batch_id}/items",
+      "requests": [],
+      "responses": [
+        {
+          "status": 200,
+          "example": "examples/shipment-batch.items.json",
+          "scenario": null,
+          "match": null,
+          "pendiente_de_servicio_real": null
+        }
+      ],
+      "errors": [
+        {
+          "status": 401,
+          "code": "NO_AUTENTICADO",
+          "example": "examples/error.no-autenticado.json"
+        },
+        {
+          "status": 403,
+          "code": "NO_AUTORIZADO",
+          "example": "examples/error.no-autorizado.json"
+        },
+        {
+          "status": 404,
+          "code": "NO_ENCONTRADO",
+          "example": "examples/error.no-encontrado.json"
         },
         {
           "status": 422,

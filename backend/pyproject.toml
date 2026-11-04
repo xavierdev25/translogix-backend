@@ -47,6 +47,7 @@ select = [
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["S101", "PLR2004"]
 "app/contracts/__main__.py" = ["T201"]
+"app/clients/cli.py" = ["T201"]
 # "›" is the context separator the ingestion spec prescribes ("[DOC › sección]").
 "app/modules/rag/*.py" = ["RUF001", "RUF003"]
 

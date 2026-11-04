@@ -61,6 +61,11 @@ class Settings(BaseSettings):
 
     cors_allow_origins: Annotated[list[str], NoDecode] = Field(default_factory=list)
     chat_rate_limit_per_minute: int = Field(default=30, ge=0)  # 0 = sin límite
+    # Bulk shipments (B2B API, contract 1.3.0).
+    batch_max_items: int = Field(default=500, gt=0)
+    batch_max_body_bytes: int = Field(default=2 * 1024 * 1024, gt=0)
+    batch_rate_limit_per_minute: int = Field(default=10, ge=0)  # 0 = sin límite
+    batch_lease_seconds: int = Field(default=60, gt=0)
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
     clock_override: AwareDatetime | None = None
 

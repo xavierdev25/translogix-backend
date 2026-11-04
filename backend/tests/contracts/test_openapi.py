@@ -32,6 +32,9 @@ EXPECTED_SURFACE = {
     ("get", "/api/v1/handoffs"),
     ("get", "/api/v1/metrics/channels"),
     ("post", "/api/v1/admin/rag/reindex"),
+    ("post", "/api/v1/shipment-batches"),  # 1.3.0: bulk shipments (B2B, P0)
+    ("get", "/api/v1/shipment-batches/{batch_id}"),
+    ("get", "/api/v1/shipment-batches/{batch_id}/items"),
     ("get", "/health"),
     ("get", "/ready"),
 }
@@ -118,6 +121,13 @@ def test_protected_operations_declare_the_admin_token() -> None:
 
     for operation_id in ("reindexRag", "getHandoff", "listHandoffs", "updateHandoffStatus"):
         assert by_id[operation_id]["security"] == [{"AdminToken": []}]
+
+
+def test_bulk_shipment_operations_declare_the_client_api_key() -> None:
+    by_id = {op["operationId"]: op for _, _, op in operations(build_openapi())}
+
+    for operation_id in ("createShipmentBatch", "getShipmentBatch", "listShipmentBatchItems"):
+        assert by_id[operation_id]["security"] == [{"ApiKey": []}]
 
 
 def test_env_example_lists_exactly_the_canonical_names_without_secrets() -> None:

@@ -6,6 +6,11 @@ from alembic import context
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import create_async_engine
 
+# Every table module must be imported so its tables join Base.metadata.
+import app.audit.infrastructure.tables
+import app.batches.infrastructure.tables
+import app.clients.infrastructure.tables
+import app.shipments.infrastructure.tables  # noqa: F401
 from app.db.models import Base
 
 config = context.config

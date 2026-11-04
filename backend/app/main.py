@@ -6,6 +6,7 @@ Run: ``uv run uvicorn app.main:app --port 8000`` (from ``backend/``).
 
 import hashlib
 import hmac
+import json
 import re
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
@@ -30,9 +31,18 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, PlainTextResponse
 from pydantic import AwareDatetime
 from sqlalchemy import text
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 
-from app.contracts.api_spec import API_PREFIX, DESCRIPTION, TITLE, AdminTokenDep
+from app.audit.application.service import ApiAuditService
+from app.batches.api import routes as batch_routes
+from app.batches.application.service import BatchService
+from app.contracts.api_spec import (
+    API_PREFIX,
+    DESCRIPTION,
+    TITLE,
+    AdminTokenDep,
+    build_contract_app,
+)
 from app.contracts.attachments import AttachmentUploadResponse
 from app.contracts.channels_http import (
     ChannelTurnResult,
@@ -85,6 +95,7 @@ from app.contracts.reply import (
     HandoffNoticeBlock,
     QuickRepliesBlock,
 )
+from app.contracts.shipment_batches import ShipmentBatchRequest
 from app.contracts.tracking import TrackingResponse
 from app.db.repositories import (
     AttachmentRepository,
@@ -122,6 +133,7 @@ from app.shared.http import (
 )
 from app.shared.llm import OllamaChat, OllamaEmbedding
 from app.shared.logging import configure_logging
+from app.shipments.application.service import ShipmentService, tariff_version
 
 CONFIG_DIR = REPO_ROOT / "data" / "config"
 
@@ -144,6 +156,11 @@ class Container:
     ingestion: IngestionService | None
     intents: IntentDetector
     limiter: SlidingWindowRateLimiter
+    engine: AsyncEngine
+    audit: ApiAuditService
+    shipments: ShipmentService
+    batches: BatchService
+    batch_limiter: SlidingWindowRateLimiter
 
     def pqrs(self, session: AsyncSession) -> PqrsService:
         return PqrsService(
@@ -206,7 +223,15 @@ def build_container(settings: Settings) -> Container:
         crit003_mode=settings.crit003_mode,
         crit005_mode=settings.crit005_mode,
     )
-    sessions = create_session_factory(create_engine(settings))
+    engine = create_engine(settings)
+    sessions = create_session_factory(engine)
+    quotation = QuotationService(tariffs, insurance_min_source=settings.insurance_min_source)
+    shipments = ShipmentService(
+        tariffs,
+        quotation,
+        tarifa_version=tariff_version(source / "matriz_tarifas_y_fletes.csv"),
+        clock=clock,
+    )
     llm = embedding = None
     rag = ingestion = None
     if settings.ollama_base_url is not None:
@@ -235,7 +260,7 @@ def build_container(settings: Settings) -> Container:
             clock,
         ),
         tariffs=tariffs,
-        quotation=QuotationService(tariffs, insurance_min_source=settings.insurance_min_source),
+        quotation=quotation,
         escalation=escalation,
         sentiment=LexiconSentiment(CONFIG_DIR / "sentiment_es.json"),
         accounts=FixtureAccountDirectory(
@@ -248,6 +273,13 @@ def build_container(settings: Settings) -> Container:
         ingestion=ingestion,
         intents=IntentDetector(llm, tariffs),
         limiter=SlidingWindowRateLimiter(settings.chat_rate_limit_per_minute),
+        engine=engine,
+        audit=ApiAuditService(sessions),
+        shipments=shipments,
+        batches=BatchService(
+            sessions, shipments, clock, lease_seconds=settings.batch_lease_seconds
+        ),
+        batch_limiter=SlidingWindowRateLimiter(settings.batch_rate_limit_per_minute),
     )
 
 
@@ -743,6 +775,27 @@ async def get_readiness(box: Box) -> JSONResponse:
     return JSONResponse(body.model_dump(mode="json"), status_code=200 if ready else 503)
 
 
+def _publish_raw_body_schemas(app: FastAPI) -> None:
+    """Routes that read their raw body publish the contract request schema, copied as is."""
+    generate = app.openapi
+
+    def openapi() -> dict[str, Any]:
+        if app.openapi_schema is None:
+            schema = generate()
+            published = schema["components"]["schemas"]
+            contract = build_contract_app().openapi()["components"]["schemas"]
+            pending = [ShipmentBatchRequest.__name__]
+            while pending:
+                name = pending.pop()
+                if name not in published:
+                    published[name] = contract[name]
+                    pending += re.findall(r"#/components/schemas/(\w+)", json.dumps(contract[name]))
+            app.openapi_schema = schema
+        return app.openapi_schema
+
+    app.openapi = openapi  # type: ignore[method-assign]
+
+
 def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or get_settings()
     configure_logging(settings.log_level)
@@ -755,6 +808,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         for client in (box.llm, box.embedding):
             if client is not None:
                 await client.aclose()
+        await box.engine.dispose()
 
     app = FastAPI(title=TITLE, version=CONTRACT_VERSION, description=DESCRIPTION, lifespan=lifespan)
     app.add_middleware(
@@ -766,7 +820,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.add_middleware(RequestIdMiddleware)
     register_error_handlers(app)
     app.include_router(api)
+    app.include_router(batch_routes.router)
     app.include_router(root)
+    _publish_raw_body_schemas(app)
     return app
 
 

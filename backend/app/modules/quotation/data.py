@@ -50,6 +50,7 @@ class Route:
 
 @dataclass(frozen=True)
 class Coverage:
+    codigo_dane: str
     municipio: str
     departamento: str
     tiempo_horas: int
@@ -107,6 +108,7 @@ class TariffData:
         places = {}
         for item in json.loads(path.read_text(encoding="utf-8")):
             place = Coverage(
+                codigo_dane=str(item["codigo_dane"]),
                 municipio=item["municipio"],
                 departamento=item["departamento"],
                 tiempo_horas=int(item["tiempo_entrega_estandar_horas"]),
